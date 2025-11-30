@@ -428,3 +428,5 @@ def get_user_data():
 **Built with ❤️ for Life Fractal Intelligence**
 
 **Questions? Check the logs:** `heroku logs --tail`
+#   p l a n n e r  
+ 
