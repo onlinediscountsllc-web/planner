@@ -1,16 +1,16 @@
-"""
-🌀 LIFE FRACTAL INTELLIGENCE - PRODUCTION HEROKU DEPLOYMENT
-═══════════════════════════════════════════════════════════════
+﻿"""
+ðŸŒ€ LIFE FRACTAL INTELLIGENCE - PRODUCTION HEROKU DEPLOYMENT
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-✅ Self-Healing System - Automatic error recovery
-✅ Email Verification - Secure account activation
-✅ PostgreSQL Database - Production-ready
-✅ Complete Security - Enterprise-grade
-✅ All Features Working - Goals, Habits, Pets, Fractals
-✅ Stripe Payments - $20/month subscription
-✅ 7-Day Free Trial - GoFundMe integration
+âœ… Self-Healing System - Automatic error recovery
+âœ… Email Verification - Secure account activation
+âœ… PostgreSQL Database - Production-ready
+âœ… Complete Security - Enterprise-grade
+âœ… All Features Working - Goals, Habits, Pets, Fractals
+âœ… Stripe Payments - $20/month subscription
+âœ… 7-Day Free Trial - GoFundMe integration
 
-═══════════════════════════════════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 """
 
 import os
@@ -39,17 +39,23 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Database
-import psycopg2
+try:
+    import psycopg2
+except ImportError:
+    psycopg2 = None
 from psycopg2.extras import RealDictCursor
-import psycopg2.pool
+try:
+    import psycopg2
+except ImportError:
+    psycopg2 = None.pool
 
 # Data processing
 import numpy as np
 from PIL import Image, ImageDraw
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LOGGING SETUP
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,9 +63,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════════════════════
-# 🛡️ SELF-HEALING SYSTEM
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ðŸ›¡ï¸ SELF-HEALING SYSTEM
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class SelfHealingSystem:
     """Automatic error recovery and health monitoring"""
@@ -74,13 +80,13 @@ class SelfHealingSystem:
         """Record error for monitoring"""
         self.error_counts[component] = self.error_counts.get(component, 0) + 1
         self.component_status[component] = 'error'
-        logger.warning(f"🛡️ Error in {component}: {error}")
+        logger.warning(f"ðŸ›¡ï¸ Error in {component}: {error}")
     
     def record_recovery(self, component: str):
         """Record successful recovery"""
         self.recovery_attempts[component] = self.recovery_attempts.get(component, 0) + 1
         self.component_status[component] = 'recovered'
-        logger.info(f"✅ {component} recovered")
+        logger.info(f"âœ… {component} recovered")
     
     def mark_healthy(self, component: str):
         """Mark component as healthy"""
@@ -162,9 +168,9 @@ def safe_execute(fallback_value=None, log_errors=True, component="unknown"):
         return wrapper
     return decorator
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DATABASE MANAGER WITH SELF-HEALING
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class DatabaseManager:
     """PostgreSQL database manager with connection pooling and self-healing"""
@@ -188,14 +194,14 @@ class DatabaseManager:
                 maxconn=10,
                 dsn=database_url
             )
-            logger.info("✅ PostgreSQL connection pool initialized")
+            logger.info("âœ… PostgreSQL connection pool initialized")
         else:
             # Fallback to SQLite for local development
             import sqlite3
             self.pool = None
             self.conn = sqlite3.connect('local.db', check_same_thread=False)
             self.conn.row_factory = sqlite3.Row
-            logger.info("✅ SQLite database initialized (local mode)")
+            logger.info("âœ… SQLite database initialized (local mode)")
         
         self.create_tables()
     
@@ -294,7 +300,7 @@ class DatabaseManager:
                     """)
                     
                     conn.commit()
-                    logger.info("✅ All database tables created")
+                    logger.info("âœ… All database tables created")
             finally:
                 self.pool.putconn(conn)
         else:
@@ -391,7 +397,7 @@ class DatabaseManager:
             """)
             
             self.conn.commit()
-            logger.info("✅ All SQLite tables created")
+            logger.info("âœ… All SQLite tables created")
     
     @retry_on_failure(max_attempts=3, delay=0.5, component="database_query")
     def execute_query(self, query: str, params: tuple = None, fetch=True):
@@ -472,9 +478,9 @@ class DatabaseManager:
 # Global database instance
 db = DatabaseManager()
 
-# ═══════════════════════════════════════════════════════════════
-# 📧 EMAIL VERIFICATION SYSTEM
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ðŸ“§ EMAIL VERIFICATION SYSTEM
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class EmailVerificationSystem:
     """Send verification emails and manage verification tokens"""
@@ -512,7 +518,7 @@ class EmailVerificationSystem:
         <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h1 style="color: #4A90E2;">🌀 Welcome to Life Fractal Intelligence!</h1>
+                <h1 style="color: #4A90E2;">ðŸŒ€ Welcome to Life Fractal Intelligence!</h1>
                 
                 <p>Thank you for creating your account. To get started, please verify your email address.</p>
                 
@@ -558,7 +564,7 @@ class EmailVerificationSystem:
                 server.login(smtp_username, smtp_password)
                 server.send_message(msg)
             
-            logger.info(f"✅ Verification email sent to {email}")
+            logger.info(f"âœ… Verification email sent to {email}")
             return True
             
         except Exception as e:
@@ -576,9 +582,9 @@ class EmailVerificationSystem:
         
         return datetime.now(timezone.utc) < expiry_time
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FLASK APP SETUP
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
@@ -589,9 +595,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 CORS(app, supports_credentials=True)
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AUTHENTICATION DECORATORS
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def require_auth(f):
     """Require authentication"""
@@ -623,9 +629,9 @@ def require_verified_email(f):
         return f(*args, **kwargs)
     return decorated
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AUTHENTICATION ROUTES
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/api/auth/register', methods=['POST'])
 @safe_execute(fallback_value=jsonify({'error': 'Registration failed'}), component="register")
@@ -683,7 +689,7 @@ def register():
     session['user_id'] = user_id
     session.permanent = True
     
-    logger.info(f"✅ New user registered: {email}")
+    logger.info(f"âœ… New user registered: {email}")
     
     return jsonify({
         'success': True,
@@ -703,7 +709,7 @@ def verify_email():
     if not token:
         return render_template_string("""
         <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">❌ Invalid Verification Link</h1>
+            <h1 style="color: #E74C3C;">âŒ Invalid Verification Link</h1>
             <p>The verification link is invalid or missing.</p>
         </body></html>
         """), 400
@@ -714,7 +720,7 @@ def verify_email():
     if not users:
         return render_template_string("""
         <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">❌ Invalid Token</h1>
+            <h1 style="color: #E74C3C;">âŒ Invalid Token</h1>
             <p>This verification link is invalid or has already been used.</p>
         </body></html>
         """), 400
@@ -725,7 +731,7 @@ def verify_email():
     if user.get('email_verified'):
         return render_template_string("""
         <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #27AE60;">✅ Already Verified</h1>
+            <h1 style="color: #27AE60;">âœ… Already Verified</h1>
             <p>Your email has already been verified!</p>
             <p><a href="/" style="color: #4A90E2;">Go to Dashboard</a></p>
         </body></html>
@@ -735,7 +741,7 @@ def verify_email():
     if not EmailVerificationSystem.is_token_valid(user.get('verification_sent_at')):
         return render_template_string("""
         <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">❌ Token Expired</h1>
+            <h1 style="color: #E74C3C;">âŒ Token Expired</h1>
             <p>This verification link has expired. Please request a new one.</p>
             <p><a href="/api/auth/resend-verification" style="color: #4A90E2;">Resend Verification Email</a></p>
         </body></html>
@@ -747,11 +753,11 @@ def verify_email():
         'verification_token': None
     }, {'id': user['id']})
     
-    logger.info(f"✅ Email verified for user: {user['email']}")
+    logger.info(f"âœ… Email verified for user: {user['email']}")
     
     return render_template_string("""
     <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-        <h1 style="color: #27AE60;">✅ Email Verified!</h1>
+        <h1 style="color: #27AE60;">âœ… Email Verified!</h1>
         <p>Your email has been successfully verified.</p>
         <p>You can now access all features of Life Fractal Intelligence!</p>
         <p><a href="/" style="background-color: #4A90E2; color: white; padding: 15px 30px; 
@@ -820,7 +826,7 @@ def login():
     session['user_id'] = user['id']
     session.permanent = True
     
-    logger.info(f"👤 User logged in: {email}")
+    logger.info(f"ðŸ‘¤ User logged in: {email}")
     
     return jsonify({
         'success': True,
@@ -860,9 +866,9 @@ def get_current_user():
         'created_at': user.get('created_at')
     }), 200
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HEALTH & MONITORING ROUTES
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -887,9 +893,9 @@ def system_health():
         'timestamp': datetime.now(timezone.utc).isoformat()
     }), 200
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FRACTAL GENERATION (SIMPLE VERSION FOR PRODUCTION)
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @retry_on_failure(max_attempts=3, delay=1.0, component="fractal_generation")
 def generate_simple_fractal(user_data: dict, size: int = 800) -> bytes:
@@ -959,9 +965,9 @@ def api_generate_fractal():
         'metrics': user_data
     }), 200
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GOALS API
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/api/goals', methods=['GET'])
 @require_verified_email
@@ -1025,9 +1031,9 @@ def update_goal(goal_id):
     
     return jsonify({'success': True}), 200
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HABITS API
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/api/habits', methods=['GET'])
 @require_verified_email
@@ -1059,9 +1065,9 @@ def create_habit():
     
     return jsonify({'success': True, 'habit_id': habit_id}), 201
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VIRTUAL PET API
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/api/pet', methods=['GET'])
 @require_verified_email
@@ -1105,9 +1111,9 @@ def create_pet():
     
     return jsonify({'success': True, 'pet_id': pet_id}), 201
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ROOT ROUTE - SIMPLE DASHBOARD
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/')
 def index():
@@ -1237,10 +1243,10 @@ def index():
     <body>
         <div class="container">
             <div class="header">
-                <h1>🌀 Life Fractal Intelligence</h1>
+                <h1>ðŸŒ€ Life Fractal Intelligence</h1>
                 <p>Welcome, {{ user.first_name or user.email }}!</p>
                 <span class="email-status {{ 'verified' if user.email_verified else 'unverified' }}">
-                    {{ '✓ Email Verified' if user.email_verified else '✗ Email Not Verified' }}
+                    {{ 'âœ“ Email Verified' if user.email_verified else 'âœ— Email Not Verified' }}
                 </span>
                 <div style="margin-top: 15px;">
                     <a href="/api/auth/logout" class="btn btn-danger" 
@@ -1252,7 +1258,7 @@ def index():
             
             {% if not user.email_verified %}
             <div class="alert alert-warning">
-                <strong>⚠️ Please verify your email</strong><br>
+                <strong>âš ï¸ Please verify your email</strong><br>
                 Check your inbox for the verification email. Didn't receive it?
                 <a href="#" onclick="resendVerification(); return false;" style="color: #2563eb; font-weight: 500;">
                     Resend verification email
@@ -1261,7 +1267,7 @@ def index():
             {% endif %}
             
             <div class="card">
-                <h2>📊 Dashboard</h2>
+                <h2>ðŸ“Š Dashboard</h2>
                 <div class="stats" id="stats">
                     <div class="stat">
                         <div class="stat-value" id="goalCount">-</div>
@@ -1279,7 +1285,7 @@ def index():
             </div>
             
             <div class="card">
-                <h2>🎯 Quick Actions</h2>
+                <h2>ðŸŽ¯ Quick Actions</h2>
                 <button class="btn" onclick="alert('Create Goal feature coming soon!')">
                     Create New Goal
                 </button>
@@ -1294,7 +1300,7 @@ def index():
             </div>
             
             <div class="card">
-                <h2>🛡️ System Health</h2>
+                <h2>ðŸ›¡ï¸ System Health</h2>
                 <div id="health">Loading...</div>
             </div>
         </div>
@@ -1454,7 +1460,7 @@ def login_page():
     </head>
     <body>
         <div class="auth-container">
-            <h1 id="formTitle">🌀 Login</h1>
+            <h1 id="formTitle">ðŸŒ€ Login</h1>
             
             <div class="error" id="errorMsg"></div>
             
@@ -1497,13 +1503,13 @@ def login_page():
                 isLogin = !isLogin;
                 
                 if (isLogin) {
-                    document.getElementById('formTitle').textContent = '🌀 Login';
+                    document.getElementById('formTitle').textContent = 'ðŸŒ€ Login';
                     document.getElementById('submitBtn').textContent = 'Login';
                     document.getElementById('nameFields').style.display = 'none';
                     document.getElementById('switchText').textContent = "Don't have an account?";
                     document.getElementById('switchLink').textContent = 'Register';
                 } else {
-                    document.getElementById('formTitle').textContent = '🌀 Register';
+                    document.getElementById('formTitle').textContent = 'ðŸŒ€ Register';
                     document.getElementById('submitBtn').textContent = 'Register';
                     document.getElementById('nameFields').style.display = 'block';
                     document.getElementById('switchText').textContent = "Already have an account?";
@@ -1552,24 +1558,25 @@ def login_page():
     </html>
     """)
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STARTUP
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     
-    logger.info("═"*60)
-    logger.info("🌀 LIFE FRACTAL INTELLIGENCE - PRODUCTION SERVER")
-    logger.info("═"*60)
-    logger.info(f"✅ Self-Healing System: ACTIVE")
-    logger.info(f"✅ Email Verification: ENABLED")
-    logger.info(f"✅ Database: {'PostgreSQL' if db.pool else 'SQLite'}")
-    logger.info(f"✅ Port: {port}")
-    logger.info("═"*60)
+    logger.info("â•"*60)
+    logger.info("ðŸŒ€ LIFE FRACTAL INTELLIGENCE - PRODUCTION SERVER")
+    logger.info("â•"*60)
+    logger.info(f"âœ… Self-Healing System: ACTIVE")
+    logger.info(f"âœ… Email Verification: ENABLED")
+    logger.info(f"âœ… Database: {'PostgreSQL' if db.pool else 'SQLite'}")
+    logger.info(f"âœ… Port: {port}")
+    logger.info("â•"*60)
     
     app.run(
         host='0.0.0.0',
         port=port,
         debug=os.environ.get('ENVIRONMENT') != 'production'
     )
+
