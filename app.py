@@ -38,16 +38,15 @@ from flask import Flask, request, jsonify, session, render_template_string, redi
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Database
+# Database (optional - fallback to JSON if not available)
 try:
     import psycopg2
+    from psycopg2.extras import RealDictCursor
+    from psycopg2 import pool as psycopg2_pool
 except ImportError:
     psycopg2 = None
-from psycopg2.extras import RealDictCursor
-try:
-    import psycopg2
-except ImportError:
-    psycopg2 = None.pool
+    RealDictCursor = None
+    psycopg2_pool = None
 
 # Data processing
 import numpy as np
@@ -189,7 +188,7 @@ class DatabaseManager:
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
         
         if 'postgresql://' in database_url:
-            self.pool = psycopg2.pool.SimpleConnectionPool(
+            self.pool = psycopg2_pool.SimpleConnectionPool(
                 minconn=1,
                 maxconn=10,
                 dsn=database_url
@@ -1579,4 +1578,5 @@ if __name__ == '__main__':
         port=port,
         debug=os.environ.get('ENVIRONMENT') != 'production'
     )
+
 
