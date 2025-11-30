@@ -1,1590 +1,966 @@
-﻿"""
-ðŸŒ€ LIFE FRACTAL INTELLIGENCE - PRODUCTION HEROKU DEPLOYMENT
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-âœ… Self-Healing System - Automatic error recovery
-âœ… Email Verification - Secure account activation
-âœ… PostgreSQL Database - Production-ready
-âœ… Complete Security - Enterprise-grade
-âœ… All Features Working - Goals, Habits, Pets, Fractals
-âœ… Stripe Payments - $20/month subscription
-âœ… 7-Day Free Trial - GoFundMe integration
-
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#!/usr/bin/env python3
+"""
+LIFE FRACTAL INTELLIGENCE - Neurodivergent-Optimized Edition
+Swedish minimalism + Autism-safe + Aphantasia-first + ADHD-friendly
 """
 
 import os
-import sys
 import json
 import math
-import time
 import secrets
 import logging
-import hashlib
-import smtplib
-import traceback
+import sqlite3
 from datetime import datetime, timedelta, timezone
-from dataclasses import dataclass, asdict
-from typing import Dict, List, Optional, Any
-from enum import Enum
 from io import BytesIO
-from functools import wraps
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import base64
 
-# Flask
-from flask import Flask, request, jsonify, session, render_template_string, redirect
+from flask import Flask, request, jsonify, render_template_string, g, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Database (optional - fallback to JSON if not available)
-try:
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
-    from psycopg2 import pool as psycopg2_pool
-except ImportError:
-    psycopg2 = None
-    RealDictCursor = None
-    psycopg2_pool = None
-
-# Data processing
 import numpy as np
 from PIL import Image, ImageDraw
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# LOGGING SETUP
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-)
+# Configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ðŸ›¡ï¸ SELF-HEALING SYSTEM
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+DATABASE = os.environ.get('DATABASE_PATH', '/tmp/life_fractal.db')
+SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
-class SelfHealingSystem:
-    """Automatic error recovery and health monitoring"""
-    
-    def __init__(self):
-        self.error_counts = {}
-        self.recovery_attempts = {}
-        self.component_status = {}
-        self.start_time = datetime.now(timezone.utc)
-    
-    def record_error(self, component: str, error: str):
-        """Record error for monitoring"""
-        self.error_counts[component] = self.error_counts.get(component, 0) + 1
-        self.component_status[component] = 'error'
-        logger.warning(f"ðŸ›¡ï¸ Error in {component}: {error}")
-    
-    def record_recovery(self, component: str):
-        """Record successful recovery"""
-        self.recovery_attempts[component] = self.recovery_attempts.get(component, 0) + 1
-        self.component_status[component] = 'recovered'
-        logger.info(f"âœ… {component} recovered")
-    
-    def mark_healthy(self, component: str):
-        """Mark component as healthy"""
-        self.component_status[component] = 'healthy'
-    
-    def get_health_report(self) -> dict:
-        """Get system health status"""
-        total_errors = sum(self.error_counts.values())
-        uptime = (datetime.now(timezone.utc) - self.start_time).total_seconds()
-        
-        health = 'excellent' if total_errors == 0 else (
-            'healthy' if total_errors < 5 else 'degraded'
-        )
-        
-        return {
-            'overall_health': health,
-            'uptime_seconds': uptime,
-            'error_counts': self.error_counts,
-            'recovery_attempts': self.recovery_attempts,
-            'component_status': self.component_status
-        }
+# Sacred Mathematics
+PHI = (1 + math.sqrt(5)) / 2
+FIBONACCI = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
 
-# Global healer instance
-HEALER = SelfHealingSystem()
-
-def retry_on_failure(max_attempts=3, delay=1.0, fallback=None, component="unknown"):
-    """Decorator for automatic retry with exponential backoff"""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            current_delay = delay
-            
-            for attempt in range(max_attempts):
-                try:
-                    result = func(*args, **kwargs)
-                    if attempt > 0:
-                        HEALER.record_recovery(component)
-                    else:
-                        HEALER.mark_healthy(component)
-                    return result
-                    
-                except Exception as e:
-                    last_exception = e
-                    HEALER.record_error(component, str(e))
-                    logger.warning(f"Attempt {attempt + 1}/{max_attempts} failed for {func.__name__}: {e}")
-                    
-                    if attempt < max_attempts - 1:
-                        time.sleep(current_delay)
-                        current_delay *= 2  # Exponential backoff
-            
-            logger.error(f"All attempts failed for {func.__name__}: {last_exception}")
-            
-            if fallback is not None:
-                if callable(fallback):
-                    return fallback(*args, **kwargs)
-                return fallback
-            
-            raise last_exception
-        
-        return wrapper
-    return decorator
-
-def safe_execute(fallback_value=None, log_errors=True, component="unknown"):
-    """Safe execution with automatic error handling
-    
-    Note: fallback_value can be a callable (like a lambda) to defer evaluation
-    until runtime. This is important for Flask functions like jsonify() that
-    require application context.
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                result = func(*args, **kwargs)
-                HEALER.mark_healthy(component)
-                return result
-            except Exception as e:
-                HEALER.record_error(component, str(e))
-                if log_errors:
-                    logger.error(f"Error in {func.__name__}: {e}")
-                    logger.debug(traceback.format_exc())
-                # If fallback_value is callable, call it to get the actual value
-                if callable(fallback_value):
-                    return fallback_value()
-                return fallback_value
-        return wrapper
-    return decorator
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# DATABASE MANAGER WITH SELF-HEALING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-class DatabaseManager:
-    """PostgreSQL database manager with connection pooling and self-healing"""
-    
-    def __init__(self):
-        self.pool = None
-        self.initialize_pool()
-    
-    @retry_on_failure(max_attempts=5, delay=2.0, component="database_init")
-    def initialize_pool(self):
-        """Initialize connection pool with retry"""
-        database_url = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
-        
-        if database_url.startswith('postgres://'):
-            # Heroku uses postgres://, but psycopg2 needs postgresql://
-            database_url = database_url.replace('postgres://', 'postgresql://', 1)
-        
-        if 'postgresql://' in database_url:
-            self.pool = psycopg2_pool.SimpleConnectionPool(
-                minconn=1,
-                maxconn=10,
-                dsn=database_url
-            )
-            logger.info("âœ… PostgreSQL connection pool initialized")
-        else:
-            # Fallback to SQLite for local development
-            import sqlite3
-            self.pool = None
-            self.conn = sqlite3.connect('local.db', check_same_thread=False)
-            self.conn.row_factory = sqlite3.Row
-            logger.info("âœ… SQLite database initialized (local mode)")
-        
-        self.create_tables()
-    
-    @retry_on_failure(max_attempts=3, delay=1.0, component="database_tables")
-    def create_tables(self):
-        """Create all database tables"""
-        
-        if self.pool:
-            # PostgreSQL
-            conn = self.pool.getconn()
-            try:
-                with conn.cursor() as cur:
-                    # Users table
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS users (
-                            id VARCHAR(255) PRIMARY KEY,
-                            email VARCHAR(255) UNIQUE NOT NULL,
-                            password_hash TEXT NOT NULL,
-                            first_name VARCHAR(255),
-                            last_name VARCHAR(255),
-                            email_verified BOOLEAN DEFAULT FALSE,
-                            verification_token VARCHAR(255),
-                            verification_sent_at TIMESTAMP,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            last_login TIMESTAMP,
-                            is_active BOOLEAN DEFAULT TRUE,
-                            subscription_status VARCHAR(50) DEFAULT 'trial',
-                            trial_start TIMESTAMP,
-                            trial_end TIMESTAMP,
-                            subscription_start TIMESTAMP,
-                            stripe_customer_id VARCHAR(255),
-                            stripe_subscription_id VARCHAR(255)
-                        )
-                    """)
-                    
-                    # Goals table
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS goals (
-                            id VARCHAR(255) PRIMARY KEY,
-                            user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-                            title TEXT NOT NULL,
-                            category VARCHAR(100),
-                            description TEXT,
-                            target_date DATE,
-                            priority INTEGER DEFAULT 5,
-                            status VARCHAR(50) DEFAULT 'active',
-                            progress FLOAT DEFAULT 0.0,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            completed_at TIMESTAMP
-                        )
-                    """)
-                    
-                    # Habits table
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS habits (
-                            id VARCHAR(255) PRIMARY KEY,
-                            user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-                            name TEXT NOT NULL,
-                            frequency VARCHAR(50) DEFAULT 'daily',
-                            current_streak INTEGER DEFAULT 0,
-                            longest_streak INTEGER DEFAULT 0,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            is_active BOOLEAN DEFAULT TRUE
-                        )
-                    """)
-                    
-                    # Virtual Pets table
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS virtual_pets (
-                            id VARCHAR(255) PRIMARY KEY,
-                            user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-                            name VARCHAR(255) NOT NULL,
-                            species VARCHAR(100) NOT NULL,
-                            level INTEGER DEFAULT 1,
-                            xp INTEGER DEFAULT 0,
-                            health INTEGER DEFAULT 100,
-                            happiness INTEGER DEFAULT 100,
-                            hunger INTEGER DEFAULT 0,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            last_interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        )
-                    """)
-                    
-                    # Journal Entries table
-                    cur.execute("""
-                        CREATE TABLE IF NOT EXISTS journal_entries (
-                            id VARCHAR(255) PRIMARY KEY,
-                            user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
-                            content TEXT NOT NULL,
-                            mood INTEGER,
-                            energy INTEGER,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            sentiment_score FLOAT
-                        )
-                    """)
-                    
-                    conn.commit()
-                    logger.info("âœ… All database tables created")
-            finally:
-                self.pool.putconn(conn)
-        else:
-            # SQLite
-            cur = self.conn.cursor()
-            
-            # Users table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id TEXT PRIMARY KEY,
-                    email TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    first_name TEXT,
-                    last_name TEXT,
-                    email_verified INTEGER DEFAULT 0,
-                    verification_token TEXT,
-                    verification_sent_at TEXT,
-                    created_at TEXT,
-                    last_login TEXT,
-                    is_active INTEGER DEFAULT 1,
-                    subscription_status TEXT DEFAULT 'trial',
-                    trial_start TEXT,
-                    trial_end TEXT,
-                    subscription_start TEXT,
-                    stripe_customer_id TEXT,
-                    stripe_subscription_id TEXT
-                )
-            """)
-            
-            # Goals table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS goals (
-                    id TEXT PRIMARY KEY,
-                    user_id TEXT,
-                    title TEXT NOT NULL,
-                    category TEXT,
-                    description TEXT,
-                    target_date TEXT,
-                    priority INTEGER DEFAULT 5,
-                    status TEXT DEFAULT 'active',
-                    progress REAL DEFAULT 0.0,
-                    created_at TEXT,
-                    updated_at TEXT,
-                    completed_at TEXT,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-                )
-            """)
-            
-            # Habits table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS habits (
-                    id TEXT PRIMARY KEY,
-                    user_id TEXT,
-                    name TEXT NOT NULL,
-                    frequency TEXT DEFAULT 'daily',
-                    current_streak INTEGER DEFAULT 0,
-                    longest_streak INTEGER DEFAULT 0,
-                    created_at TEXT,
-                    is_active INTEGER DEFAULT 1,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-                )
-            """)
-            
-            # Virtual Pets table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS virtual_pets (
-                    id TEXT PRIMARY KEY,
-                    user_id TEXT,
-                    name TEXT NOT NULL,
-                    species TEXT NOT NULL,
-                    level INTEGER DEFAULT 1,
-                    xp INTEGER DEFAULT 0,
-                    health INTEGER DEFAULT 100,
-                    happiness INTEGER DEFAULT 100,
-                    hunger INTEGER DEFAULT 0,
-                    created_at TEXT,
-                    last_interaction TEXT,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-                )
-            """)
-            
-            # Journal Entries table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS journal_entries (
-                    id TEXT PRIMARY KEY,
-                    user_id TEXT,
-                    content TEXT NOT NULL,
-                    mood INTEGER,
-                    energy INTEGER,
-                    created_at TEXT,
-                    sentiment_score REAL,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-                )
-            """)
-            
-            self.conn.commit()
-            logger.info("âœ… All SQLite tables created")
-    
-    @retry_on_failure(max_attempts=3, delay=0.5, component="database_query")
-    def execute_query(self, query: str, params: tuple = None, fetch=True):
-        """Execute query with automatic retry"""
-        if self.pool:
-            # PostgreSQL
-            conn = self.pool.getconn()
-            try:
-                with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    cur.execute(query, params or ())
-                    
-                    if fetch:
-                        results = cur.fetchall()
-                        return [dict(row) for row in results]
-                    else:
-                        conn.commit()
-                        return None
-            finally:
-                self.pool.putconn(conn)
-        else:
-            # SQLite
-            cur = self.conn.cursor()
-            cur.execute(query, params or ())
-            
-            if fetch:
-                results = cur.fetchall()
-                return [dict(row) for row in results]
-            else:
-                self.conn.commit()
-                return None
-    
-    @safe_execute(fallback_value=[], component="database_select")
-    def select(self, table: str, where: dict = None):
-        """Select rows from table"""
-        query = f"SELECT * FROM {table}"
-        params = []
-        
-        if where:
-            conditions = []
-            for key, value in where.items():
-                conditions.append(f"{key} = %s" if self.pool else f"{key} = ?")
-                params.append(value)
-            query += " WHERE " + " AND ".join(conditions)
-        
-        return self.execute_query(query, tuple(params), fetch=True)
-    
-    @safe_execute(fallback_value=False, component="database_insert")
-    def insert(self, table: str, data: dict):
-        """Insert row into table"""
-        columns = ', '.join(data.keys())
-        placeholders = ', '.join(['%s' if self.pool else '?'] * len(data))
-        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-        
-        self.execute_query(query, tuple(data.values()), fetch=False)
-        return True
-    
-    @safe_execute(fallback_value=False, component="database_update")
-    def update(self, table: str, data: dict, where: dict):
-        """Update rows in table"""
-        set_clause = ', '.join([f"{k} = %s" if self.pool else f"{k} = ?" for k in data.keys()])
-        where_clause = ' AND '.join([f"{k} = %s" if self.pool else f"{k} = ?" for k in where.keys()])
-        
-        query = f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-        params = list(data.values()) + list(where.values())
-        
-        self.execute_query(query, tuple(params), fetch=False)
-        return True
-    
-    @safe_execute(fallback_value=False, component="database_delete")
-    def delete(self, table: str, where: dict):
-        """Delete rows from table"""
-        where_clause = ' AND '.join([f"{k} = %s" if self.pool else f"{k} = ?" for k in where.keys()])
-        query = f"DELETE FROM {table} WHERE {where_clause}"
-        
-        self.execute_query(query, tuple(where.values()), fetch=False)
-        return True
-
-# Global database instance
-db = DatabaseManager()
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ðŸ“§ EMAIL VERIFICATION SYSTEM
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-class EmailVerificationSystem:
-    """Send verification emails and manage verification tokens"""
-    
-    @staticmethod
-    def generate_verification_token() -> str:
-        """Generate secure verification token"""
-        return secrets.token_urlsafe(32)
-    
-    @staticmethod
-    @safe_execute(fallback_value=False, component="email_send")
-    def send_verification_email(email: str, token: str, app_url: str):
-        """Send verification email to user"""
-        
-        # For production, use environment variables for email config
-        smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        smtp_username = os.environ.get('SMTP_USERNAME', '')
-        smtp_password = os.environ.get('SMTP_PASSWORD', '')
-        from_email = os.environ.get('FROM_EMAIL', 'noreply@lifefractal.ai')
-        
-        if not smtp_username or not smtp_password:
-            logger.warning("Email not configured - verification email not sent")
-            logger.info(f"Verification token for {email}: {token}")
-            return False
-        
-        verification_url = f"{app_url}/api/auth/verify-email?token={token}"
-        
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = 'Verify Your Life Fractal Intelligence Account'
-        msg['From'] = from_email
-        msg['To'] = email
-        
-        html_content = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h1 style="color: #4A90E2;">ðŸŒ€ Welcome to Life Fractal Intelligence!</h1>
-                
-                <p>Thank you for creating your account. To get started, please verify your email address.</p>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{verification_url}" 
-                       style="background-color: #4A90E2; color: white; padding: 15px 30px; 
-                              text-decoration: none; border-radius: 5px; display: inline-block;
-                              font-weight: bold;">
-                        Verify Email Address
-                    </a>
-                </div>
-                
-                <p>Or copy and paste this link into your browser:</p>
-                <p style="background-color: #f4f4f4; padding: 10px; border-radius: 5px; 
-                          word-break: break-all;">
-                    {verification_url}
-                </p>
-                
-                <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                    This verification link will expire in 24 hours.
-                </p>
-                
-                <p style="color: #666; font-size: 14px;">
-                    If you didn't create this account, you can safely ignore this email.
-                </p>
-                
-                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                
-                <p style="color: #999; font-size: 12px;">
-                    Life Fractal Intelligence - Your Personal Growth Companion
-                </p>
-            </div>
-        </body>
-        </html>
-        """
-        
-        html_part = MIMEText(html_content, 'html')
-        msg.attach(html_part)
-        
-        try:
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_username, smtp_password)
-                server.send_message(msg)
-            
-            logger.info(f"âœ… Verification email sent to {email}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to send verification email: {e}")
-            return False
-    
-    @staticmethod
-    def is_token_valid(verification_sent_at: str) -> bool:
-        """Check if verification token is still valid (24 hours)"""
-        if not verification_sent_at:
-            return False
-        
-        sent_time = datetime.fromisoformat(verification_sent_at)
-        expiry_time = sent_time + timedelta(hours=24)
-        
-        return datetime.now(timezone.utc) < expiry_time
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# FLASK APP SETUP
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Autism-Safe Color Palette (Swedish minimalism + high contrast)
+COLORS = {
+    'primary': '#4A6FA5',      # Calm blue
+    'secondary': '#7C9CB8',    # Soft blue-gray
+    'background': '#F5F7FA',   # Very light gray
+    'surface': '#FFFFFF',      # Pure white
+    'text': '#2C3E50',         # Dark blue-gray
+    'text_secondary': '#6C757D', # Medium gray
+    'success': '#52A675',      # Muted green
+    'warning': '#D4A574',      # Warm tan
+    'error': '#C45C5C',        # Muted red
+    'border': '#DEE2E6',       # Light gray
+    'focus': '#5A8DC7'         # Bright blue for focus
+}
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
-app.config['SESSION_COOKIE_SECURE'] = os.environ.get('ENVIRONMENT') == 'production'
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+CORS(app)
 
-CORS(app, supports_credentials=True)
+# Database Functions
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# AUTHENTICATION DECORATORS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+def init_db():
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            name TEXT,
+            created_at TEXT NOT NULL,
+            break_interval INTEGER DEFAULT 25,
+            sound_enabled BOOLEAN DEFAULT 0,
+            high_contrast BOOLEAN DEFAULT 0
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS goals (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            progress REAL DEFAULT 0.0,
+            target_date TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS habits (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            frequency TEXT DEFAULT 'daily',
+            current_streak INTEGER DEFAULT 0,
+            best_streak INTEGER DEFAULT 0,
+            last_completed TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS daily_entries (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            mood_level INTEGER DEFAULT 50,
+            energy_level INTEGER DEFAULT 50,
+            stress_level INTEGER DEFAULT 50,
+            notes TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE(user_id, date),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pet_state (
+            user_id TEXT PRIMARY KEY,
+            species TEXT DEFAULT 'companion',
+            name TEXT DEFAULT 'Friend',
+            level INTEGER DEFAULT 1,
+            experience INTEGER DEFAULT 0,
+            last_interaction TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS break_reminders (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            reminder_time TEXT NOT NULL,
+            completed BOOLEAN DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    db.commit()
 
-def require_auth(f):
-    """Require authentication"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({'error': 'Not authenticated'}), 401
-        return f(*args, **kwargs)
-    return decorated
+@app.before_request
+def before_request():
+    if not hasattr(g, 'db_initialized'):
+        init_db()
+        g.db_initialized = True
 
-def require_verified_email(f):
-    """Require verified email"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({'error': 'Not authenticated'}), 401
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+# Fractal Generation (GPU-free, optimized for accessibility)
+def generate_fractal(mood=50, energy=50, stress=50):
+    """Generate calm, predictable fractal based on wellness metrics"""
+    width, height = 800, 800
+    max_iter = 50
+    
+    # Calculate zoom and center based on metrics (smooth, predictable)
+    zoom = 1.0 + (energy / 200)
+    center_x = -0.5 + (stress - 50) / 300
+    center_y = (mood - 50) / 300
+    
+    x = np.linspace(-2/zoom + center_x, 2/zoom + center_x, width)
+    y = np.linspace(-1.5/zoom + center_y, 1.5/zoom + center_y, height)
+    X, Y = np.meshgrid(x, y)
+    c = X + 1j * Y
+    z = np.zeros_like(c)
+    iterations = np.zeros((height, width))
+    
+    for i in range(max_iter):
+        mask = np.abs(z) <= 2
+        z[mask] = z[mask] ** 2 + c[mask]
+        iterations[mask] = i
+    
+    # Autism-safe color mapping (no flashing, predictable gradients)
+    normalized = iterations / max_iter
+    
+    # Use calming blues and greens
+    r = (normalized * 100 + 100).astype(np.uint8)
+    g = (normalized * 150 + 100).astype(np.uint8)
+    b = (normalized * 200 + 50).astype(np.uint8)
+    
+    rgb = np.dstack([r, g, b])
+    image = Image.fromarray(rgb, 'RGB')
+    
+    # Add sacred geometry overlays (visible but not overwhelming)
+    draw = ImageDraw.Draw(image, 'RGBA')
+    cx, cy = width // 2, height // 2
+    
+    for i, fib in enumerate(FIBONACCI[:8]):
+        radius = int(fib * 3)
+        alpha = 30 + i * 10  # Gradual transparency
+        draw.ellipse(
+            [cx - radius, cy - radius, cx + radius, cy + radius],
+            outline=(255, 255, 255, alpha),
+            width=2
+        )
+    
+    return image
+
+# HTML Templates
+MAIN_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Fractal Intelligence - Neurodivergent-Friendly</title>
+    <style>
+        /* Swedish Minimalism + Autism-Safe Design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        users = db.select('users', {'id': session['user_id']})
-        if not users:
-            return jsonify({'error': 'User not found'}), 404
+        :root {
+            --primary: {{ COLORS.primary }};
+            --secondary: {{ COLORS.secondary }};
+            --background: {{ COLORS.background }};
+            --surface: {{ COLORS.surface }};
+            --text: {{ COLORS.text }};
+            --text-secondary: {{ COLORS.text_secondary }};
+            --success: {{ COLORS.success }};
+            --warning: {{ COLORS.warning }};
+            --error: {{ COLORS.error }};
+            --border: {{ COLORS.border }};
+            --focus: {{ COLORS.focus }};
+        }
         
-        user = users[0]
-        if not user.get('email_verified'):
-            return jsonify({
-                'error': 'Email not verified',
-                'message': 'Please verify your email address to access this feature'
-            }), 403
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 16px;
+        }
         
-        return f(*args, **kwargs)
-    return decorated
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# AUTHENTICATION ROUTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/api/auth/register', methods=['POST'])
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Registration failed'}), 500), component="register")
-def register():
-    """Register new user with email verification"""
-    data = request.get_json()
-    email = data.get('email', '').lower().strip()
-    password = data.get('password', '')
-    first_name = data.get('first_name', '')
-    last_name = data.get('last_name', '')
-    
-    # Validation
-    if not email or not password:
-        return jsonify({'error': 'Email and password required'}), 400
-    
-    if len(password) < 8:
-        return jsonify({'error': 'Password must be at least 8 characters'}), 400
-    
-    # Check existing user
-    existing = db.select('users', {'email': email})
-    if existing:
-        return jsonify({'error': 'Email already registered'}), 400
-    
-    # Create user
-    user_id = f"user_{secrets.token_hex(8)}"
-    verification_token = EmailVerificationSystem.generate_verification_token()
-    now = datetime.now(timezone.utc).isoformat()
-    
-    # Calculate trial period
-    trial_start = datetime.now(timezone.utc)
-    trial_end = trial_start + timedelta(days=7)
-    
-    db.insert('users', {
-        'id': user_id,
-        'email': email,
-        'password_hash': generate_password_hash(password),
-        'first_name': first_name,
-        'last_name': last_name,
-        'email_verified': False if db.pool else 0,  # Boolean for PostgreSQL, Integer for SQLite
-        'verification_token': verification_token,
-        'verification_sent_at': now,
-        'created_at': now,
-        'last_login': now,
-        'is_active': True if db.pool else 1,
-        'subscription_status': 'trial',
-        'trial_start': trial_start.isoformat(),
-        'trial_end': trial_end.isoformat()
-    })
-    
-    # Send verification email
-    app_url = os.environ.get('APP_URL', request.host_url.rstrip('/'))
-    EmailVerificationSystem.send_verification_email(email, verification_token, app_url)
-    
-    # Create session
-    session['user_id'] = user_id
-    session.permanent = True
-    
-    logger.info(f"âœ… New user registered: {email}")
-    
-    return jsonify({
-        'success': True,
-        'user_id': user_id,
-        'email': email,
-        'email_verified': False,
-        'message': 'Registration successful! Please check your email to verify your account.',
-        'trial_ends_at': trial_end.isoformat()
-    }), 201
-
-@app.route('/api/auth/verify-email', methods=['GET'])
-@safe_execute(fallback_value="Verification failed", component="verify_email")
-def verify_email():
-    """Verify user email address"""
-    token = request.args.get('token')
-    
-    if not token:
-        return render_template_string("""
-        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">âŒ Invalid Verification Link</h1>
-            <p>The verification link is invalid or missing.</p>
-        </body></html>
-        """), 400
-    
-    # Find user with this token
-    users = db.select('users', {'verification_token': token})
-    
-    if not users:
-        return render_template_string("""
-        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">âŒ Invalid Token</h1>
-            <p>This verification link is invalid or has already been used.</p>
-        </body></html>
-        """), 400
-    
-    user = users[0]
-    
-    # Check if already verified
-    if user.get('email_verified'):
-        return render_template_string("""
-        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #27AE60;">âœ… Already Verified</h1>
-            <p>Your email has already been verified!</p>
-            <p><a href="/" style="color: #4A90E2;">Go to Dashboard</a></p>
-        </body></html>
-        """), 200
-    
-    # Check token expiry
-    if not EmailVerificationSystem.is_token_valid(user.get('verification_sent_at')):
-        return render_template_string("""
-        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1 style="color: #E74C3C;">âŒ Token Expired</h1>
-            <p>This verification link has expired. Please request a new one.</p>
-            <p><a href="/api/auth/resend-verification" style="color: #4A90E2;">Resend Verification Email</a></p>
-        </body></html>
-        """), 400
-    
-    # Verify email
-    db.update('users', {
-        'email_verified': True if db.pool else 1,
-        'verification_token': None
-    }, {'id': user['id']})
-    
-    logger.info(f"âœ… Email verified for user: {user['email']}")
-    
-    return render_template_string("""
-    <html><body style="font-family: Arial; text-align: center; padding: 50px;">
-        <h1 style="color: #27AE60;">âœ… Email Verified!</h1>
-        <p>Your email has been successfully verified.</p>
-        <p>You can now access all features of Life Fractal Intelligence!</p>
-        <p><a href="/" style="background-color: #4A90E2; color: white; padding: 15px 30px; 
-                         text-decoration: none; border-radius: 5px; display: inline-block; 
-                         margin-top: 20px;">Go to Dashboard</a></p>
-    </body></html>
-    """), 200
-
-@app.route('/api/auth/resend-verification', methods=['POST'])
-@require_auth
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to resend'}), 500), component="resend_verification")
-def resend_verification():
-    """Resend verification email"""
-    users = db.select('users', {'id': session['user_id']})
-    if not users:
-        return jsonify({'error': 'User not found'}), 404
-    
-    user = users[0]
-    
-    if user.get('email_verified'):
-        return jsonify({'message': 'Email already verified'}), 200
-    
-    # Generate new token
-    verification_token = EmailVerificationSystem.generate_verification_token()
-    now = datetime.now(timezone.utc).isoformat()
-    
-    db.update('users', {
-        'verification_token': verification_token,
-        'verification_sent_at': now
-    }, {'id': user['id']})
-    
-    # Send email
-    app_url = os.environ.get('APP_URL', request.host_url.rstrip('/'))
-    EmailVerificationSystem.send_verification_email(user['email'], verification_token, app_url)
-    
-    return jsonify({
-        'success': True,
-        'message': 'Verification email sent! Please check your inbox.'
-    }), 200
-
-@app.route('/api/auth/login', methods=['POST'])
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Login failed'}), 500), component="login")
-def login():
-    """User login"""
-    data = request.get_json()
-    email = data.get('email', '').lower().strip()
-    password = data.get('password', '')
-    
-    # Find user
-    users = db.select('users', {'email': email})
-    if not users:
-        return jsonify({'error': 'Invalid credentials'}), 401
-    
-    user = users[0]
-    
-    # Check password
-    if not check_password_hash(user['password_hash'], password):
-        return jsonify({'error': 'Invalid credentials'}), 401
-    
-    # Update last login
-    db.update('users', {
-        'last_login': datetime.now(timezone.utc).isoformat()
-    }, {'id': user['id']})
-    
-    # Create session
-    session['user_id'] = user['id']
-    session.permanent = True
-    
-    logger.info(f"ðŸ‘¤ User logged in: {email}")
-    
-    return jsonify({
-        'success': True,
-        'user_id': user['id'],
-        'email': user['email'],
-        'email_verified': user.get('email_verified', False),
-        'subscription_status': user.get('subscription_status'),
-        'trial_ends_at': user.get('trial_end')
-    }), 200
-
-@app.route('/api/auth/logout', methods=['POST'])
-@require_auth
-def logout():
-    """User logout"""
-    session.clear()
-    return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
-
-@app.route('/api/auth/me', methods=['GET'])
-@require_auth
-def get_current_user():
-    """Get current user info"""
-    users = db.select('users', {'id': session['user_id']})
-    if not users:
-        return jsonify({'error': 'User not found'}), 404
-    
-    user = users[0]
-    
-    return jsonify({
-        'id': user['id'],
-        'email': user['email'],
-        'first_name': user.get('first_name'),
-        'last_name': user.get('last_name'),
-        'email_verified': user.get('email_verified', False),
-        'subscription_status': user.get('subscription_status'),
-        'trial_start': user.get('trial_start'),
-        'trial_end': user.get('trial_end'),
-        'created_at': user.get('created_at')
-    }), 200
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# HEALTH & MONITORING ROUTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    health = HEALER.get_health_report()
-    
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now(timezone.utc).isoformat(),
-        **health
-    }), 200
-
-@app.route('/api/system/health', methods=['GET'])
-@require_auth
-def system_health():
-    """Detailed system health for admins"""
-    health = HEALER.get_health_report()
-    
-    return jsonify({
-        'system_health': health,
-        'database_connected': db.pool is not None or db.conn is not None,
-        'timestamp': datetime.now(timezone.utc).isoformat()
-    }), 200
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# FRACTAL GENERATION (SIMPLE VERSION FOR PRODUCTION)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@retry_on_failure(max_attempts=3, delay=1.0, component="fractal_generation")
-def generate_simple_fractal(user_data: dict, size: int = 800) -> bytes:
-    """Generate simple fractal visualization"""
-    
-    # Extract metrics
-    goal_progress = user_data.get('goal_progress', 0.5)
-    habit_streak = user_data.get('habit_streak', 0)
-    wellness_score = user_data.get('wellness_score', 50)
-    
-    # Create image
-    img = Image.new('RGB', (size, size), color='black')
-    draw = ImageDraw.Draw(img)
-    
-    # Generate fractal pattern based on user metrics
-    phi = (1 + math.sqrt(5)) / 2  # Golden ratio
-    
-    for i in range(1000):
-        # Use user metrics to influence pattern
-        angle = i * phi * 2 * math.pi * (1 + goal_progress)
-        radius = (i / 10) * (1 + wellness_score / 100)
+        /* High contrast mode support */
+        body.high-contrast {
+            --text: #000000;
+            --background: #FFFFFF;
+            --border: #000000;
+        }
         
-        x = size/2 + radius * math.cos(angle)
-        y = size/2 + radius * math.sin(angle)
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         
-        # Color based on habit streak
-        color_intensity = min(255, 100 + habit_streak * 10)
-        color = (color_intensity, int(color_intensity * 0.8), int(color_intensity * 0.6))
+        /* Header - Clean and simple */
+        header {
+            background: var(--surface);
+            border-bottom: 2px solid var(--border);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
         
-        if 0 <= x < size and 0 <= y < size:
-            draw.point((x, y), fill=color)
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* Cards - Clear boundaries, no shadows */
+        .card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        /* Forms - Large, clear inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            transition: border-color 0.2s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--focus);
+            box-shadow: 0 0 0 3px rgba(90, 141, 199, 0.1);
+        }
+        
+        /* Buttons - Clear, high contrast */
+        button, .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--focus);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        /* Break Reminder - Non-intrusive but clear */
+        .break-reminder {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--warning);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 2px solid var(--text);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .break-reminder.show {
+            display: block;
+        }
+        
+        /* Progress bars - Clear visual feedback */
+        .progress-bar {
+            width: 100%;
+            height: 32px;
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Stats - Clear, grid layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        /* Fractal display - Optional, can be hidden */
+        .fractal-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .fractal-container img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Accessibility helpers */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        /* Timer display */
+        .timer-display {
+            font-size: 48px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary);
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Settings toggle */
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        
+        .toggle input[type="checkbox"] {
+            width: 48px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
     
-    # Convert to bytes
-    img_bytes = BytesIO()
-    img.save(img_bytes, format='PNG')
-    img_bytes.seek(0)
-    
-    return img_bytes.getvalue()
-
-@app.route('/api/fractal/generate', methods=['GET'])
-@require_verified_email
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Generation failed'}), 500), component="fractal_api")
-def api_generate_fractal():
-    """Generate personalized fractal"""
-    user_id = session['user_id']
-    
-    # Get user metrics
-    goals = db.select('goals', {'user_id': user_id, 'status': 'active'})
-    habits = db.select('habits', {'user_id': user_id, 'is_active': True if db.pool else 1})
-    
-    # Calculate metrics
-    avg_progress = sum(g.get('progress', 0) for g in goals) / len(goals) if goals else 0
-    max_streak = max((h.get('current_streak', 0) for h in habits), default=0)
-    
-    user_data = {
-        'goal_progress': avg_progress,
-        'habit_streak': max_streak,
-        'wellness_score': 75  # Default
-    }
-    
-    # Generate fractal
-    fractal_bytes = generate_simple_fractal(user_data)
-    
-    return jsonify({
-        'success': True,
-        'fractal_data': base64.b64encode(fractal_bytes).decode('utf-8'),
-        'metrics': user_data
-    }), 200
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# GOALS API
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/api/goals', methods=['GET'])
-@require_verified_email
-def get_goals():
-    """Get user's goals"""
-    goals = db.select('goals', {'user_id': session['user_id']})
-    return jsonify(goals), 200
-
-@app.route('/api/goals', methods=['POST'])
-@require_verified_email
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create goal'}), 500), component="create_goal")
-def create_goal():
-    """Create new goal"""
-    data = request.get_json()
-    
-    goal_id = f"goal_{secrets.token_hex(8)}"
-    now = datetime.now(timezone.utc).isoformat()
-    
-    db.insert('goals', {
-        'id': goal_id,
-        'user_id': session['user_id'],
-        'title': data.get('title'),
-        'category': data.get('category', 'personal'),
-        'description': data.get('description', ''),
-        'target_date': data.get('target_date'),
-        'priority': data.get('priority', 5),
-        'status': 'active',
-        'progress': 0.0,
-        'created_at': now,
-        'updated_at': now
-    })
-    
-    return jsonify({'success': True, 'goal_id': goal_id}), 201
-
-@app.route('/api/goals/<goal_id>', methods=['PUT'])
-@require_verified_email
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to update goal'}), 500), component="update_goal")
-def update_goal(goal_id):
-    """Update goal"""
-    data = request.get_json()
-    
-    # Verify ownership
-    goals = db.select('goals', {'id': goal_id, 'user_id': session['user_id']})
-    if not goals:
-        return jsonify({'error': 'Goal not found'}), 404
-    
-    update_data = {
-        'updated_at': datetime.now(timezone.utc).isoformat()
-    }
-    
-    # Update allowed fields
-    for field in ['title', 'description', 'category', 'target_date', 'priority', 'status', 'progress']:
-        if field in data:
-            update_data[field] = data[field]
-    
-    # Mark completed if status changes to completed
-    if data.get('status') == 'completed' and goals[0]['status'] != 'completed':
-        update_data['completed_at'] = datetime.now(timezone.utc).isoformat()
-    
-    db.update('goals', update_data, {'id': goal_id})
-    
-    return jsonify({'success': True}), 200
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# HABITS API
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/api/habits', methods=['GET'])
-@require_verified_email
-def get_habits():
-    """Get user's habits"""
-    habits = db.select('habits', {'user_id': session['user_id']})
-    return jsonify(habits), 200
-
-@app.route('/api/habits', methods=['POST'])
-@require_verified_email
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create habit'}), 500), component="create_habit")
-def create_habit():
-    """Create new habit"""
-    data = request.get_json()
-    
-    habit_id = f"habit_{secrets.token_hex(8)}"
-    now = datetime.now(timezone.utc).isoformat()
-    
-    db.insert('habits', {
-        'id': habit_id,
-        'user_id': session['user_id'],
-        'name': data.get('name'),
-        'frequency': data.get('frequency', 'daily'),
-        'current_streak': 0,
-        'longest_streak': 0,
-        'created_at': now,
-        'is_active': True if db.pool else 1
-    })
-    
-    return jsonify({'success': True, 'habit_id': habit_id}), 201
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# VIRTUAL PET API
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/api/pet', methods=['GET'])
-@require_verified_email
-def get_pet():
-    """Get user's virtual pet"""
-    pets = db.select('virtual_pets', {'user_id': session['user_id']})
-    
-    if not pets:
-        return jsonify({'error': 'No pet found'}), 404
-    
-    return jsonify(pets[0]), 200
-
-@app.route('/api/pet/create', methods=['POST'])
-@require_verified_email
-@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create pet'}), 500), component="create_pet")
-def create_pet():
-    """Create virtual pet"""
-    data = request.get_json()
-    
-    # Check if pet already exists
-    existing = db.select('virtual_pets', {'user_id': session['user_id']})
-    if existing:
-        return jsonify({'error': 'Pet already exists'}), 400
-    
-    pet_id = f"pet_{secrets.token_hex(8)}"
-    now = datetime.now(timezone.utc).isoformat()
-    
-    db.insert('virtual_pets', {
-        'id': pet_id,
-        'user_id': session['user_id'],
-        'name': data.get('name', 'Buddy'),
-        'species': data.get('species', 'cat'),
-        'level': 1,
-        'xp': 0,
-        'health': 100,
-        'happiness': 100,
-        'hunger': 0,
-        'created_at': now,
-        'last_interaction': now
-    })
-    
-    return jsonify({'success': True, 'pet_id': pet_id}), 201
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ROOT ROUTE - SIMPLE DASHBOARD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-@app.route('/')
-def index():
-    """Main dashboard"""
-    if 'user_id' not in session:
-        return redirect('/login')
-    
-    users = db.select('users', {'id': session['user_id']})
-    if not users:
-        session.clear()
-        return redirect('/login')
-    
-    user = users[0]
-    
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Life Fractal Intelligence</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                padding: 20px;
-            }
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-            }
-            .header {
-                background: white;
-                border-radius: 10px;
-                padding: 30px;
-                margin-bottom: 20px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            }
-            .header h1 {
-                color: #667eea;
-                margin-bottom: 10px;
-            }
-            .email-status {
-                display: inline-block;
-                padding: 5px 15px;
-                border-radius: 20px;
-                font-size: 14px;
-                font-weight: 500;
-                margin-left: 10px;
-            }
-            .verified {
-                background: #10b981;
-                color: white;
-            }
-            .unverified {
-                background: #ef4444;
-                color: white;
-            }
-            .card {
-                background: white;
-                border-radius: 10px;
-                padding: 25px;
-                margin-bottom: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .card h2 {
-                color: #333;
-                margin-bottom: 15px;
-            }
-            .btn {
-                background: #667eea;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: 500;
-                text-decoration: none;
-                display: inline-block;
-                transition: background 0.3s;
-            }
-            .btn:hover {
-                background: #5568d3;
-            }
-            .btn-danger {
-                background: #ef4444;
-            }
-            .btn-danger:hover {
-                background: #dc2626;
-            }
-            .stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-                margin-top: 20px;
-            }
-            .stat {
-                background: #f3f4f6;
-                padding: 20px;
-                border-radius: 8px;
-                text-align: center;
-            }
-            .stat-value {
-                font-size: 32px;
-                font-weight: bold;
-                color: #667eea;
-            }
-            .stat-label {
-                color: #666;
-                margin-top: 5px;
-            }
-            .alert {
-                padding: 15px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-            }
-            .alert-warning {
-                background: #fef3c7;
-                border-left: 4px solid #f59e0b;
-                color: #92400e;
-            }
-        </style>
-    </head>
-    <body>
+    <header>
         <div class="container">
-            <div class="header">
-                <h1>ðŸŒ€ Life Fractal Intelligence</h1>
-                <p>Welcome, {{ user.first_name or user.email }}!</p>
-                <span class="email-status {{ 'verified' if user.email_verified else 'unverified' }}">
-                    {{ 'âœ“ Email Verified' if user.email_verified else 'âœ— Email Not Verified' }}
-                </span>
-                <div style="margin-top: 15px;">
-                    <a href="/api/auth/logout" class="btn btn-danger" 
-                       onclick="event.preventDefault(); fetch('/api/auth/logout', {method:'POST'}).then(()=>location.href='/login');">
-                        Logout
-                    </a>
-                </div>
-            </div>
-            
-            {% if not user.email_verified %}
-            <div class="alert alert-warning">
-                <strong>âš ï¸ Please verify your email</strong><br>
-                Check your inbox for the verification email. Didn't receive it?
-                <a href="#" onclick="resendVerification(); return false;" style="color: #2563eb; font-weight: 500;">
-                    Resend verification email
-                </a>
-            </div>
-            {% endif %}
-            
-            <div class="card">
-                <h2>ðŸ“Š Dashboard</h2>
-                <div class="stats" id="stats">
-                    <div class="stat">
-                        <div class="stat-value" id="goalCount">-</div>
-                        <div class="stat-label">Active Goals</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" id="habitCount">-</div>
-                        <div class="stat-label">Habits Tracked</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">{{ user.subscription_status }}</div>
-                        <div class="stat-label">Account Status</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2>ðŸŽ¯ Quick Actions</h2>
-                <button class="btn" onclick="alert('Create Goal feature coming soon!')">
-                    Create New Goal
-                </button>
-                <button class="btn" onclick="alert('Add Habit feature coming soon!')" style="margin-left: 10px;">
-                    Add Habit
-                </button>
-                {% if user.email_verified %}
-                <button class="btn" onclick="generateFractal()" style="margin-left: 10px;">
-                    Generate Fractal
-                </button>
-                {% endif %}
-            </div>
-            
-            <div class="card">
-                <h2>ðŸ›¡ï¸ System Health</h2>
-                <div id="health">Loading...</div>
-            </div>
+            <h1>Life Fractal Intelligence</h1>
+            <p class="subtitle">Neurodivergent-optimized life planning</p>
         </div>
-        
-        <script>
-            async function loadStats() {
-                try {
-                    const [goals, habits] = await Promise.all([
-                        fetch('/api/goals').then(r => r.json()),
-                        fetch('/api/habits').then(r => r.json())
-                    ]);
-                    
-                    document.getElementById('goalCount').textContent = goals.filter(g => g.status === 'active').length;
-                    document.getElementById('habitCount').textContent = habits.filter(h => h.is_active).length;
-                } catch (e) {
-                    console.error('Failed to load stats:', e);
-                }
-            }
-            
-            async function loadHealth() {
-                try {
-                    const health = await fetch('/health').then(r => r.json());
-                    document.getElementById('health').innerHTML = `
-                        <strong>Status:</strong> ${health.overall_health}<br>
-                        <strong>Uptime:</strong> ${Math.round(health.uptime_seconds / 60)} minutes
-                    `;
-                } catch (e) {
-                    document.getElementById('health').textContent = 'Unable to load health data';
-                }
-            }
-            
-            async function resendVerification() {
-                try {
-                    const response = await fetch('/api/auth/resend-verification', { method: 'POST' });
-                    const data = await response.json();
-                    alert(data.message || 'Verification email sent!');
-                } catch (e) {
-                    alert('Failed to resend verification email');
-                }
-            }
-            
-            async function generateFractal() {
-                try {
-                    const response = await fetch('/api/fractal/generate');
-                    const data = await response.json();
-                    if (data.success) {
-                        alert('Fractal generated! (Display feature coming soon)');
-                    }
-                } catch (e) {
-                    alert('Failed to generate fractal');
-                }
-            }
-            
-            loadStats();
-            loadHealth();
-            setInterval(loadHealth, 30000); // Refresh every 30 seconds
-        </script>
-    </body>
-    </html>
-    """, user=user)
-
-@app.route('/login')
-def login_page():
-    """Login/register page"""
-    if 'user_id' in session:
-        return redirect('/')
+    </header>
     
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Login - Life Fractal Intelligence</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }
-            .auth-container {
-                background: white;
-                border-radius: 10px;
-                padding: 40px;
-                width: 100%;
-                max-width: 400px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            }
-            h1 {
-                color: #667eea;
-                margin-bottom: 30px;
-                text-align: center;
-            }
-            .form-group {
-                margin-bottom: 20px;
-            }
-            label {
-                display: block;
-                color: #333;
-                margin-bottom: 8px;
-                font-weight: 500;
-            }
-            input {
-                width: 100%;
-                padding: 12px;
-                border: 2px solid #e5e7eb;
-                border-radius: 6px;
-                font-size: 16px;
-                transition: border-color 0.3s;
-            }
-            input:focus {
-                outline: none;
-                border-color: #667eea;
-            }
-            .btn {
-                width: 100%;
-                padding: 14px;
-                background: #667eea;
-                color: white;
-                border: none;
-                border-radius: 6px;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background 0.3s;
-            }
-            .btn:hover {
-                background: #5568d3;
-            }
-            .switch {
-                text-align: center;
-                margin-top: 20px;
-                color: #666;
-            }
-            .switch a {
-                color: #667eea;
-                text-decoration: none;
-                font-weight: 500;
-            }
-            .error {
-                background: #fee2e2;
-                color: #991b1b;
-                padding: 12px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-                display: none;
-            }
-            .name-fields {
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="auth-container">
-            <h1 id="formTitle">ðŸŒ€ Login</h1>
+    <main id="main" class="container">
+        {% if not logged_in %}
+        <div class="card">
+            <h2 class="card-title">Welcome</h2>
+            <p style="margin-bottom: 20px;">A calm, predictable space for planning your life.</p>
             
-            <div class="error" id="errorMsg"></div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
+            </div>
             
-            <form id="authForm" onsubmit="handleSubmit(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" required minlength="8">
-                </div>
-                
-                <div class="name-fields" id="nameFields">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" id="firstName">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" id="lastName">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn" id="submitBtn">Login</button>
-            </form>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter secure password" required>
+            </div>
             
-            <div class="switch">
-                <span id="switchText">Don't have an account?</span>
-                <a href="#" onclick="toggleMode(); return false;" id="switchLink">Register</a>
+            <div class="form-group">
+                <label for="name">Name (optional)</label>
+                <input type="text" id="name" placeholder="What should we call you?">
+            </div>
+            
+            <button onclick="register()" class="btn btn-primary">Create Account</button>
+            <button onclick="login()" class="btn btn-secondary" style="margin-left: 12px;">Login</button>
+            
+            <div id="message" style="margin-top: 20px;"></div>
+        </div>
+        {% else %}
+        <div class="break-reminder" id="breakReminder">
+            <p><strong>Time for a break</strong></p>
+            <p>You've been working for {{ break_interval }} minutes.</p>
+            <button onclick="dismissBreak()" class="btn btn-primary" style="margin-top: 12px;">Take Break (5 min)</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="goalCount">0</div>
+                <div class="stat-label">Active Goals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="habitStreak">0</div>
+                <div class="stat-label">Longest Streak</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="petLevel">1</div>
+                <div class="stat-label">Companion Level</div>
             </div>
         </div>
         
-        <script>
-            let isLogin = true;
+        <div class="card">
+            <h2 class="card-title">Today's Check-In</h2>
             
-            function toggleMode() {
-                isLogin = !isLogin;
+            <div class="form-group">
+                <label for="mood">How is your mood? (1-100)</label>
+                <input type="range" id="mood" min="1" max="100" value="50" oninput="updateSlider('mood', this.value)">
+                <div id="moodValue" style="text-align: center; font-weight: 600;">50</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="energy">Energy level? (1-100)</label>
+                <input type="range" id="energy" min="1" max="100" value="50" oninput="updateSlider('energy', this.value)">
+                <div id="energyValue" style="text-align: center; font-weight: 600;">50</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="stress">Stress level? (1-100)</label>
+                <input type="range" id="stress" min="1" max="100" value="50" oninput="updateSlider('stress', this.value)">
+                <div id="stressValue" style="text-align: center; font-weight: 600;">50</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Notes (optional - voice input supported)</label>
+                <textarea id="notes" rows="4" placeholder="How are you feeling today?"></textarea>
+            </div>
+            
+            <button onclick="saveDaily()" class="btn btn-success">Save Check-In</button>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Your Goals</h2>
+            <div id="goalsList"></div>
+            <button onclick="showAddGoal()" class="btn btn-primary">Add Goal</button>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Your Habits</h2>
+            <div id="habitsList"></div>
+            <button onclick="showAddHabit()" class="btn btn-primary">Add Habit</button>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Fractal Visualization</h2>
+            <p style="margin-bottom: 16px; color: var(--text-secondary);">Optional: See your wellness as mathematical art</p>
+            <button onclick="toggleFractal()" class="btn btn-secondary" id="fractalToggle">Show Visualization</button>
+            <div id="fractalContainer" class="fractal-container hidden">
+                <img id="fractalImage" src="" alt="Your personalized fractal">
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Settings</h2>
+            
+            <div class="toggle">
+                <input type="checkbox" id="breakReminders" onchange="toggleBreaks()">
+                <label for="breakReminders">Break reminders (every 25 minutes)</label>
+            </div>
+            
+            <div class="toggle">
+                <input type="checkbox" id="soundEnabled" onchange="toggleSound()">
+                <label for="soundEnabled">Adaptive soundscape</label>
+            </div>
+            
+            <div class="toggle">
+                <input type="checkbox" id="highContrast" onchange="toggleContrast()">
+                <label for="highContrast">High contrast mode</label>
+            </div>
+            
+            <button onclick="logout()" class="btn btn-warning" style="margin-top: 20px;">Logout</button>
+        </div>
+        {% endif %}
+    </main>
+    
+    <script>
+        let userId = {{ user_id | tojson }};
+        let breakTimer = null;
+        let fractalVisible = false;
+        
+        function updateSlider(name, value) {
+            document.getElementById(name + 'Value').textContent = value;
+        }
+        
+        async function register() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password, name})
+                });
+                const data = await res.json();
                 
-                if (isLogin) {
-                    document.getElementById('formTitle').textContent = 'ðŸŒ€ Login';
-                    document.getElementById('submitBtn').textContent = 'Login';
-                    document.getElementById('nameFields').style.display = 'none';
-                    document.getElementById('switchText').textContent = "Don't have an account?";
-                    document.getElementById('switchLink').textContent = 'Register';
+                if (data.success) {
+                    location.reload();
                 } else {
-                    document.getElementById('formTitle').textContent = 'ðŸŒ€ Register';
-                    document.getElementById('submitBtn').textContent = 'Register';
-                    document.getElementById('nameFields').style.display = 'block';
-                    document.getElementById('switchText').textContent = "Already have an account?";
-                    document.getElementById('switchLink').textContent = 'Login';
+                    document.getElementById('message').innerHTML = 
+                        '<p style="color: var(--error);">' + data.error + '</p>';
                 }
-                
-                document.getElementById('errorMsg').style.display = 'none';
+            } catch (e) {
+                document.getElementById('message').innerHTML = 
+                    '<p style="color: var(--error);">Error: ' + e.message + '</p>';
             }
+        }
+        
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             
-            async function handleSubmit(e) {
-                e.preventDefault();
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
                 
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                
-                const data = { email, password };
-                
-                if (!isLogin) {
-                    data.first_name = document.getElementById('firstName').value;
-                    data.last_name = document.getElementById('lastName').value;
+                if (data.success) {
+                    location.reload();
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<p style="color: var(--error);">' + data.error + '</p>';
                 }
+            } catch (e) {
+                document.getElementById('message').innerHTML = 
+                    '<p style="color: var(--error);">Error: ' + e.message + '</p>';
+            }
+        }
+        
+        async function saveDaily() {
+            const mood = document.getElementById('mood').value;
+            const energy = document.getElementById('energy').value;
+            const stress = document.getElementById('stress').value;
+            const notes = document.getElementById('notes').value;
+            
+            try {
+                const res = await fetch('/api/daily', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: userId,
+                        mood_level: mood,
+                        energy_level: energy,
+                        stress_level: stress,
+                        notes: notes
+                    })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('Check-in saved successfully!');
+                    loadStats();
+                }
+            } catch (e) {
+                alert('Error saving: ' + e.message);
+            }
+        }
+        
+        async function toggleFractal() {
+            if (fractalVisible) {
+                document.getElementById('fractalContainer').classList.add('hidden');
+                document.getElementById('fractalToggle').textContent = 'Show Visualization';
+                fractalVisible = false;
+            } else {
+                const mood = document.getElementById('mood').value;
+                const energy = document.getElementById('energy').value;
+                const stress = document.getElementById('stress').value;
                 
                 try {
-                    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-                    const response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
+                    const res = await fetch(`/api/fractal?user_id=${userId}&mood=${mood}&energy=${energy}&stress=${stress}`);
+                    const data = await res.json();
                     
-                    const result = await response.json();
-                    
-                    if (response.ok) {
-                        window.location.href = '/';
-                    } else {
-                        document.getElementById('errorMsg').textContent = result.error || 'An error occurred';
-                        document.getElementById('errorMsg').style.display = 'block';
-                    }
-                } catch (error) {
-                    document.getElementById('errorMsg').textContent = 'Network error. Please try again.';
-                    document.getElementById('errorMsg').style.display = 'block';
+                    document.getElementById('fractalImage').src = data.image;
+                    document.getElementById('fractalContainer').classList.remove('hidden');
+                    document.getElementById('fractalToggle').textContent = 'Hide Visualization';
+                    fractalVisible = true;
+                } catch (e) {
+                    alert('Error loading fractal: ' + e.message);
                 }
             }
-        </script>
-    </body>
-    </html>
-    """)
+        }
+        
+        function toggleBreaks() {
+            const enabled = document.getElementById('breakReminders').checked;
+            if (enabled) {
+                startBreakTimer();
+            } else {
+                if (breakTimer) clearInterval(breakTimer);
+            }
+        }
+        
+        function startBreakTimer() {
+            breakTimer = setInterval(() => {
+                document.getElementById('breakReminder').classList.add('show');
+            }, 25 * 60 * 1000); // 25 minutes
+        }
+        
+        function dismissBreak() {
+            document.getElementById('breakReminder').classList.remove('show');
+        }
+        
+        function toggleSound() {
+            // Implement adaptive soundscape
+            const enabled = document.getElementById('soundEnabled').checked;
+            console.log('Sound enabled:', enabled);
+        }
+        
+        function toggleContrast() {
+            const enabled = document.getElementById('highContrast').checked;
+            if (enabled) {
+                document.body.classList.add('high-contrast');
+            } else {
+                document.body.classList.remove('high-contrast');
+            }
+        }
+        
+        async function loadStats() {
+            // Load user stats
+            try {
+                const res = await fetch(`/api/stats?user_id=${userId}`);
+                const data = await res.json();
+                
+                document.getElementById('goalCount').textContent = data.goals || 0;
+                document.getElementById('habitStreak').textContent = data.best_streak || 0;
+                document.getElementById('petLevel').textContent = data.pet_level || 1;
+            } catch (e) {
+                console.error('Error loading stats:', e);
+            }
+        }
+        
+        function logout() {
+            location.href = '/logout';
+        }
+        
+        // Load data on page load
+        if (userId) {
+            loadStats();
+        }
+    </script>
+</body>
+</html>
+'''
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# STARTUP
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Routes
+@app.route('/')
+def home():
+    user_id = session.get('user_id')
+    logged_in = user_id is not None
+    break_interval = session.get('break_interval', 25)
+    
+    return render_template_string(
+        MAIN_TEMPLATE,
+        COLORS=COLORS,
+        logged_in=logged_in,
+        user_id=user_id,
+        break_interval=break_interval
+    )
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').lower().strip()
+        password = data.get('password', '')
+        name = data.get('name', '').strip()
+        
+        if not email or not password:
+            return jsonify({'error': 'Email and password required'}), 400
+        
+        db = get_db()
+        cursor = db.cursor()
+        
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        if cursor.fetchone():
+            return jsonify({'error': 'Email already registered'}), 400
+        
+        user_id = f"user_{secrets.token_hex(8)}"
+        now = datetime.now(timezone.utc).isoformat()
+        
+        cursor.execute('''
+            INSERT INTO users (id, email, password_hash, name, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (user_id, email, generate_password_hash(password), name or email.split('@')[0], now))
+        
+        cursor.execute('''
+            INSERT INTO pet_state (user_id, name)
+            VALUES (?, ?)
+        ''', (user_id, 'Friend'))
+        
+        db.commit()
+        
+        session['user_id'] = user_id
+        session.permanent = True
+        
+        return jsonify({'success': True, 'user_id': user_id}), 201
+        
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').lower().strip()
+        password = data.get('password', '')
+        
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cursor.fetchone()
+        
+        if not user or not check_password_hash(user['password_hash'], password):
+            return jsonify({'error': 'Invalid credentials'}), 401
+        
+        session['user_id'] = user['id']
+        session.permanent = True
+        
+        return jsonify({'success': True, 'user_id': user['id']}), 200
+        
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+@app.route('/api/daily', methods=['POST'])
+def daily():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'user_id required'}), 400
+        
+        db = get_db()
+        cursor = db.cursor()
+        today = datetime.now(timezone.utc).date().isoformat()
+        
+        entry_id = f"entry_{secrets.token_hex(8)}"
+        now = datetime.now(timezone.utc).isoformat()
+        
+        cursor.execute('''
+            INSERT OR REPLACE INTO daily_entries 
+            (id, user_id, date, mood_level, energy_level, stress_level, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (entry_id, user_id, today, 
+              data.get('mood_level', 50),
+              data.get('energy_level', 50),
+              data.get('stress_level', 50),
+              data.get('notes', ''),
+              now))
+        
+        db.commit()
+        return jsonify({'success': True}), 200
+        
+    except Exception as e:
+        logger.error(f"Daily entry error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/fractal')
+def fractal():
+    user_id = request.args.get('user_id')
+    mood = int(request.args.get('mood', 50))
+    energy = int(request.args.get('energy', 50))
+    stress = int(request.args.get('stress', 50))
+    
+    if not user_id:
+        return jsonify({'error': 'user_id required'}), 400
+    
+    image = generate_fractal(mood, energy, stress)
+    
+    buffer = BytesIO()
+    image.save(buffer, format='PNG')
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    
+    return jsonify({
+        'image': f'data:image/png;base64,{img_str}',
+        'mood': mood,
+        'energy': energy,
+        'stress': stress
+    }), 200
+
+@app.route('/api/stats')
+def stats():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'user_id required'}), 400
+    
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT COUNT(*) as count FROM goals WHERE user_id = ?", (user_id,))
+    goals = cursor.fetchone()['count']
+    
+    cursor.execute("SELECT MAX(best_streak) as streak FROM habits WHERE user_id = ?", (user_id,))
+    streak_row = cursor.fetchone()
+    best_streak = streak_row['streak'] if streak_row and streak_row['streak'] else 0
+    
+    cursor.execute("SELECT level FROM pet_state WHERE user_id = ?", (user_id,))
+    pet_row = cursor.fetchone()
+    pet_level = pet_row['level'] if pet_row else 1
+    
+    return jsonify({
+        'goals': goals,
+        'best_streak': best_streak,
+        'pet_level': pet_level
+    }), 200
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy', 'version': 'neurodivergent-optimized'}), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    
-    logger.info("â•"*60)
-    logger.info("ðŸŒ€ LIFE FRACTAL INTELLIGENCE - PRODUCTION SERVER")
-    logger.info("â•"*60)
-    logger.info(f"âœ… Self-Healing System: ACTIVE")
-    logger.info(f"âœ… Email Verification: ENABLED")
-    logger.info(f"âœ… Database: {'PostgreSQL' if db.pool else 'SQLite'}")
-    logger.info(f"âœ… Port: {port}")
-    logger.info("â•"*60)
-    
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=os.environ.get('ENVIRONMENT') != 'production'
-    )
-
-
+    logger.info("Life Fractal Intelligence - Neurodivergent Edition starting...")
+    app.run(host='0.0.0.0', port=port, debug=False)
