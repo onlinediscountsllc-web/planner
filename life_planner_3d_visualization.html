@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Life Fractal Intelligence - 3D Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+        }
+
+        #parallax-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease-out;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #667eea;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        #legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #764ba2;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #48c774;
+            z-index: 1000;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .control-group button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .control-group button:hover {
+            transform: scale(1.05);
+        }
+
+        .control-group button:active {
+            transform: scale(0.95);
+        }
+
+        .toggle-btn {
+            background: #333 !important;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #48c774 0%, #3ba368 100%) !important;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .legend-icon {
+            font-size: 24px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .legend-text {
+            flex: 1;
+        }
+
+        .legend-text strong {
+            display: block;
+            color: #fff;
+        }
+
+        .legend-text small {
+            color: #aaa;
+            font-size: 11px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: #48c774;
+            font-weight: bold;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            pointer-events: none;
+            display: none;
+            z-index: 2000;
+            max-width: 250px;
+        }
+
+        #tooltip h3 {
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        #tooltip p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .node-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            z-index: 1000;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+        }
+
+        #mode-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading your life fractal...</p>
+        </div>
+
+        <!-- 3D Canvas -->
+        <canvas id="canvas3d"></canvas>
+
+        <!-- Parallax Container (CPU fallback) -->
+        <div id="parallax-container"></div>
+
+        <!-- Controls -->
+        <div id="controls">
+            <h2>🎮 Controls</h2>
+            <div class="control-group">
+                <label>View Mode</label>
+                <button id="toggle3d" class="toggle-btn">Enable 3D Navigation</button>
+            </div>
+            <div class="control-group">
+                <button id="reset-camera">Reset Camera</button>
+            </div>
+            <div class="control-group">
+                <button id="toggle-fractal" class="toggle-btn active">Show Fractal</button>
+            </div>
+            <div class="control-group">
+                <button id="toggle-geometry" class="toggle-btn active">Show Sacred Geometry</button>
+            </div>
+            <div class="control-group">
+                <button id="toggle-connections" class="toggle-btn active">Show Connections</button>
+            </div>
+            <div class="control-group">
+                <button id="rotate-auto" class="toggle-btn">Auto-Rotate</button>
+            </div>
+            <p style="margin-top: 15px; color: #aaa; font-size: 11px;">
+                <strong>3D Navigation:</strong><br>
+                • Left click + drag: Rotate<br>
+                • Right click + drag: Pan<br>
+                • Scroll: Zoom<br>
+                • Hover: View details
+            </p>
+        </div>
+
+        <!-- Legend -->
+        <div id="legend">
+            <h2>🗺️ Visualization Key</h2>
+            <div id="legend-content"></div>
+        </div>
+
+        <!-- Stats -->
+        <div id="stats">
+            <h2 style="font-size: 14px; margin-bottom: 10px;">📊 Live Stats</h2>
+            <div id="stats-content"></div>
+        </div>
+
+        <!-- Tooltip -->
+        <div id="tooltip"></div>
+
+        <!-- Mode Indicator -->
+        <div id="mode-indicator">
+            <span id="mode-text">⚡ GPU Mode: 3D Available</span>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:5000/api';
+        let accessToken = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('accessToken');
+        
+        // State
+        let scene, camera, renderer, controls;
+        let dataPoints = {};
+        let connections = [];
+        let fractalTexture;
+        let is3DMode = false;
+        let autoRotate = false;
+        let showFractal = true;
+        let showGeometry = true;
+        let showConnections = true;
+        let animationFrame;
+        let nodes = [];
+        let gpuAvailable = false;
+
+        // Initialize
+        async function init() {
+            if (!accessToken) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                // Load visualization data
+                const response = await fetch(`${API_BASE}/user/${accessToken}/visualization`);
+                const data = await response.json();
+                
+                dataPoints = data.data_points;
+                connections = data.connections;
+                gpuAvailable = data.gpu_available;
+
+                // Set up visualization mode
+                if (gpuAvailable) {
+                    document.getElementById('mode-text').textContent = '⚡ GPU Mode: Full 3D Available';
+                    document.getElementById('toggle3d').textContent = 'Enable 3D Navigation (GPU)';
+                } else {
+                    document.getElementById('mode-text').textContent = '💻 CPU Mode: Parallax Effect';
+                    document.getElementById('toggle3d').textContent = 'Enable Parallax (CPU)';
+                }
+
+                // Set up legend
+                setupLegend(data.legend);
+
+                // Set up stats
+                setupStats(data.summary);
+
+                // Initialize 2D view
+                setup2DView(data);
+
+                // Load fractal as background
+                await loadFractal();
+
+                // Set up event listeners
+                setupEventListeners();
+
+                document.getElementById('loading').style.display = 'none';
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('loading').innerHTML = '<p>Error loading visualization</p>';
+            }
+        }
+
+        // Load fractal image
+        async function loadFractal() {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    fractalTexture = img;
+                    resolve();
+                };
+                img.src = `${API_BASE}/user/${accessToken}/fractal?t=${Date.now()}`;
+            });
+        }
+
+        // Setup 2D parallax view (default)
+        function setup2DView(data) {
+            const container = document.getElementById('parallax-container');
+            container.style.display = 'block';
+            container.innerHTML = '';
+
+            // Background fractal layer
+            const fractalLayer = document.createElement('div');
+            fractalLayer.className = 'parallax-layer';
+            fractalLayer.style.backgroundImage = `url(${fractalTexture.src})`;
+            fractalLayer.style.backgroundSize = 'cover';
+            fractalLayer.style.backgroundPosition = 'center';
+            fractalLayer.style.opacity = '0.6';
+            fractalLayer.style.filter = 'blur(2px)';
+            container.appendChild(fractalLayer);
+
+            // Data points layer
+            const nodesLayer = document.createElement('div');
+            nodesLayer.className = 'parallax-layer';
+            nodesLayer.id = 'nodes-layer';
+            container.appendChild(nodesLayer);
+
+            // Create nodes
+            createDataNodes(nodesLayer, data);
+
+            // Parallax mouse effect
+            container.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                
+                fractalLayer.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+                nodesLayer.style.transform = `translate(${x * 0.5}px, ${y * 0.5}px)`;
+            });
+        }
+
+        // Create data point nodes
+        function createDataNodes(container, data) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const scale = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+
+            // Pet (center)
+            createNode(container, dataPoints.pet, centerX, centerY, scale);
+
+            // Wellness metrics
+            dataPoints.wellness.forEach(point => {
+                const x = centerX + point.x * scale;
+                const y = centerY + point.y * scale;
+                createNode(container, point, x, y, scale);
+            });
+
+            // Goals
+            dataPoints.goals.forEach(point => {
+                const x = centerX + point.x * scale;
+                const y = centerY + point.y * scale;
+                createNode(container, point, x, y, scale);
+            });
+
+            // Habits
+            dataPoints.habits.forEach(point => {
+                const x = centerX + point.x * scale;
+                const y = centerY + point.y * scale;
+                createNode(container, point, x, y, scale);
+            });
+        }
+
+        // Create individual node
+        function createNode(container, point, x, y, scale) {
+            const node = document.createElement('div');
+            node.className = 'node-label';
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.style.transform = 'translate(-50%, -50%)';
+            node.style.borderColor = point.color;
+            node.style.fontSize = `${point.size}px`;
+            
+            if (point.pulse) {
+                node.classList.add('pulse');
+            }
+
+            node.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 24px; margin-bottom: 5px;">${point.icon}</div>
+                    <strong>${point.label}</strong>
+                    <div style="color: ${point.color}; font-size: 14px; font-weight: bold;">${point.value}</div>
+                </div>
+            `;
+
+            // Tooltip on hover
+            node.addEventListener('mouseenter', (e) => showTooltip(e, point));
+            node.addEventListener('mouseleave', hideTooltip);
+
+            container.appendChild(node);
+            nodes.push(node);
+        }
+
+        // Show tooltip
+        function showTooltip(e, point) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${e.pageX + 15}px`;
+            tooltip.style.top = `${e.pageY + 15}px`;
+            
+            tooltip.innerHTML = `
+                <h3>${point.icon} ${point.label}</h3>
+                <p><strong>Value:</strong> ${point.value}</p>
+                <p>${point.description}</p>
+                ${point.type === 'goal' && point.milestones ? 
+                    `<p><strong>Milestones:</strong> ${point.milestones.join(', ')}%</p>` : ''}
+                ${point.type === 'habit' && point.streak ? 
+                    `<p><strong>Streak:</strong> ${point.streak} days</p>` : ''}
+                ${point.type === 'pet' && point.stats ? 
+                    `<p><strong>Stats:</strong><br>
+                    Hunger: ${point.stats.hunger.toFixed(0)}%<br>
+                    Energy: ${point.stats.energy.toFixed(0)}%<br>
+                    Mood: ${point.stats.mood.toFixed(0)}%<br>
+                    Bond: ${point.stats.bond.toFixed(0)}%</p>` : ''}
+            `;
+        }
+
+        // Hide tooltip
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        // Setup legend
+        function setupLegend(legend) {
+            const content = document.getElementById('legend-content');
+            
+            Object.entries(legend).forEach(([key, item]) => {
+                const div = document.createElement('div');
+                div.className = 'legend-item';
+                div.innerHTML = `
+                    <div class="legend-icon">${item.icon}</div>
+                    <div class="legend-text">
+                        <strong>${item.description}</strong>
+                        <small>${item.color}</small>
+                    </div>
+                `;
+                content.appendChild(div);
+            });
+        }
+
+        // Setup stats
+        function setupStats(summary) {
+            const content = document.getElementById('stats-content');
+            content.innerHTML = `
+                <div class="stat-row">
+                    <span class="stat-label">Wellness:</span>
+                    <span class="stat-value">${summary.wellness_index}/100</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Streak:</span>
+                    <span class="stat-value">${summary.streak_days} days</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Goals:</span>
+                    <span class="stat-value">${summary.goals_progress.toFixed(0)}%</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Habits Today:</span>
+                    <span class="stat-value">${summary.habits_completed_today}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Mood:</span>
+                    <span class="stat-value">${summary.mood_category}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Data Points:</span>
+                    <span class="stat-value">${summary.total_nodes}</span>
+                </div>
+            `;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('toggle3d').addEventListener('click', toggle3DMode);
+            document.getElementById('reset-camera').addEventListener('click', resetCamera);
+            document.getElementById('toggle-fractal').addEventListener('click', toggleFractal);
+            document.getElementById('toggle-geometry').addEventListener('click', toggleGeometry);
+            document.getElementById('toggle-connections').addEventListener('click', toggleConnections);
+            document.getElementById('rotate-auto').addEventListener('click', toggleAutoRotate);
+        }
+
+        // Toggle 3D mode
+        function toggle3DMode() {
+            is3DMode = !is3DMode;
+            const btn = document.getElementById('toggle3d');
+            btn.classList.toggle('active');
+            
+            if (is3DMode && gpuAvailable) {
+                // TODO: Initialize Three.js 3D scene
+                alert('Full 3D mode with Three.js coming soon! For now, enjoy the enhanced 2D parallax view.');
+            }
+        }
+
+        // Reset camera
+        function resetCamera() {
+            const container = document.getElementById('parallax-container');
+            const layers = container.querySelectorAll('.parallax-layer');
+            layers.forEach(layer => {
+                layer.style.transform = 'translate(0, 0)';
+            });
+        }
+
+        // Toggle fractal
+        function toggleFractal() {
+            showFractal = !showFractal;
+            document.getElementById('toggle-fractal').classList.toggle('active');
+            const fractal = document.querySelector('.parallax-layer');
+            if (fractal) {
+                fractal.style.opacity = showFractal ? '0.6' : '0';
+            }
+        }
+
+        // Toggle geometry
+        function toggleGeometry() {
+            showGeometry = !showGeometry;
+            document.getElementById('toggle-geometry').classList.toggle('active');
+            // TODO: Implement geometry overlay
+        }
+
+        // Toggle connections
+        function toggleConnections() {
+            showConnections = !showConnections;
+            document.getElementById('toggle-connections').classList.toggle('active');
+            // TODO: Implement connection lines
+        }
+
+        // Toggle auto-rotate
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+            document.getElementById('rotate-auto').classList.toggle('active');
+            if (autoRotate) {
+                startAutoRotate();
+            } else {
+                stopAutoRotate();
+            }
+        }
+
+        // Auto-rotate animation
+        let rotateAngle = 0;
+        function startAutoRotate() {
+            function rotate() {
+                if (!autoRotate) return;
+                
+                rotateAngle += 0.005;
+                const nodesLayer = document.getElementById('nodes-layer');
+                if (nodesLayer) {
+                    const x = Math.sin(rotateAngle) * 20;
+                    const y = Math.cos(rotateAngle) * 10;
+                    nodesLayer.style.transform = `translate(${x}px, ${y}px) rotate(${rotateAngle * 2}deg)`;
+                }
+                
+                animationFrame = requestAnimationFrame(rotate);
+            }
+            rotate();
+        }
+
+        function stopAutoRotate() {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            resetCamera();
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

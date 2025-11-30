@@ -1,0 +1,365 @@
+{
+  "users": {
+    "admin_001": {
+      "id": "admin_001",
+      "email": "onlinediscountsllc@gmail.com",
+      "first_name": "Luke",
+      "last_name": "Smith",
+      "is_active": true,
+      "subscription_status": "active",
+      "trial_days_remaining": 0,
+      "created_at": "2025-11-29T19:40:03.015276+00:00",
+      "last_login": "",
+      "current_streak": 0,
+      "longest_streak": 0,
+      "current_month": 1,
+      "big_why": "Build the independent life I deserve",
+      "goals_count": 3,
+      "journal_entries_count": 7,
+      "vision_board_count": 0,
+      "is_admin": true,
+      "email_verified": true,
+      "goals": {
+        "goal_1_b005e0ad": {
+          "id": "goal_1_b005e0ad",
+          "category": "mental",
+          "title": "Establish daily routine",
+          "description": "Create a sustainable daily routine that supports my wellbeing",
+          "completed": false,
+          "created_date": "2025-11-22T19:40:03.316942+00:00",
+          "completed_date": "",
+          "difficulty": 4,
+          "importance": 9,
+          "energy_required": 5,
+          "estimated_hours": 0.0,
+          "actual_hours": 0.0,
+          "notes": "",
+          "tags": [],
+          "subtasks": [
+            "Morning routine",
+            "Evening routine",
+            "Meal times",
+            "Exercise time"
+          ],
+          "resources_needed": [],
+          "obstacles": [
+            "Impulsivity",
+            "Forgetting",
+            "Loss of motivation"
+          ],
+          "support_needed": "Reminder app, accountability partner",
+          "why_important": "Structure helps me manage ADHD and build consistency",
+          "success_criteria": [
+            "Follow routine 5/7 days",
+            "Feel more grounded",
+            "Better sleep"
+          ],
+          "progress_percentage": 0.0
+        },
+        "goal_2_d0e10265": {
+          "id": "goal_2_d0e10265",
+          "category": "financial",
+          "title": "Open secured credit card",
+          "description": "Apply for and activate a secured credit card to build credit",
+          "completed": false,
+          "created_date": "2025-11-22T19:40:03.316942+00:00",
+          "completed_date": "",
+          "difficulty": 3,
+          "importance": 10,
+          "energy_required": 4,
+          "estimated_hours": 0.0,
+          "actual_hours": 0.0,
+          "notes": "",
+          "tags": [],
+          "subtasks": [
+            "Research cards",
+            "Gather documents",
+            "Apply",
+            "Make first deposit"
+          ],
+          "resources_needed": [
+            "$200-500 deposit",
+            "ID",
+            "Bank account"
+          ],
+          "obstacles": [],
+          "support_needed": "",
+          "why_important": "Need good credit to rent an apartment",
+          "success_criteria": [
+            "Card approved",
+            "First charge made",
+            "First payment on time"
+          ],
+          "progress_percentage": 0.0
+        },
+        "goal_3_a704a125": {
+          "id": "goal_3_a704a125",
+          "category": "career",
+          "title": "Create portfolio website",
+          "description": "Build professional portfolio showcasing my work",
+          "completed": false,
+          "created_date": "2025-11-22T19:40:03.316942+00:00",
+          "completed_date": "",
+          "difficulty": 6,
+          "importance": 8,
+          "energy_required": 7,
+          "estimated_hours": 20.0,
+          "actual_hours": 0.0,
+          "notes": "",
+          "tags": [],
+          "subtasks": [
+            "Choose platform",
+            "Select projects",
+            "Write descriptions",
+            "Design layout",
+            "Launch"
+          ],
+          "resources_needed": [
+            "Domain name",
+            "Hosting",
+            "Project screenshots"
+          ],
+          "obstacles": [],
+          "support_needed": "",
+          "why_important": "",
+          "success_criteria": [
+            "3+ projects shown",
+            "Professional appearance",
+            "Contact form works"
+          ],
+          "progress_percentage": 0.0
+        }
+      },
+      "milestones": [
+        {
+          "id": 1,
+          "title": "Secured credit card opened",
+          "target_month": 1,
+          "completed": false,
+          "completed_date": "",
+          "fibonacci_number": 1,
+          "energy_score": 0.0,
+          "description": "First step in building credit",
+          "category": "financial"
+        },
+        {
+          "id": 2,
+          "title": "First portfolio piece created",
+          "target_month": 3,
+          "completed": false,
+          "completed_date": "",
+          "fibonacci_number": 2,
+          "energy_score": 0.0,
+          "description": "Showcase professional work",
+          "category": "career"
+        },
+        {
+          "id": 3,
+          "title": "Daily routine established",
+          "target_month": 2,
+          "completed": false,
+          "completed_date": "",
+          "fibonacci_number": 3,
+          "energy_score": 0.0,
+          "description": "Consistent healthy habits",
+          "category": "mental"
+        },
+        {
+          "id": 4,
+          "title": "First freelance income",
+          "target_month": 6,
+          "completed": false,
+          "completed_date": "",
+          "fibonacci_number": 5,
+          "energy_score": 0.0,
+          "description": "Earning independently",
+          "category": "career"
+        },
+        {
+          "id": 5,
+          "title": "Emergency fund: $500",
+          "target_month": 8,
+          "completed": false,
+          "completed_date": "",
+          "fibonacci_number": 8,
+          "energy_score": 0.0,
+          "description": "Financial safety net",
+          "category": "financial"
+        }
+      ],
+      "journal_entries": {
+        "2025-11-29": {
+          "date": "2025-11-29",
+          "mood": 5,
+          "energy": 7,
+          "focus": 5,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 0"
+          ],
+          "wins": [
+            "Small win from day 0"
+          ],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 0...",
+          "tasks_completed": 0,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-28": {
+          "date": "2025-11-28",
+          "mood": 5,
+          "energy": 6,
+          "focus": 5,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 1"
+          ],
+          "wins": [],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 1...",
+          "tasks_completed": 1,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-27": {
+          "date": "2025-11-27",
+          "mood": 6,
+          "energy": 6,
+          "focus": 6,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 2"
+          ],
+          "wins": [
+            "Small win from day 2"
+          ],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 2...",
+          "tasks_completed": 2,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-26": {
+          "date": "2025-11-26",
+          "mood": 6,
+          "energy": 5,
+          "focus": 6,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 3"
+          ],
+          "wins": [],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 3...",
+          "tasks_completed": 0,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-25": {
+          "date": "2025-11-25",
+          "mood": 6,
+          "energy": 5,
+          "focus": 6,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 4"
+          ],
+          "wins": [
+            "Small win from day 4"
+          ],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 4...",
+          "tasks_completed": 1,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-24": {
+          "date": "2025-11-24",
+          "mood": 6,
+          "energy": 5,
+          "focus": 6,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 5"
+          ],
+          "wins": [],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 5...",
+          "tasks_completed": 2,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        },
+        "2025-11-23": {
+          "date": "2025-11-23",
+          "mood": 5,
+          "energy": 4,
+          "focus": 6,
+          "anxiety": 5,
+          "stress": 5,
+          "sleep_hours": 7.0,
+          "sleep_quality": 5,
+          "gratitude": [
+            "Something good from day 6"
+          ],
+          "wins": [
+            "Small win from day 6"
+          ],
+          "challenges": [],
+          "lessons_learned": [],
+          "tomorrow_intentions": [],
+          "journal_text": "Reflection for day 6...",
+          "tasks_completed": 0,
+          "exercise_minutes": 0,
+          "social_time": false,
+          "creative_time": false,
+          "learning_time": false
+        }
+      },
+      "vision_board": []
+    }
+  },
+  "timestamp": "2025-11-29T20:10:03.355718+00:00"
+}

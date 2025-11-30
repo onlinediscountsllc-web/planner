@@ -1,0 +1,47 @@
+# ⚡ COPY-PASTE THESE COMMANDS - EASIEST WAY!
+# Just copy each line and run it in PowerShell
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 1: Install Core Libraries (Required - 30 seconds)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pip install flask flask-cors numpy pillow scikit-learn --break-system-packages
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 2: Install PyTorch (GPU Acceleration - 3-5x faster fractals - 2-3 minutes)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pip install torch torchvision torchaudio --break-system-packages --index-url https://download.pytorch.org/whl/cu118
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 3: Install Audio Libraries (Audio-Reactive Feature - 1 minute)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pip install librosa soundfile --break-system-packages
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 4: Install MIDI Library (Music Generation - 5 seconds)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pip install mido --break-system-packages
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 5: Start the Server!
+# ═══════════════════════════════════════════════════════════════════════════════
+
+py life_fractal_complete_v3_1.py
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DONE! Now open your browser to: http://localhost:5000
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Login:
+#   Email:    onlinediscountsllc@gmail.com
+#   Password: admin8587037321
+
+# You should now see all features as "true" in the JSON response!

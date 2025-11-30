@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Fractal Intelligence - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .auth-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .fractal-display {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+
+        #fractalImage {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        #fractalImage:hover {
+            transform: scale(1.02);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .metric {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #ffd700;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        input, button, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input, textarea {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        button {
+            background: #ffd700;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .pet-display {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .pet-emoji {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+
+        .pet-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .stat-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .goal-list, .habit-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .error {
+            background: rgba(255,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: rgba(0,255,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #ffd700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .tab.active {
+            background: #ffd700;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌀 Life Fractal Intelligence</h1>
+            <p class="subtitle">Your life, visualized as living fractal art</p>
+        </header>
+
+        <!-- Authentication Section -->
+        <div class="auth-section" id="authSection">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('login')">Login</button>
+                <button class="tab" onclick="showTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" />
+                <input type="password" id="loginPassword" placeholder="Password" />
+                <button onclick="login()">Login</button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="hidden">
+                <input type="email" id="regEmail" placeholder="Email" />
+                <input type="password" id="regPassword" placeholder="Password (min 8 chars)" />
+                <select id="petSpecies" style="padding: 12px; margin: 8px 0; border-radius: 8px; background: rgba(255,255,255,0.2); color: #fff; border: none;">
+                    <option value="cat">🐱 Cat - Mysterious & Independent</option>
+                    <option value="dragon">🐉 Dragon - Powerful & Ambitious</option>
+                    <option value="phoenix">🔥 Phoenix - Resilient & Transformative</option>
+                    <option value="owl">🦉 Owl - Wise & Analytical</option>
+                    <option value="fox">🦊 Fox - Clever & Adaptable</option>
+                </select>
+                <input type="text" id="petName" placeholder="Pet Name" value="Buddy" />
+                <button onclick="register()">Create Account</button>
+            </div>
+
+            <div id="authMessage"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <!-- Fractal Visualization -->
+            <div class="card fractal-display">
+                <h2>🎨 Your Life Fractal</h2>
+                <div class="loading" id="fractalLoading">
+                    <div class="spinner"></div>
+                    <p>Generating your personalized fractal...</p>
+                </div>
+                <img id="fractalImage" class="hidden" alt="Your Life Fractal" />
+                <button onclick="generateFractal()" style="margin-top: 20px;">🔄 Regenerate Fractal</button>
+            </div>
+
+            <!-- Metrics -->
+            <div class="card">
+                <h2>📊 Life Metrics</h2>
+                <div class="metrics" id="metricsDisplay">
+                    <div class="metric">
+                        <div class="metric-label">Momentum</div>
+                        <div class="metric-value" id="momentum">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Goals</div>
+                        <div class="metric-value" id="goalRate">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Streak</div>
+                        <div class="metric-value" id="streak">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Total XP</div>
+                        <div class="metric-value" id="totalXP">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Virtual Pet -->
+            <div class="card">
+                <h2>🐉 Virtual Companion</h2>
+                <div class="pet-display" id="petDisplay">
+                    <div class="pet-emoji" id="petEmoji">🐱</div>
+                    <h3 id="petName">Loading...</h3>
+                    <p>Level <span id="petLevel">1</span></p>
+                    <div class="pet-stats">
+                        <div style="flex: 1; margin: 0 10px;">
+                            <div>Happiness</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" id="happinessBar"></div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; margin: 0 10px;">
+                            <div>Hunger</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" id="hungerBar" style="background: linear-gradient(90deg, #ff6b6b, #ffd700);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button onclick="feedPet()" style="width: 48%; display: inline-block; margin: 1%;">🍖 Feed</button>
+                        <button onclick="playWithPet()" style="width: 48%; display: inline-block; margin: 1%;">🎾 Play</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h2>⚡ Quick Actions</h2>
+                <input type="text" id="newGoalTitle" placeholder="New goal..." />
+                <button onclick="createGoal()">Add Goal</button>
+                
+                <input type="text" id="newHabitTitle" placeholder="New habit..." style="margin-top: 15px;" />
+                <button onclick="createHabit()">Add Habit</button>
+
+                <textarea id="journalContent" placeholder="Write journal entry..." rows="3" style="margin-top: 15px;"></textarea>
+                <button onclick="createJournalEntry()">Save Entry</button>
+
+                <button onclick="exportData()" style="margin-top: 15px; background: #4CAF50;">📥 Export Data</button>
+                <button onclick="logout()" style="background: #f44336;">🚪 Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let authToken = localStorage.getItem('fractal_token');
+
+        // Initialize
+        if (authToken) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            loadDashboard();
+        }
+
+        function showTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                tabs[0].classList.add('active');
+            } else {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const petSpecies = document.getElementById('petSpecies').value;
+            const petName = document.getElementById('petName').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, pet_species: petSpecies, pet_name: petName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('fractal_token', authToken);
+                    showMessage('Registration successful!', 'success');
+                    setTimeout(() => {
+                        document.getElementById('authSection').style.display = 'none';
+                        document.getElementById('dashboard').classList.add('active');
+                        loadDashboard();
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('fractal_token', authToken);
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('dashboard').classList.add('active');
+                    loadDashboard();
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('fractal_token');
+            location.reload();
+        }
+
+        async function loadDashboard() {
+            await Promise.all([
+                loadMetrics(),
+                loadPet(),
+                generateFractal()
+            ]);
+        }
+
+        async function loadMetrics() {
+            try {
+                const response = await fetch(`${API_URL}/fractal/metrics`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                const m = data.metrics;
+
+                document.getElementById('momentum').textContent = Math.round(m.momentum * 100) + '%';
+                document.getElementById('goalRate').textContent = Math.round(m.goal_completion_rate * 100) + '%';
+                document.getElementById('streak').textContent = Math.round(m.max_streak);
+                document.getElementById('totalXP').textContent = m.total_xp;
+            } catch (error) {
+                console.error('Failed to load metrics:', error);
+            }
+        }
+
+        async function loadPet() {
+            try {
+                const response = await fetch(`${API_URL}/pet`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                const pet = data.pet;
+
+                const emojiMap = {
+                    'cat': '🐱', 'dragon': '🐉', 'phoenix': '🔥',
+                    'owl': '🦉', 'fox': '🦊'
+                };
+
+                document.getElementById('petEmoji').textContent = emojiMap[pet.species] || '🐱';
+                document.getElementById('petName').textContent = pet.name;
+                document.getElementById('petLevel').textContent = pet.level;
+                document.getElementById('happinessBar').style.width = pet.happiness + '%';
+                document.getElementById('hungerBar').style.width = pet.hunger + '%';
+            } catch (error) {
+                console.error('Failed to load pet:', error);
+            }
+        }
+
+        async function generateFractal() {
+            const loading = document.getElementById('fractalLoading');
+            const img = document.getElementById('fractalImage');
+            
+            loading.classList.remove('hidden');
+            img.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_URL}/fractal/generate?type=auto`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                img.src = url;
+                img.onload = () => {
+                    loading.classList.add('hidden');
+                    img.classList.remove('hidden');
+                };
+            } catch (error) {
+                loading.innerHTML = '<p style="color: #ff6b6b;">Failed to generate fractal</p>';
+            }
+        }
+
+        async function feedPet() {
+            try {
+                await fetch(`${API_URL}/pet/feed`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                await loadPet();
+                showMessage('Pet fed! 🍖', 'success');
+            } catch (error) {
+                showMessage('Failed to feed pet', 'error');
+            }
+        }
+
+        async function playWithPet() {
+            try {
+                await fetch(`${API_URL}/pet/play`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                await loadPet();
+                showMessage('Pet had fun! 🎾', 'success');
+            } catch (error) {
+                showMessage('Failed to play with pet', 'error');
+            }
+        }
+
+        async function createGoal() {
+            const title = document.getElementById('newGoalTitle').value;
+            if (!title) return;
+
+            try {
+                await fetch(`${API_URL}/goals`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: '',
+                        category: 'personal',
+                        priority: 'medium',
+                        target_date: new Date(Date.now() + 30*24*60*60*1000).toISOString()
+                    })
+                });
+
+                document.getElementById('newGoalTitle').value = '';
+                showMessage('Goal created! 🎯', 'success');
+                await loadMetrics();
+            } catch (error) {
+                showMessage('Failed to create goal', 'error');
+            }
+        }
+
+        async function createHabit() {
+            const title = document.getElementById('newHabitTitle').value;
+            if (!title) return;
+
+            try {
+                await fetch(`${API_URL}/habits`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: '',
+                        frequency: 'daily'
+                    })
+                });
+
+                document.getElementById('newHabitTitle').value = '';
+                showMessage('Habit created! 📅', 'success');
+                await loadMetrics();
+            } catch (error) {
+                showMessage('Failed to create habit', 'error');
+            }
+        }
+
+        async function createJournalEntry() {
+            const content = document.getElementById('journalContent').value;
+            if (!content) return;
+
+            try {
+                await fetch(`${API_URL}/journal`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content, tags: [] })
+                });
+
+                document.getElementById('journalContent').value = '';
+                showMessage('Journal entry saved! 📔', 'success');
+                await loadMetrics();
+                await generateFractal(); // Regenerate fractal with new sentiment
+            } catch (error) {
+                showMessage('Failed to save entry', 'error');
+            }
+        }
+
+        async function exportData() {
+            try {
+                const response = await fetch(`${API_URL}/export`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `life_fractal_backup_${Date.now()}.json`;
+                a.click();
+                
+                showMessage('Data exported! 📥', 'success');
+            } catch (error) {
+                showMessage('Failed to export data', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const authMessage = document.getElementById('authMessage');
+            authMessage.className = type;
+            authMessage.textContent = message;
+            authMessage.style.display = 'block';
+            setTimeout(() => {
+                authMessage.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+2025-11-29 16:16:16,882 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:16:16,906 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-29 16:16:16,906 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-29 16:16:16,907 [INFO] werkzeug:  * Restarting with stat
+2025-11-29 16:16:18,856 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:16:18,868 [WARNING] werkzeug:  * Debugger is active!
+2025-11-29 16:16:18,873 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-29 16:16:31,043 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:16:31] "GET / HTTP/1.1" 200 -
+2025-11-29 16:16:31,075 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:16:31] "[31m[1mGET /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:17:10,154 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:10] "[31m[1mPOST /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:17:17,441 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:17] "[31m[1mPOST /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:17:21,103 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:21] "[31m[1mGET /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:17:23,291 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:23] "[31m[1mGET /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:17:25,764 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:25] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:28,463 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:28] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:29,058 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:29] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:30,386 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:30] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:31,264 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:31] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:32,450 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:32] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:33,094 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:33] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:34,213 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:34] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:35,022 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:35] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:36,197 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:36] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:37,530 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:37] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:39,073 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:39] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -
+2025-11-29 16:17:39,359 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:17:39] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:18:24,472 [INFO] werkzeug:  * Detected change in 'C:\\Users\\Luke\\Desktop\\planner\\fractal_engine_ultimate.py', reloading
+2025-11-29 16:18:24,969 [INFO] werkzeug:  * Restarting with stat
+2025-11-29 16:18:28,293 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:18:28,306 [WARNING] werkzeug:  * Debugger is active!
+2025-11-29 16:18:28,309 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-29 16:18:32,605 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:18:32,624 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-29 16:18:32,625 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-29 16:18:32,625 [INFO] werkzeug:  * Restarting with stat
+2025-11-29 16:18:34,524 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:18:34,536 [WARNING] werkzeug:  * Debugger is active!
+2025-11-29 16:18:34,539 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-29 16:18:40,480 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:18:40] "GET / HTTP/1.1" 200 -
+2025-11-29 16:18:40,503 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:18:40] "[31m[1mGET /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:19:22,086 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:19:22] "[31m[1mPOST /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:32:27,032 [INFO] werkzeug:  * Detected change in 'C:\\Users\\Luke\\Desktop\\planner\\ultimate_life_planner_v6.py', reloading
+2025-11-29 16:32:27,545 [INFO] werkzeug:  * Restarting with stat
+2025-11-29 16:32:30,185 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:32:30,199 [WARNING] werkzeug:  * Debugger is active!
+2025-11-29 16:32:30,203 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-29 16:32:34,381 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:32:34,406 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-29 16:32:34,406 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-29 16:32:34,407 [INFO] werkzeug:  * Restarting with stat
+2025-11-29 16:32:36,423 [INFO] __main__: 3D Fractal Engine: GPU mode
+2025-11-29 16:32:36,439 [WARNING] werkzeug:  * Debugger is active!
+2025-11-29 16:32:36,447 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-29 16:32:45,633 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:32:45] "GET / HTTP/1.1" 200 -
+2025-11-29 16:32:45,654 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:32:45] "[31m[1mGET /api/goals HTTP/1.1[0m" 401 -
+2025-11-29 16:32:52,054 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:32:52] "[31m[1mPOST /api/visualization/fractal/3d HTTP/1.1[0m" 401 -
+2025-11-29 16:32:53,535 [INFO] werkzeug: 127.0.0.1 - - [29/Nov/2025 16:32:53] "[31m[1mPOST /api/visualization/fractal/2d HTTP/1.1[0m" 401 -

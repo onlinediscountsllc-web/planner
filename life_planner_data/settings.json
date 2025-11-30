@@ -1,0 +1,9 @@
+{
+  "name": "Luke Smith",
+  "big_why": "become indipendent and be happy",
+  "current_month": 1,
+  "accessibility_mode": "advanced",
+  "audio_enabled": true,
+  "comfyui_host": "127.0.0.1",
+  "comfyui_port": 8188
+}

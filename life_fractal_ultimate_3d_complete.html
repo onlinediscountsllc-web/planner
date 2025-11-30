@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Life Fractal Intelligence - Ultimate 3D Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Sacred Geometry SVG Overlays */
+        .sacred-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.3;
+            transition: opacity 0.3s, stroke-width 0.1s;
+        }
+
+        #flower-of-life {
+            width: 600px;
+            height: 600px;
+        }
+
+        #metatron-cube {
+            width: 500px;
+            height: 500px;
+        }
+
+        #golden-spiral {
+            width: 700px;
+            height: 700px;
+        }
+
+        /* Control Panel */
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid rgba(102, 126, 234, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 350px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }
+
+        #controls h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+            padding-bottom: 10px;
+        }
+
+        #controls h3 {
+            color: #a8b3ff;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .control-group label {
+            display: block;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin: 8px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #48c774 0%, #38a169 100%);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .checkbox-label:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* Stats Display */
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid rgba(72, 199, 116, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }
+
+        #stats h2 {
+            color: #48c774;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            color: #48c774;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Legend */
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            max-width: 400px;
+        }
+
+        #legend h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tooltip */
+        #tooltip {
+            position: absolute;
+            background: rgba(10, 10, 20, 0.98);
+            border: 2px solid rgba(102, 126, 234, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 300px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+        }
+
+        #tooltip.visible {
+            opacity: 1;
+        }
+
+        #tooltip h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        #tooltip p {
+            color: #d0d0d0;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        /* Loading */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Audio Visualizer */
+        #audio-visualizer {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 80px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid rgba(138, 43, 226, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+        }
+
+        #waveform {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Camera Mode Indicator */
+        #camera-mode {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(138, 43, 226, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sacred Math Display */
+        #sacred-math {
+            position: absolute;
+            bottom: 20px;
+            right: 340px;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 250px;
+        }
+
+        #sacred-math h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #sacred-math p {
+            color: #d0d0d0;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .sacred-value {
+            color: #48c774;
+            font-family: monospace;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Loading Screen -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <h2 style="color: #667eea;">Loading Sacred Geometry...</h2>
+            <p style="color: #a0a0a0;">Initializing GPU acceleration</p>
+        </div>
+
+        <!-- 3D Canvas -->
+        <canvas id="canvas-3d"></canvas>
+
+        <!-- Sacred Geometry SVG Overlays -->
+        <svg id="flower-of-life" class="sacred-overlay" viewBox="0 0 600 600">
+            <g id="flower-circles" stroke="gold" stroke-width="1.5" fill="none" opacity="0.6">
+                <!-- Generated dynamically -->
+            </g>
+        </svg>
+
+        <svg id="metatron-cube" class="sacred-overlay" viewBox="0 0 500 500">
+            <g id="metatron-lines" stroke="cyan" stroke-width="1.5" fill="none" opacity="0.7">
+                <!-- Generated dynamically -->
+            </g>
+        </svg>
+
+        <svg id="golden-spiral" class="sacred-overlay" viewBox="0 0 700 700">
+            <path id="spiral-path" stroke="rgba(255, 215, 0, 0.5)" stroke-width="2" fill="none"/>
+        </svg>
+
+        <!-- Control Panel -->
+        <div id="controls">
+            <h2>🌀 Visualization Controls</h2>
+            
+            <div class="control-group">
+                <button id="btn-auto-rotate" class="active">🔄 Auto-Rotate</button>
+                <button id="btn-reset-camera">📷 Reset Camera</button>
+                <button id="btn-toggle-fractal">🎨 Toggle Fractal</button>
+                <button id="btn-generate-music">🎵 Generate Music</button>
+            </div>
+
+            <h3>🔮 Sacred Geometry</h3>
+            <div class="control-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-flower" checked>
+                    <span>🌸 Flower of Life</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-metatron" checked>
+                    <span>🔷 Metatron's Cube</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-spiral" checked>
+                    <span>🌟 Golden Spiral</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-connections" checked>
+                    <span>⚡ Energy Connections</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="chk-audio-reactive">
+                    <span>🔊 Audio Reactive</span>
+                </label>
+            </div>
+
+            <h3>⚙️ Visualization</h3>
+            <div class="control-group">
+                <label>Recursion Depth: <span id="depth-value">5</span></label>
+                <input type="range" id="recursion-depth" min="1" max="13" value="5">
+                
+                <label>Particle Count: <span id="particle-value">1000</span></label>
+                <input type="range" id="particle-count" min="100" max="5000" step="100" value="1000">
+                
+                <label>Animation Speed: <span id="speed-value">1.0</span>x</label>
+                <input type="range" id="animation-speed" min="0.1" max="3" step="0.1" value="1.0">
+                
+                <label>Chaos Factor: <span id="chaos-value">0.5</span></label>
+                <input type="range" id="chaos-factor" min="0" max="1" step="0.05" value="0.5">
+            </div>
+
+            <h3>🎥 Camera Mode</h3>
+            <div class="control-group">
+                <button id="btn-orbit">🌍 Orbit Mode</button>
+                <button id="btn-fly">🚀 Fly Mode</button>
+                <button id="btn-first-person">👤 First Person</button>
+                <button id="btn-top-down">🔝 Top-Down</button>
+            </div>
+        </div>
+
+        <!-- Stats Display -->
+        <div id="stats">
+            <h2>📊 Live Statistics</h2>
+            <div class="stat-item">
+                <span class="stat-label">Wellness Index:</span>
+                <span class="stat-value" id="stat-wellness">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Chaos Score:</span>
+                <span class="stat-value" id="stat-chaos">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Active Goals:</span>
+                <span class="stat-value" id="stat-goals">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Habit Streak:</span>
+                <span class="stat-value" id="stat-streak">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Pet Level:</span>
+                <span class="stat-value" id="stat-pet-level">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Badges Earned:</span>
+                <span class="stat-value" id="stat-badges">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">FPS:</span>
+                <span class="stat-value" id="stat-fps">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Data Points:</span>
+                <span class="stat-value" id="stat-points">--</span>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div id="legend">
+            <h3>🎨 Data Point Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: hsl(280, 70%, 60%);"></div>
+                <span>🐱 Pet (Center - Purple)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: hsl(200, 70%, 60%);"></div>
+                <span>😊 Wellness Metrics (Inner Ring)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: hsl(120, 70%, 60%);"></div>
+                <span>🎯 Goals (Middle Ring - Green)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: hsl(30, 70%, 60%);"></div>
+                <span>✓ Habits (Outer Ring - Orange)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(255, 215, 0, 0.5);"></div>
+                <span>⚡ Connections (Energy Flow)</span>
+            </div>
+        </div>
+
+        <!-- Sacred Math Display -->
+        <div id="sacred-math">
+            <h3>🔢 Sacred Mathematics</h3>
+            <p>φ (Phi): <span class="sacred-value">1.618033989</span></p>
+            <p>Golden Angle: <span class="sacred-value">137.5078°</span></p>
+            <p>Fibonacci: <span class="sacred-value">1,1,2,3,5,8,13...</span></p>
+            <p>Current Iteration: <span class="sacred-value" id="current-iteration">0</span></p>
+        </div>
+
+        <!-- Tooltip -->
+        <div id="tooltip">
+            <h4 id="tooltip-title"></h4>
+            <p id="tooltip-content"></p>
+        </div>
+
+        <!-- Audio Visualizer -->
+        <div id="audio-visualizer">
+            <canvas id="waveform"></canvas>
+        </div>
+
+        <!-- Camera Mode Indicator -->
+        <div id="camera-mode">🌍 Orbit Mode</div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // SACRED MATHEMATICS CONSTANTS
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        const PHI = (1 + Math.sqrt(5)) / 2;
+        const GOLDEN_ANGLE = 137.5077640500378;
+        const GOLDEN_ANGLE_RAD = GOLDEN_ANGLE * Math.PI / 180;
+        const FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // GLOBAL STATE
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        let scene, camera, renderer, controls;
+        let dataPoints = [];
+        let connectionLines = [];
+        let particles = [];
+        let fractalBackground;
+        let audioContext, audioAnalyser, audioDataArray;
+        let autoRotate = true;
+        let cameraMode = 'orbit';
+        let currentIteration = 0;
+        
+        const config = {
+            recursionDepth: 5,
+            particleCount: 1000,
+            animationSpeed: 1.0,
+            chaosFactor: 0.5,
+            showFlower: true,
+            showMetatron: true,
+            showSpiral: true,
+            showConnections: true,
+            audioReactive: false,
+            showFractal: true
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        async function init() {
+            console.log('🌀 Initializing Life Fractal Intelligence...');
+            
+            // Setup Three.js scene
+            setupScene();
+            setupLights();
+            await loadData();
+            createSacredGeometrySVG();
+            createParticleSystem();
+            setupEventListeners();
+            
+            // Hide loading screen
+            document.getElementById('loading').style.display = 'none';
+            
+            // Start animation loop
+            animate();
+            
+            console.log('✨ Initialization complete!');
+        }
+        
+        function setupScene() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0a);
+            scene.fog = new THREE.FogExp2(0x0a0a0a, 0.15);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                60,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, -1.5, 1.5);
+            camera.lookAt(0, 0, 0.5);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById('canvas-3d'),
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Add ambient grid
+            const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+            gridHelper.position.y = -0.5;
+            scene.add(gridHelper);
+        }
+        
+        function setupLights() {
+            // Ambient light
+            const ambient = new THREE.AmbientLight(0x404040, 1.5);
+            scene.add(ambient);
+            
+            // Directional light (sun)
+            const directional = new THREE.DirectionalLight(0xffffff, 0.8);
+            directional.position.set(5, 10, 5);
+            directional.castShadow = true;
+            scene.add(directional);
+            
+            // Point lights for sacred geometry glow
+            const pointLight1 = new THREE.PointLight(0x667eea, 2, 10);
+            pointLight1.position.set(0, 0, 2);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0x48c774, 1.5, 8);
+            pointLight2.position.set(0, 0, -1);
+            scene.add(pointLight2);
+        }
+        
+        async function loadData() {
+            // Get user ID from URL or use admin
+            const userId = new URLSearchParams(window.location.search).get('user') || 'admin_001';
+            
+            try {
+                const response = await fetch(`/api/user/${userId}/visualization`);
+                const data = await response.json();
+                
+                console.log('📊 Data loaded:', data);
+                
+                // Update stats
+                updateStats(data.summary);
+                
+                // Create 3D data points
+                createDataPoints(data);
+                
+                // Create connections
+                if (config.showConnections) {
+                    createConnections(data.connections);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading data:', error);
+                // Use demo data
+                createDemoDataPoints();
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // DATA POINT CREATION
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function createDataPoints(data) {
+            // Clear existing
+            dataPoints.forEach(dp => scene.remove(dp.mesh));
+            dataPoints = [];
+            
+            // Pet at center
+            createPetNode(data.data_points.pet);
+            
+            // Wellness metrics (inner ring)
+            data.data_points.wellness.forEach(point => {
+                createWellnessNode(point);
+            });
+            
+            // Goals (middle ring)
+            data.data_points.goals.forEach(point => {
+                createGoalNode(point);
+            });
+            
+            // Habits (outer ring)
+            data.data_points.habits.forEach(point => {
+                createHabitNode(point);
+            });
+            
+            console.log(`✅ Created ${dataPoints.length} data points`);
+        }
+        
+        function createPetNode(petData) {
+            const geometry = new THREE.SphereGeometry(petData.size / 50, 32, 32);
+            const material = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(`hsl(${petData.hue}, 70%, 60%)`),
+                emissive: new THREE.Color(`hsl(${petData.hue}, 70%, 30%)`),
+                shininess: 100,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(petData.x, petData.y, petData.z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            
+            // Add glow
+            const glowGeometry = new THREE.SphereGeometry(petData.size / 40, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(`hsl(${petData.hue}, 100%, 60%)`),
+                transparent: true,
+                opacity: 0.3
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            mesh.add(glow);
+            
+            scene.add(mesh);
+            
+            dataPoints.push({
+                mesh,
+                data: petData,
+                type: 'pet',
+                pulse: true
+            });
+        }
+        
+        function createWellnessNode(nodeData) {
+            // Use different shapes for variety
+            const shapes = [
+                new THREE.SphereGeometry(nodeData.size / 100, 16, 16),
+                new THREE.OctahedronGeometry(nodeData.size / 100),
+                new THREE.TetrahedronGeometry(nodeData.size / 100),
+                new THREE.IcosahedronGeometry(nodeData.size / 100)
+            ];
+            
+            const geometry = shapes[Math.floor(Math.random() * shapes.length)];
+            const material = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(`hsl(${nodeData.hue}, 70%, 60%)`),
+                emissive: new THREE.Color(`hsl(${nodeData.hue}, 70%, 20%)`),
+                shininess: 80,
+                transparent: true,
+                opacity: 0.85
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(nodeData.x, nodeData.y, nodeData.z);
+            mesh.castShadow = true;
+            
+            scene.add(mesh);
+            
+            dataPoints.push({
+                mesh,
+                data: nodeData,
+                type: 'wellness',
+                pulse: nodeData.pulse || false,
+                rotation: {
+                    x: Math.random() * 0.02,
+                    y: Math.random() * 0.02,
+                    z: Math.random() * 0.02
+                }
+            });
+        }
+        
+        function createGoalNode(nodeData) {
+            // Goals are cubes that grow with progress
+            const size = nodeData.size / 100;
+            const geometry = new THREE.BoxGeometry(size, size, size * 1.5);
+            const material = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(`hsl(${nodeData.hue}, 80%, 55%)`),
+                emissive: new THREE.Color(`hsl(${nodeData.hue}, 80%, 20%)`),
+                shininess: 60
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(nodeData.x, nodeData.y, nodeData.z);
+            mesh.castShadow = true;
+            
+            // Add edge glow for completed goals
+            if (nodeData.completed) {
+                const edges = new THREE.EdgesGeometry(geometry);
+                const lineMaterial = new THREE.LineBasicMaterial({
+                    color: 0x00ff00,
+                    linewidth: 2
+                });
+                const wireframe = new THREE.LineSegments(edges, lineMaterial);
+                mesh.add(wireframe);
+            }
+            
+            scene.add(mesh);
+            
+            dataPoints.push({
+                mesh,
+                data: nodeData,
+                type: 'goal',
+                rotation: {
+                    x: 0.01,
+                    y: 0.015,
+                    z: 0.01
+                }
+            });
+        }
+        
+        function createHabitNode(nodeData) {
+            // Habits are toruses (rings) - eternal cycles
+            const geometry = new THREE.TorusGeometry(
+                nodeData.size / 150,
+                nodeData.size / 300,
+                16,
+                100
+            );
+            const material = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(`hsl(${nodeData.hue}, 70%, 60%)`),
+                emissive: new THREE.Color(`hsl(${nodeData.hue}, 70%, 15%)`),
+                shininess: 70
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(nodeData.x, nodeData.y, nodeData.z);
+            mesh.castShadow = true;
+            
+            scene.add(mesh);
+            
+            dataPoints.push({
+                mesh,
+                data: nodeData,
+                type: 'habit',
+                rotation: {
+                    x: 0.02,
+                    y: 0.01,
+                    z: 0.015
+                }
+            });
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // CONNECTION LINES
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function createConnections(connections) {
+            connectionLines.forEach(line => scene.remove(line));
+            connectionLines = [];
+            
+            connections.forEach(conn => {
+                const points = [
+                    new THREE.Vector3(conn.from[0], conn.from[1], conn.from[2]),
+                    new THREE.Vector3(conn.to[0], conn.to[1], conn.to[2])
+                ];
+                
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({
+                    color: new THREE.Color(conn.color),
+                    transparent: true,
+                    opacity: conn.strength * 0.6,
+                    linewidth: 2
+                });
+                
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+                connectionLines.push(line);
+            });
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // PARTICLE SYSTEM
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function createParticleSystem() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+            
+            for (let i = 0; i < config.particleCount; i++) {
+                // Position on golden spiral
+                const theta = i * GOLDEN_ANGLE_RAD;
+                const r = Math.sqrt(i) * 0.05;
+                const z = (Math.random() - 0.5) * 2;
+                
+                positions.push(
+                    r * Math.cos(theta),
+                    r * Math.sin(theta),
+                    z
+                );
+                
+                // Color gradient
+                const hue = (i / config.particleCount) * 360;
+                const color = new THREE.Color(`hsl(${hue}, 70%, 60%)`);
+                colors.push(color.r, color.g, color.b);
+                
+                sizes.push(Math.random() * 2 + 1);
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                sizeAttenuation: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particleSystem = new THREE.Points(geometry, material);
+            scene.add(particleSystem);
+            particles.push(particleSystem);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // SACRED GEOMETRY SVG
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function createSacredGeometrySVG() {
+            // Flower of Life
+            const flowerGroup = document.getElementById('flower-circles');
+            const radius = 50;
+            for (let i = -3; i <= 3; i++) {
+                for (let j = -3; j <= 3; j++) {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', 300 + i * radius);
+                    circle.setAttribute('cy', 300 + j * radius);
+                    circle.setAttribute('r', radius);
+                    flowerGroup.appendChild(circle);
+                }
+            }
+            
+            // Metatron's Cube
+            const metatronGroup = document.getElementById('metatron-lines');
+            const centerX = 250, centerY = 250, mainRadius = 120;
+            
+            // Center circle
+            const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            centerCircle.setAttribute('cx', centerX);
+            centerCircle.setAttribute('cy', centerY);
+            centerCircle.setAttribute('r', 60);
+            metatronGroup.appendChild(centerCircle);
+            
+            // Outer circles and connections
+            for (let angle = 0; angle < 360; angle += 60) {
+                const rad = angle * Math.PI / 180;
+                const x = centerX + mainRadius * Math.cos(rad);
+                const y = centerY + mainRadius * Math.sin(rad);
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 60);
+                metatronGroup.appendChild(circle);
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', centerX);
+                line.setAttribute('y1', centerY);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', y);
+                metatronGroup.appendChild(line);
+            }
+            
+            // Golden Spiral
+            const spiralPath = document.getElementById('spiral-path');
+            let pathData = 'M 350,350';
+            for (let i = 0; i < 100; i++) {
+                const theta = i * GOLDEN_ANGLE_RAD;
+                const r = Math.sqrt(i) * 20;
+                const x = 350 + r * Math.cos(theta);
+                const y = 350 + r * Math.sin(theta);
+                pathData += ` L ${x},${y}`;
+            }
+            spiralPath.setAttribute('d', pathData);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // ANIMATION LOOP
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001 * config.animationSpeed;
+            currentIteration++;
+            document.getElementById('current-iteration').textContent = currentIteration;
+            
+            // Auto-rotate camera
+            if (autoRotate && cameraMode === 'orbit') {
+                camera.position.x = Math.cos(time * 0.1) * 3;
+                camera.position.y = Math.sin(time * 0.1) * 3;
+                camera.lookAt(0, 0, 0.5);
+            }
+            
+            // Animate data points
+            dataPoints.forEach((dp, i) => {
+                // Rotation
+                if (dp.rotation) {
+                    dp.mesh.rotation.x += dp.rotation.x;
+                    dp.mesh.rotation.y += dp.rotation.y;
+                    dp.mesh.rotation.z += dp.rotation.z;
+                }
+                
+                // Pulse effect
+                if (dp.pulse) {
+                    const scale = 1 + Math.sin(time * 2 + i) * 0.1;
+                    dp.mesh.scale.setScalar(scale);
+                }
+                
+                // Chaos wobble
+                if (config.chaosFactor > 0) {
+                    dp.mesh.position.y += Math.sin(time * 3 + i) * config.chaosFactor * 0.001;
+                }
+            });
+            
+            // Animate particles
+            particles.forEach(system => {
+                system.rotation.z = time * 0.05;
+                const positions = system.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 2] += Math.sin(time + i) * 0.001;
+                }
+                system.geometry.attributes.position.needsUpdate = true;
+            });
+            
+            // Audio-reactive sacred geometry
+            if (config.audioReactive && audioAnalyser) {
+                updateAudioReactiveSVG();
+            }
+            
+            // FPS counter
+            updateFPS();
+            
+            renderer.render(scene, camera);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // AUDIO REACTIVITY
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function updateAudioReactiveSVG() {
+            audioAnalyser.getByteFrequencyData(audioDataArray);
+            const average = audioDataArray.reduce((a, b) => a + b) / audioDataArray.length;
+            const intensity = average / 255;
+            
+            // Pulse sacred geometry
+            pulseSVG('flower-of-life', intensity);
+            pulseSVG('metatron-cube', intensity * 0.8);
+            pulseSVG('golden-spiral', intensity * 0.6);
+        }
+        
+        function pulseSVG(id, intensity) {
+            const el = document.getElementById(id);
+            const group = el.querySelector('g') || el;
+            group.style.strokeWidth = (1.5 + intensity * 3) + 'px';
+            group.style.opacity = 0.5 + intensity * 0.5;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // EVENT LISTENERS
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function setupEventListeners() {
+            // Window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Mouse movement for tooltip
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            
+            renderer.domElement.addEventListener('mousemove', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(dataPoints.map(dp => dp.mesh));
+                
+                if (intersects.length > 0) {
+                    const dp = dataPoints.find(d => d.mesh === intersects[0].object);
+                    showTooltip(event.clientX, event.clientY, dp.data);
+                } else {
+                    hideTooltip();
+                }
+            });
+            
+            // Control buttons
+            document.getElementById('btn-auto-rotate').addEventListener('click', function() {
+                autoRotate = !autoRotate;
+                this.classList.toggle('active', autoRotate);
+            });
+            
+            document.getElementById('btn-reset-camera').addEventListener('click', () => {
+                camera.position.set(0, -1.5, 1.5);
+                camera.lookAt(0, 0, 0.5);
+            });
+            
+            document.getElementById('btn-toggle-fractal').addEventListener('click', function() {
+                config.showFractal = !config.showFractal;
+                this.classList.toggle('active', config.showFractal);
+                // Toggle fractal background visibility
+            });
+            
+            document.getElementById('btn-generate-music').addEventListener('click', generateMusic);
+            
+            // Checkboxes
+            document.getElementById('chk-flower').addEventListener('change', (e) => {
+                config.showFlower = e.target.checked;
+                document.getElementById('flower-of-life').style.display = e.target.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('chk-metatron').addEventListener('change', (e) => {
+                config.showMetatron = e.target.checked;
+                document.getElementById('metatron-cube').style.display = e.target.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('chk-spiral').addEventListener('change', (e) => {
+                config.showSpiral = e.target.checked;
+                document.getElementById('golden-spiral').style.display = e.target.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('chk-connections').addEventListener('change', (e) => {
+                config.showConnections = e.target.checked;
+                connectionLines.forEach(line => line.visible = e.target.checked);
+            });
+            
+            document.getElementById('chk-audio-reactive').addEventListener('change', (e) => {
+                config.audioReactive = e.target.checked;
+                if (e.target.checked && !audioContext) {
+                    initAudio();
+                }
+            });
+            
+            // Sliders
+            document.getElementById('recursion-depth').addEventListener('input', (e) => {
+                config.recursionDepth = parseInt(e.target.value);
+                document.getElementById('depth-value').textContent = e.target.value;
+            });
+            
+            document.getElementById('particle-count').addEventListener('input', (e) => {
+                config.particleCount = parseInt(e.target.value);
+                document.getElementById('particle-value').textContent = e.target.value;
+                // Recreate particle system
+                particles.forEach(p => scene.remove(p));
+                particles = [];
+                createParticleSystem();
+            });
+            
+            document.getElementById('animation-speed').addEventListener('input', (e) => {
+                config.animationSpeed = parseFloat(e.target.value);
+                document.getElementById('speed-value').textContent = e.target.value;
+            });
+            
+            document.getElementById('chaos-factor').addEventListener('input', (e) => {
+                config.chaosFactor = parseFloat(e.target.value);
+                document.getElementById('chaos-value').textContent = e.target.value;
+            });
+            
+            // Camera modes
+            document.getElementById('btn-orbit').addEventListener('click', () => setCameraMode('orbit'));
+            document.getElementById('btn-fly').addEventListener('click', () => setCameraMode('fly'));
+            document.getElementById('btn-first-person').addEventListener('click', () => setCameraMode('first-person'));
+            document.getElementById('btn-top-down').addEventListener('click', () => setCameraMode('top-down'));
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // UTILITY FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        function updateStats(summary) {
+            document.getElementById('stat-wellness').textContent = summary.wellness_index;
+            document.getElementById('stat-chaos').textContent = summary.chaos_score || 0;
+            document.getElementById('stat-goals').textContent = summary.active_goals || 0;
+            document.getElementById('stat-streak').textContent = summary.streak_days;
+            document.getElementById('stat-pet-level').textContent = summary.pet_level || 1;
+            document.getElementById('stat-badges').textContent = summary.badges_earned || 0;
+            document.getElementById('stat-points').textContent = summary.total_nodes;
+        }
+        
+        let lastTime = Date.now();
+        let frames = 0;
+        function updateFPS() {
+            frames++;
+            const now = Date.now();
+            if (now - lastTime >= 1000) {
+                document.getElementById('stat-fps').textContent = frames;
+                frames = 0;
+                lastTime = now;
+            }
+        }
+        
+        function showTooltip(x, y, data) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+            tooltip.classList.add('visible');
+            
+            document.getElementById('tooltip-title').textContent = `${data.icon} ${data.label}`;
+            document.getElementById('tooltip-content').innerHTML = `
+                <p><strong>Value:</strong> ${data.value.toFixed(1)}</p>
+                <p><strong>Type:</strong> ${data.description}</p>
+                ${data.stats ? `<p><strong>Stats:</strong> ${JSON.stringify(data.stats)}</p>` : ''}
+            `;
+        }
+        
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+        
+        function setCameraMode(mode) {
+            cameraMode = mode;
+            document.getElementById('camera-mode').textContent = {
+                'orbit': '🌍 Orbit Mode',
+                'fly': '🚀 Fly Mode',
+                'first-person': '👤 First Person',
+                'top-down': '🔝 Top-Down'
+            }[mode];
+            
+            // Update camera position
+            switch(mode) {
+                case 'orbit':
+                    camera.position.set(0, -1.5, 1.5);
+                    break;
+                case 'fly':
+                    camera.position.set(0, -3, 2);
+                    break;
+                case 'first-person':
+                    camera.position.set(0, 0, 0.5);
+                    break;
+                case 'top-down':
+                    camera.position.set(0, 0, 5);
+                    camera.lookAt(0, 0, 0);
+                    break;
+            }
+        }
+        
+        function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioAnalyser = audioContext.createAnalyser();
+            audioAnalyser.fftSize = 256;
+            audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+            
+            // Connect to destination
+            audioAnalyser.connect(audioContext.destination);
+            
+            document.getElementById('audio-visualizer').style.display = 'block';
+            console.log('🔊 Audio initialized');
+        }
+        
+        async function generateMusic() {
+            const userId = new URLSearchParams(window.location.search).get('user') || 'admin_001';
+            
+            try {
+                const response = await fetch(`/api/user/${userId}/music/generate`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`🎵 Music generated! File: ${data.file}`);
+                } else {
+                    alert('❌ Music generation failed');
+                }
+            } catch (error) {
+                console.error('Error generating music:', error);
+                alert('❌ Error generating music');
+            }
+        }
+        
+        function createDemoDataPoints() {
+            // Create demo data if API fails
+            console.log('Creating demo data points...');
+            
+            // Pet at center
+            createPetNode({
+                x: 0, y: 0, z: 0.5,
+                size: 25,
+                hue: 280,
+                icon: '🐉',
+                label: 'Demo Pet'
+            });
+            
+            // Wellness metrics
+            for (let i = 0; i < 8; i++) {
+                const angle = i * GOLDEN_ANGLE_RAD;
+                const r = 0.3;
+                createWellnessNode({
+                    x: r * Math.cos(angle),
+                    y: r * Math.sin(angle),
+                    z: Math.random() * 0.5,
+                    size: 10 + Math.random() * 5,
+                    hue: i * 45,
+                    icon: '😊',
+                    label: `Metric ${i+1}`,
+                    value: 50 + Math.random() * 40
+                });
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════
+        // START APPLICATION
+        // ═══════════════════════════════════════════════════════════════════════
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

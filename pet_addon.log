@@ -1,0 +1,56 @@
+2025-11-28 23:23:37,815 [INFO] backend.gpu_extensions: PyTorch not available, using CPU only
+2025-11-28 23:25:22,336 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:25:22,737 [INFO] __main__: Admin user created: onlinediscountsllc@gmail.com
+2025-11-28 23:25:22,777 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-28 23:25:22,777 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-28 23:25:22,781 [INFO] werkzeug:  * Restarting with stat
+2025-11-28 23:25:25,488 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:25:25,518 [WARNING] werkzeug:  * Debugger is active!
+2025-11-28 23:25:25,521 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-28 23:27:03,942 [INFO] werkzeug: 127.0.0.1 - - [28/Nov/2025 23:27:03] "[33mGET / HTTP/1.1[0m" 404 -
+2025-11-28 23:27:04,009 [INFO] werkzeug: 127.0.0.1 - - [28/Nov/2025 23:27:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-11-28 23:27:08,341 [INFO] werkzeug: 127.0.0.1 - - [28/Nov/2025 23:27:08] "[33mGET / HTTP/1.1[0m" 404 -
+2025-11-28 23:27:11,676 [INFO] werkzeug: 127.0.0.1 - - [28/Nov/2025 23:27:11] "[33mGET / HTTP/1.1[0m" 404 -
+2025-11-28 23:29:59,751 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:29:59,788 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-28 23:29:59,788 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-28 23:29:59,789 [INFO] werkzeug:  * Restarting with stat
+2025-11-28 23:30:02,577 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:30:02,602 [WARNING] werkzeug:  * Debugger is active!
+2025-11-28 23:30:02,605 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-28 23:31:09,701 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:31:09,733 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-28 23:31:09,733 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-28 23:31:09,734 [INFO] werkzeug:  * Restarting with stat
+2025-11-28 23:31:12,544 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:31:12,569 [WARNING] werkzeug:  * Debugger is active!
+2025-11-28 23:31:12,572 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-28 23:31:53,942 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:31:53,974 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-28 23:31:53,974 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-28 23:31:53,974 [INFO] werkzeug:  * Restarting with stat
+2025-11-28 23:31:56,727 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:31:56,751 [WARNING] werkzeug:  * Debugger is active!
+2025-11-28 23:31:56,754 [INFO] werkzeug:  * Debugger PIN: 486-372-166
+2025-11-28 23:38:26,285 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:38:26,319 [INFO] werkzeug: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.7.187:5000
+2025-11-28 23:38:26,320 [INFO] werkzeug: [33mPress CTRL+C to quit[0m
+2025-11-28 23:38:26,320 [INFO] werkzeug:  * Restarting with stat
+2025-11-28 23:38:29,048 [INFO] backend.gpu_extensions: Using CPU for fractal generation
+2025-11-28 23:38:29,074 [WARNING] werkzeug:  * Debugger is active!
+2025-11-28 23:38:29,077 [INFO] werkzeug:  * Debugger PIN: 486-372-166

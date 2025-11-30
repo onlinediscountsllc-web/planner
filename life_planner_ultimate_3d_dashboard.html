@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Life Fractal Intelligence - Ultimate 3D System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        /* Main Layout */
+        #main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* Header */
+        #header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        #header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        #user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Left Sidebar */
+        #left-sidebar {
+            background: rgba(20, 20, 30, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Main Visualization Area */
+        #visualization-container {
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* SVG Sacred Geometry Overlays */
+        #sacred-geometry-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Fractal Background Layer */
+        #fractal-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            filter: blur(2px);
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+        }
+
+        /* Right Sidebar - Stats & Controls */
+        #right-sidebar {
+            background: rgba(20, 20, 30, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: rgba(100, 100, 150, 0.3);
+            border: 1px solid rgba(100, 126, 234, 0.5);
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(100, 126, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(30, 30, 40, 0.8);
+            border: 1px solid rgba(100, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats Display */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #48c774;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(100, 100, 150, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(100, 100, 150, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48c774 0%, #2ecc71 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f14668 0%, #e74c3c 100%);
+        }
+
+        /* Pet Display */
+        #pet-display {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #pet-icon {
+            font-size: 4rem;
+            margin: 15px 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pet-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .pet-stat {
+            background: rgba(50, 50, 60, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(100, 100, 150, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #48c774 100%);
+            transition: width 0.5s;
+            border-radius: 4px;
+        }
+
+        /* Badge Display */
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(100, 100, 150, 0.3);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Legend */
+        #legend {
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Loading Overlay */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tooltip */
+        #tooltip {
+            position: absolute;
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            padding: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 250px;
+            backdrop-filter: blur(10px);
+        }
+
+        #tooltip h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 20, 30, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 126, 234, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 126, 234, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            #main-container {
+                grid-template-columns: 250px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            #main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr;
+            }
+
+            #left-sidebar, #right-sidebar {
+                display: none;
+            }
+        }
+
+        /* Accessibility */
+        .high-contrast {
+            filter: contrast(1.5);
+        }
+
+        .reduce-motion * {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        /* Pulse Animation for High Values */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: #667eea;">Initializing Fractal Intelligence...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div id="main-container">
+        <!-- Header -->
+        <div id="header">
+            <h1>🌀 Life Fractal Intelligence</h1>
+            <div id="user-info">
+                <span id="user-name">Loading...</span>
+                <button class="btn btn-secondary" onclick="logout()" style="width: auto; margin: 0; padding: 8px 16px;">Logout</button>
+            </div>
+        </div>
+
+        <!-- Left Sidebar - Navigation & Quick Stats -->
+        <div id="left-sidebar">
+            <div class="nav-tabs" style="flex-direction: column;">
+                <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+                <button class="tab-btn" onclick="switchTab('today')">📅 Today</button>
+                <button class="tab-btn" onclick="switchTab('habits')">✓ Habits</button>
+                <button class="tab-btn" onclick="switchTab('goals')">🎯 Goals</button>
+                <button class="tab-btn" onclick="switchTab('pet')">🦊 Pet</button>
+                <button class="tab-btn" onclick="switchTab('visualization')">🌀 3D Visualization</button>
+                <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
+                <button class="tab-btn" onclick="switchTab('music')">🎵 Music</button>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Quick Stats</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Wellness Index</span>
+                    <span class="stat-value" id="quick-wellness">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Chaos Score</span>
+                    <span class="stat-value" id="quick-chaos">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Streak</span>
+                    <span class="stat-value" id="quick-streak">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pet Level</span>
+                    <span class="stat-value" id="quick-pet-level">--</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🏆 Recent Badges</h3>
+                <div id="recent-badges" class="badges">
+                    Loading...
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔢 Sacred Math</h3>
+                <div class="stat-item">
+                    <span class="stat-label">φ (Phi)</span>
+                    <span class="stat-value">1.618034</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Golden Angle</span>
+                    <span class="stat-value">137.508°</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Fibonacci</span>
+                    <span class="stat-value" style="font-size: 0.8rem;">0,1,1,2,3,5,8,13...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Visualization Area -->
+        <div id="visualization-container">
+            <!-- Fractal Background -->
+            <div id="fractal-background"></div>
+
+            <!-- Three.js Canvas -->
+            <canvas id="three-canvas"></canvas>
+
+            <!-- Sacred Geometry SVG Overlay -->
+            <svg id="sacred-geometry-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+                <!-- Flower of Life -->
+                <g id="flower-of-life" stroke="gold" stroke-width="1" fill="none" opacity="0.3">
+                    <!-- Will be dynamically generated -->
+                </g>
+
+                <!-- Metatron's Cube -->
+                <g id="metatrons-cube" stroke="cyan" stroke-width="1.5" fill="none" opacity="0.4">
+                    <!-- Will be dynamically generated -->
+                </g>
+
+                <!-- Golden Spiral -->
+                <g id="golden-spiral" stroke="white" stroke-width="2" fill="none" opacity="0.3">
+                    <!-- Will be dynamically generated -->
+                </g>
+            </svg>
+
+            <!-- Tooltip -->
+            <div id="tooltip"></div>
+        </div>
+
+        <!-- Right Sidebar - Controls & Details -->
+        <div id="right-sidebar">
+            <!-- Tab Content Container -->
+            <div id="tab-content">
+                <!-- Overview Tab -->
+                <div id="overview-tab" class="tab-content">
+                    <div class="card">
+                        <h3>🦊 Your Pet</h3>
+                        <div id="pet-display">
+                            <div id="pet-icon">🐱</div>
+                            <h4 id="pet-name">Buddy</h4>
+                            <p id="pet-behavior" style="color: #667eea; margin: 10px 0;">Idle</p>
+                            
+                            <div class="pet-stats">
+                                <div class="pet-stat">
+                                    <small>Hunger</small>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="pet-hunger-bar" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div class="pet-stat">
+                                    <small>Energy</small>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="pet-energy-bar" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div class="pet-stat">
+                                    <small>Mood</small>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="pet-mood-bar" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div class="pet-stat">
+                                    <small>Bond</small>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="pet-bond-bar" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success" onclick="feedPet()">🍖 Feed</button>
+                            <button class="btn btn-success" onclick="playWithPet()">🎮 Play</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🤖 AI Guidance</h3>
+                        <div id="ai-guidance">
+                            <p style="color: #a0a0a0; font-style: italic;">Loading predictions...</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📊 Today's Summary</h3>
+                        <div id="today-summary">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today Tab -->
+                <div id="today-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>📅 Today's Entry</h3>
+                        
+                        <div class="control-group">
+                            <label>😊 Mood Level (1-5): <span id="mood-value">3</span></label>
+                            <input type="range" class="slider" min="1" max="5" value="3" id="mood-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>⚡ Energy: <span id="energy-value">50</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="50" id="energy-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>🎯 Focus: <span id="focus-value">50</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="50" id="focus-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>😰 Anxiety: <span id="anxiety-value">30</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="30" id="anxiety-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>😓 Stress: <span id="stress-value">30</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="30" id="stress-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>🧘 Mindfulness: <span id="mindfulness-value">50</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="50" id="mindfulness-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>😴 Sleep Hours: <span id="sleep-hours-value">7</span></label>
+                            <input type="range" class="slider" min="0" max="12" step="0.5" value="7" id="sleep-hours-slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label>💤 Sleep Quality: <span id="sleep-quality-value">50</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="50" id="sleep-quality-slider">
+                        </div>
+
+                        <button class="btn" onclick="saveTodayEntry()">💾 Save Entry</button>
+                    </div>
+                </div>
+
+                <!-- Habits Tab -->
+                <div id="habits-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>✓ Habits Tracker</h3>
+                        <div id="habits-list">
+                            Loading habits...
+                        </div>
+                        <button class="btn btn-secondary" onclick="addNewHabit()">+ Add Habit</button>
+                    </div>
+                </div>
+
+                <!-- Goals Tab -->
+                <div id="goals-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>🎯 Goals Progress</h3>
+                        <div id="goals-list">
+                            Loading goals...
+                        </div>
+                        <button class="btn btn-secondary" onclick="addNewGoal()">+ Add Goal</button>
+                    </div>
+                </div>
+
+                <!-- Pet Tab -->
+                <div id="pet-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>🦊 Pet Management</h3>
+                        <div id="pet-details">
+                            Loading pet details...
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏆 Sacred Badges</h3>
+                        <div id="all-badges">
+                            Loading badges...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization Tab -->
+                <div id="visualization-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>🌀 3D Controls</h3>
+                        
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Show Fractal Background</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-fractal" checked onchange="toggleFractal()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Flower of Life</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-flower" checked onchange="toggleFlowerOfLife()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Metatron's Cube</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-metatron" checked onchange="toggleMetatronsCube()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Golden Spiral</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-spiral" checked onchange="toggleGoldenSpiral()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Connection Lines</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-connections" checked onchange="toggleConnections()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Auto-Rotate</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-rotate" onchange="toggleAutoRotate()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Audio Reactive</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggle-audio" onchange="toggleAudioReactive()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <button class="btn" onclick="resetCamera()">🎥 Reset Camera</button>
+                        <button class="btn btn-secondary" onclick="regenerateFractal()">🔄 Regenerate Fractal</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>📖 Legend</h3>
+                        <div id="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                                <span><strong>Pet</strong> - Center, height = wellness</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: hsl(200, 70%, 60%);"></div>
+                                <span><strong>Wellness</strong> - Inner ring metrics</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: hsl(120, 70%, 60%);"></div>
+                                <span><strong>Goals</strong> - Middle ring, height = progress</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: hsl(30, 70%, 60%);"></div>
+                                <span><strong>Habits</strong> - Outer ring, size = streak</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>ℹ️ GPU Status</h3>
+                        <div class="stat-item">
+                            <span class="stat-label">Rendering</span>
+                            <span class="stat-value" id="gpu-status">WebGL</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">FPS</span>
+                            <span class="stat-value" id="fps-counter">60</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>📈 Wellness Trend</h3>
+                        <canvas id="wellness-chart" width="300" height="150"></canvas>
+                    </div>
+
+                    <div class="card">
+                        <h3>🌀 Chaos Analysis</h3>
+                        <div id="chaos-analysis">
+                            Loading...
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔢 Pythagorean Means</h3>
+                        <div id="pythagorean-means">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Tab -->
+                <div id="music-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3>🎵 Fibonacci Music Generator</h3>
+                        <p style="color: #a0a0a0; margin-bottom: 15px;">Generate MIDI music based on your current life data using Fibonacci intervals.</p>
+                        
+                        <div class="stat-item">
+                            <span class="stat-label">Total Generated</span>
+                            <span class="stat-value" id="music-count">0</span>
+                        </div>
+
+                        <button class="btn" onclick="generateMusic()">🎼 Generate Music</button>
+                        
+                        <div id="music-status" style="margin-top: 15px; padding: 10px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; display: none;">
+                            <p id="music-message"></p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎹 How It Works</h3>
+                        <p style="font-size: 0.85rem; color: #a0a0a0; line-height: 1.6;">
+                            Your life data is transformed into music using Fibonacci intervals: [0,1,2,3,5,8,13,21].<br><br>
+                            <strong>Mood</strong> → Note pitch (higher mood = higher notes)<br>
+                            <strong>Energy</strong> → Tempo & velocity<br>
+                            <strong>Wellness</strong> → Song length<br><br>
+                            The result is a unique melody that represents your day mathematically!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // GLOBAL STATE & CONFIG
+        // ═══════════════════════════════════════════════════════════════
+
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let currentTab = 'overview';
+        let visualizationData = null;
+        let scene, camera, renderer, controls;
+        let dataPoints = [];
+        let connections = [];
+        let autoRotate = false;
+        let audioReactive = false;
+
+        // Sacred math constants
+        const PHI = 1.618033988749895;
+        const GOLDEN_ANGLE = 137.5077640500378;
+        const FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144];
+
+        // ═══════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════
+
+        window.onload = async function() {
+            // Check if logged in
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = {id: token};
+
+            // Initialize Three.js
+            initThreeJS();
+
+            // Generate Sacred Geometry SVGs
+            generateFlowerOfLife();
+            generateMetatronsCube();
+            generateGoldenSpiral();
+
+            // Load user data
+            await loadUserData();
+
+            // Hide loading screen
+            document.getElementById('loading').style.display = 'none';
+
+            // Start animation loop
+            animate();
+
+            // Setup slider listeners
+            setupSliderListeners();
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // THREE.JS INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════
+
+        function initThreeJS() {
+            const container = document.getElementById('visualization-container');
+            const canvas = document.getElementById('three-canvas');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.Fog(0x000000, 10, 50);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(
+                60,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, -2, 1.5);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x667eea, 1, 100);
+            pointLight.position.set(0, 0, 5);
+            scene.add(pointLight);
+
+            // Grid (optional)
+            const gridHelper = new THREE.GridHelper(10, 20, 0x667eea, 0x444444);
+            gridHelper.rotation.x = Math.PI / 2;
+            scene.add(gridHelper);
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('visualization-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SACRED GEOMETRY SVG GENERATION
+        // ═══════════════════════════════════════════════════════════════
+
+        function generateFlowerOfLife() {
+            const flower = document.getElementById('flower-of-life');
+            const centerX = 500;
+            const centerY = 500;
+            const radius = 60;
+            const rings = 3;
+
+            for (let ring = 0; ring <= rings; ring++) {
+                const count = ring === 0 ? 1 : 6 * ring;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i / count) * 2 * Math.PI;
+                    const x = centerX + ring * radius * Math.cos(angle);
+                    const y = centerY + ring * radius * Math.sin(angle);
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', radius);
+                    flower.appendChild(circle);
+                }
+            }
+        }
+
+        function generateMetatronsCube() {
+            const metatron = document.getElementById('metatrons-cube');
+            const centerX = 500;
+            const centerY = 500;
+            const radius = 150;
+
+            // Center circle
+            const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            centerCircle.setAttribute('cx', centerX);
+            centerCircle.setAttribute('cy', centerY);
+            centerCircle.setAttribute('r', 30);
+            metatron.appendChild(centerCircle);
+
+            // 6 outer circles with connections
+            for (let i = 0; i < 6; i++) {
+                const angle = i * Math.PI / 3;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 25);
+                metatron.appendChild(circle);
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', centerX);
+                line.setAttribute('y1', centerY);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', y);
+                metatron.appendChild(line);
+            }
+        }
+
+        function generateGoldenSpiral() {
+            const spiral = document.getElementById('golden-spiral');
+            const centerX = 500;
+            const centerY = 500;
+            const points = [];
+
+            for (let i = 0; i < 100; i++) {
+                const angle = i * GOLDEN_ANGLE * Math.PI / 180;
+                const r = Math.sqrt(i) * 15;
+                const x = centerX + r * Math.cos(angle);
+                const y = centerY + r * Math.sin(angle);
+                points.push(`${x},${y}`);
+            }
+
+            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            polyline.setAttribute('points', points.join(' '));
+            spiral.appendChild(polyline);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DATA LOADING
+        // ═══════════════════════════════════════════════════════════════
+
+        async function loadUserData() {
+            try {
+                // Load dashboard data
+                const dashResponse = await fetch(`${API_BASE}/user/${currentUser.id}/dashboard`);
+                const dashData = await dashResponse.json();
+                
+                // Update UI
+                document.getElementById('user-name').textContent = dashData.user.email;
+                updateQuickStats(dashData.stats);
+                updatePetDisplay(dashData.pet);
+
+                // Load visualization data
+                const vizResponse = await fetch(`${API_BASE}/user/${currentUser.id}/visualization`);
+                visualizationData = await vizResponse.json();
+                
+                createDataPoints3D(visualizationData);
+                createConnections3D(visualizationData);
+
+                // Load fractal background
+                loadFractalBackground();
+
+                // Load AI guidance
+                loadGuidance();
+
+                // Load habits and goals
+                loadHabits();
+                loadGoals();
+
+                // Load badges
+                loadBadges();
+
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function updateQuickStats(stats) {
+            document.getElementById('quick-wellness').textContent = stats.wellness_index.toFixed(1);
+            document.getElementById('quick-chaos').textContent = stats.chaos_score.toFixed(1);
+            document.getElementById('quick-streak').textContent = stats.current_streak + ' days';
+            document.getElementById('quick-pet-level').textContent = 'Lvl ' + (stats.pet_level || 1);
+        }
+
+        function updatePetDisplay(pet) {
+            if (!pet) return;
+
+            const icons = {cat: '🐱', dragon: '🐉', phoenix: '🔥', owl: '🦉', fox: '🦊'};
+            document.getElementById('pet-icon').textContent = icons[pet.species] || '🐱';
+            document.getElementById('pet-name').textContent = pet.name;
+            document.getElementById('pet-behavior').textContent = pet.behavior.charAt(0).toUpperCase() + pet.behavior.slice(1);
+
+            document.getElementById('pet-hunger-bar').style.width = pet.hunger + '%';
+            document.getElementById('pet-energy-bar').style.width = pet.energy + '%';
+            document.getElementById('pet-mood-bar').style.width = pet.mood + '%';
+            document.getElementById('pet-bond-bar').style.width = pet.bond + '%';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 3D DATA POINT CREATION
+        // ═══════════════════════════════════════════════════════════════
+
+        function createDataPoints3D(data) {
+            // Clear existing points
+            dataPoints.forEach(point => scene.remove(point));
+            dataPoints = [];
+
+            // Pet at center
+            const petGeom = new THREE.SphereGeometry(0.15, 32, 32);
+            const petMat = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(`hsl(280, 70%, 60%)`),
+                emissive: new THREE.Color(`hsl(280, 70%, 30%)`),
+                shininess: 100
+            });
+            const petMesh = new THREE.Mesh(petGeom, petMat);
+            petMesh.position.set(
+                data.data_points.pet.x,
+                data.data_points.pet.y,
+                data.data_points.pet.z
+            );
+            petMesh.userData = {type: 'pet', data: data.data_points.pet};
+            scene.add(petMesh);
+            dataPoints.push(petMesh);
+
+            // Wellness metrics
+            data.data_points.wellness.forEach(point => {
+                const geom = new THREE.SphereGeometry(point.size * 0.01, 16, 16);
+                const color = new THREE.Color(point.color);
+                const mat = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.3,
+                    shininess: 80
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(point.x, point.y, point.z);
+                mesh.userData = {type: 'wellness', data: point};
+                scene.add(mesh);
+                dataPoints.push(mesh);
+
+                // Add glow for high values
+                if (point.pulse) {
+                    const glowGeom = new THREE.SphereGeometry(point.size * 0.015, 16, 16);
+                    const glowMat = new THREE.MeshBasicMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: 0.3
+                    });
+                    const glowMesh = new THREE.Mesh(glowGeom, glowMat);
+                    glowMesh.position.copy(mesh.position);
+                    scene.add(glowMesh);
+                    dataPoints.push(glowMesh);
+                }
+            });
+
+            // Goals
+            data.data_points.goals.forEach(point => {
+                const geom = new THREE.ConeGeometry(point.size * 0.008, point.size * 0.02, 8);
+                const color = new THREE.Color(point.color);
+                const mat = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.2
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(point.x, point.y, point.z);
+                mesh.rotation.x = Math.PI;
+                mesh.userData = {type: 'goal', data: point};
+                scene.add(mesh);
+                dataPoints.push(mesh);
+            });
+
+            // Habits
+            data.data_points.habits.forEach(point => {
+                const geom = new THREE.BoxGeometry(
+                    point.size * 0.01,
+                    point.size * 0.01,
+                    point.size * 0.01
+                );
+                const color = new THREE.Color(point.color);
+                const mat = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.2
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(point.x, point.y, point.z);
+                mesh.rotation.set(Math.PI / 4, Math.PI / 4, 0);
+                mesh.userData = {type: 'habit', data: point};
+                scene.add(mesh);
+                dataPoints.push(mesh);
+            });
+        }
+
+        function createConnections3D(data) {
+            // Clear existing connections
+            connections.forEach(conn => scene.remove(conn));
+            connections = [];
+
+            // Create lines from pet to top wellness metrics
+            data.connections.forEach(conn => {
+                const points = [
+                    new THREE.Vector3(conn.from[0], conn.from[1], conn.from[2]),
+                    new THREE.Vector3(conn.to[0], conn.to[1], conn.to[2])
+                ];
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const color = new THREE.Color(conn.color);
+                const material = new THREE.LineBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: conn.strength * 0.5
+                });
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+                connections.push(line);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // ANIMATION LOOP
+        // ═══════════════════════════════════════════════════════════════
+
+        let lastTime = 0;
+        let frameCount = 0;
+
+        function animate(time = 0) {
+            requestAnimationFrame(animate);
+
+            // Calculate FPS
+            frameCount++;
+            if (time - lastTime > 1000) {
+                document.getElementById('fps-counter').textContent = frameCount;
+                frameCount = 0;
+                lastTime = time;
+            }
+
+            // Auto-rotate
+            if (autoRotate) {
+                camera.position.x = Math.cos(time * 0.0001) * 2;
+                camera.position.y = Math.sin(time * 0.0001) * 2;
+                camera.lookAt(0, 0, 0);
+            }
+
+            // Pulse high-value points
+            dataPoints.forEach(point => {
+                if (point.userData.data && point.userData.data.pulse) {
+                    const scale = 1 + Math.sin(time * 0.003) * 0.1;
+                    point.scale.set(scale, scale, scale);
+                }
+            });
+
+            // Audio-reactive geometry (simulated)
+            if (audioReactive) {
+                const intensity = Math.abs(Math.sin(time * 0.002));
+                pulseSVG('flower-of-life', intensity);
+                pulseSVG('metatrons-cube', intensity * 0.8);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SVG PULSE FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        function pulseSVG(id, intensity) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.setAttribute('stroke-width', 1 + intensity * 3);
+                el.setAttribute('opacity', 0.3 + intensity * 0.4);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // FRACTAL BACKGROUND
+        // ═══════════════════════════════════════════════════════════════
+
+        async function loadFractalBackground() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/fractal/base64`);
+                const data = await response.json();
+                document.getElementById('fractal-background').style.backgroundImage = `url(${data.image})`;
+            } catch (error) {
+                console.error('Error loading fractal:', error);
+            }
+        }
+
+        function regenerateFractal() {
+            loadFractalBackground();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TAB SWITCHING
+        // ═══════════════════════════════════════════════════════════════
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            currentTab = tabName;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CONTROLS & TOGGLES
+        // ═══════════════════════════════════════════════════════════════
+
+        function toggleFractal() {
+            const bg = document.getElementById('fractal-background');
+            bg.style.display = bg.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleFlowerOfLife() {
+            const flower = document.getElementById('flower-of-life');
+            flower.style.display = flower.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleMetatronsCube() {
+            const metatron = document.getElementById('metatrons-cube');
+            metatron.style.display = metatron.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleGoldenSpiral() {
+            const spiral = document.getElementById('golden-spiral');
+            spiral.style.display = spiral.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleConnections() {
+            connections.forEach(conn => {
+                conn.visible = !conn.visible;
+            });
+        }
+
+        function toggleAutoRotate() {
+            autoRotate = !autoRotate;
+        }
+
+        function toggleAudioReactive() {
+            audioReactive = !audioReactive;
+        }
+
+        function resetCamera() {
+            camera.position.set(0, -2, 1.5);
+            camera.lookAt(0, 0, 0);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TODAY ENTRY
+        // ═══════════════════════════════════════════════════════════════
+
+        function setupSliderListeners() {
+            const sliders = [
+                'mood', 'energy', 'focus', 'anxiety', 'stress',
+                'mindfulness', 'sleep-hours', 'sleep-quality'
+            ];
+
+            sliders.forEach(id => {
+                const slider = document.getElementById(id + '-slider');
+                const value = document.getElementById(id + '-value');
+                if (slider && value) {
+                    slider.addEventListener('input', () => {
+                        value.textContent = slider.value;
+                    });
+                }
+            });
+        }
+
+        async function saveTodayEntry() {
+            const data = {
+                mood_level: parseInt(document.getElementById('mood-slider').value),
+                mood_score: parseInt(document.getElementById('mood-slider').value) * 20,
+                energy_level: parseInt(document.getElementById('energy-slider').value),
+                focus_clarity: parseInt(document.getElementById('focus-slider').value),
+                anxiety_level: parseInt(document.getElementById('anxiety-slider').value),
+                stress_level: parseInt(document.getElementById('stress-slider').value),
+                mindfulness_score: parseInt(document.getElementById('mindfulness-slider').value),
+                sleep_hours: parseFloat(document.getElementById('sleep-hours-slider').value),
+                sleep_quality: parseInt(document.getElementById('sleep-quality-slider').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/today`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('✅ Entry saved! Regenerating visualization...');
+                    await loadUserData();
+                    regenerateFractal();
+                }
+            } catch (error) {
+                console.error('Error saving entry:', error);
+                alert('❌ Failed to save entry');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PET INTERACTIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        async function feedPet() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/pet/feed`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updatePetDisplay(data.pet);
+                    alert('🍖 Pet fed!');
+                }
+            } catch (error) {
+                console.error('Error feeding pet:', error);
+            }
+        }
+
+        async function playWithPet() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/pet/play`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updatePetDisplay(data.pet);
+                    alert('🎮 Played with pet!');
+                } else {
+                    alert('❌ Pet is too tired to play');
+                }
+            } catch (error) {
+                console.error('Error playing with pet:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AI GUIDANCE
+        // ═══════════════════════════════════════════════════════════════
+
+        async function loadGuidance() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/guidance`);
+                const data = await response.json();
+                
+                const guidanceDiv = document.getElementById('ai-guidance');
+                guidanceDiv.innerHTML = `
+                    <div style="margin-bottom: 10px;">
+                        <strong>🔮 Predicted Mood Tomorrow:</strong> ${data.predicted_mood}/100
+                        <span style="font-size: 0.8rem; color: #667eea;">(${data.prediction_confidence} confidence)</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>💬 Guidance:</strong> ${data.fuzzy_message}
+                    </div>
+                    <div>
+                        <strong>🦊 Pet Says:</strong> ${data.pet_message}
+                    </div>
+                    ${data.new_badges.length > 0 ? `
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(102, 126, 234, 0.1); border-radius: 8px;">
+                            <strong>🏆 New Badges Earned!</strong><br>
+                            ${data.new_badges.join('<br>')}
+                        </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                console.error('Error loading guidance:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // HABITS & GOALS
+        // ═══════════════════════════════════════════════════════════════
+
+        async function loadHabits() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/habits`);
+                const data = await response.json();
+                
+                const habitsList = document.getElementById('habits-list');
+                habitsList.innerHTML = data.habits.map(habit => `
+                    <div class="card" style="margin: 10px 0;">
+                        <h4>${habit.name}</h4>
+                        <p style="font-size: 0.85rem; color: #a0a0a0;">${habit.category}</p>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>Streak: ${habit.current_streak} 🔥</span>
+                            <button class="btn" style="width: auto; padding: 5px 15px;" onclick="completeHabit('${habit.id}')">✓ Complete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading habits:', error);
+            }
+        }
+
+        async function completeHabit(habitId) {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/habits/${habitId}/complete`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({completed: true})
+                });
+                
+                if (response.ok) {
+                    alert('✅ Habit completed!');
+                    await loadHabits();
+                    await loadUserData();
+                }
+            } catch (error) {
+                console.error('Error completing habit:', error);
+            }
+        }
+
+        async function loadGoals() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/goals`);
+                const data = await response.json();
+                
+                const goalsList = document.getElementById('goals-list');
+                goalsList.innerHTML = data.goals.map(goal => `
+                    <div class="card" style="margin: 10px 0;">
+                        <h4>${goal.title}</h4>
+                        <p style="font-size: 0.85rem; color: #a0a0a0;">${goal.category} • Priority ${goal.priority}</p>
+                        <div class="progress-bar" style="margin: 10px 0;">
+                            <div class="progress-fill" style="width: ${goal.progress}%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>${goal.progress.toFixed(1)}%</span>
+                            <input type="number" min="0" max="100" value="${goal.progress}" id="goal-${goal.id}" style="width: 60px; padding: 5px; background: rgba(50,50,60,0.5); border: 1px solid rgba(100,126,234,0.3); border-radius: 4px; color: white;">
+                            <button class="btn" style="width: auto; padding: 5px 15px;" onclick="updateGoalProgress('${goal.id}')">Update</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading goals:', error);
+            }
+        }
+
+        async function updateGoalProgress(goalId) {
+            const input = document.getElementById('goal-' + goalId);
+            const progress = parseFloat(input.value);
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/goals/${goalId}/progress`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({progress})
+                });
+                
+                if (response.ok) {
+                    alert('✅ Goal updated!');
+                    await loadGoals();
+                    await loadUserData();
+                }
+            } catch (error) {
+                console.error('Error updating goal:', error);
+            }
+        }
+
+        function addNewHabit() {
+            const name = prompt('Habit name:');
+            if (name) {
+                // TODO: Implement add habit API call
+                alert('Feature coming soon!');
+            }
+        }
+
+        function addNewGoal() {
+            const title = prompt('Goal title:');
+            if (title) {
+                // TODO: Implement add goal API call
+                alert('Feature coming soon!');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // BADGES
+        // ═══════════════════════════════════════════════════════════════
+
+        async function loadBadges() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/pet`);
+                const data = await response.json();
+                
+                const recentBadges = document.getElementById('recent-badges');
+                if (data.badges_detailed && data.badges_detailed.length > 0) {
+                    recentBadges.innerHTML = data.badges_detailed.slice(0, 3).map(badge => `
+                        <div class="badge">${badge.icon} ${badge.name}</div>
+                    `).join('');
+                } else {
+                    recentBadges.innerHTML = '<p style="color: #a0a0a0; font-size: 0.85rem;">No badges yet. Keep going!</p>';
+                }
+
+                // All badges in pet tab
+                const allBadges = document.getElementById('all-badges');
+                if (allBadges && data.badges_detailed) {
+                    allBadges.innerHTML = data.badges_detailed.map(badge => `
+                        <div class="card" style="margin: 10px 0;">
+                            <div style="font-size: 2rem; text-align: center;">${badge.icon}</div>
+                            <h4 style="text-align: center; margin: 10px 0;">${badge.name}</h4>
+                            <p style="font-size: 0.85rem; color: #a0a0a0; text-align: center;">${badge.description}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading badges:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MUSIC GENERATION
+        // ═══════════════════════════════════════════════════════════════
+
+        async function generateMusic() {
+            const statusDiv = document.getElementById('music-status');
+            const messageDiv = document.getElementById('music-message');
+            
+            statusDiv.style.display = 'block';
+            messageDiv.textContent = 'Generating Fibonacci melody...';
+
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser.id}/music/generate`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    messageDiv.innerHTML = `
+                        ✅ Music generated successfully!<br>
+                        <strong>File:</strong> ${data.file}<br>
+                        <strong>Total Generated:</strong> ${data.total_generated}<br>
+                        <a href="${data.file}" download style="color: #667eea;">Download MIDI</a>
+                    `;
+                    document.getElementById('music-count').textContent = data.total_generated;
+                } else {
+                    messageDiv.textContent = '❌ Music generation failed. MIDI library may not be installed.';
+                }
+            } catch (error) {
+                console.error('Error generating music:', error);
+                messageDiv.textContent = '❌ Error generating music';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // LOGOUT
+        // ═══════════════════════════════════════════════════════════════
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
