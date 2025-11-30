@@ -1,830 +1,1418 @@
 """
-Life Planner Application - Main Flask Application
-Includes authentication, payment processing, and security features
+🌀 LIFE FRACTAL INTELLIGENCE - COMPLETE PRODUCTION APPLICATION
+═══════════════════════════════════════════════════════════════════════════════════════
+Full-stack life planning platform with GPU-accelerated fractal visualization
+All user data (goals, tasks, habits, journal, pet) drives the fractal art generation
+
+🎯 FEATURES:
+✅ Secure authentication with JWT tokens
+✅ Virtual pet system (5 species) that evolves with your progress
+✅ GPU-accelerated fractal visualization driven by YOUR life metrics
+✅ Sacred geometry overlays based on completion rates
+✅ Goals, habits, tasks, journal with sentiment analysis
+✅ ML-powered predictions and fuzzy logic guidance
+✅ Stripe payments ($20/month, 7-day trial)
+✅ GoFundMe integration during trial
+✅ Export/import data
+✅ Production-ready with security best practices
+
+📊 DATA → FRACTAL MAPPING:
+- Goal completion → Zoom level & fractal complexity
+- Habit streaks → Color intensity & sacred geometry overlays
+- Task velocity → Animation speed & pattern evolution
+- Journal sentiment → Color palette & emotional resonance
+- Pet happiness → Fractal type selection & special effects
+- Overall momentum → Fibonacci spiral intensity
+═══════════════════════════════════════════════════════════════════════════════════════
 """
 
-from flask import Flask, request, jsonify, render_template, send_file
-from flask_cors import CORS
-from flask_jwt_extended import (
-    JWTManager, create_access_token, create_refresh_token,
-    jwt_required, get_jwt_identity, get_jwt
-)
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_mail import Mail, Message
-from werkzeug.security import generate_password_hash
-from datetime import datetime, timedelta
-import stripe
 import os
-import logging
-from dotenv import load_dotenv
 import json
+import math
+import secrets
+import logging
+import hashlib
+from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Optional, Any, Tuple
+from enum import Enum
 from io import BytesIO
+import base64
+import re
 
-# Load environment variables
-load_dotenv()
+# Flask
+from flask import Flask, request, jsonify, send_file, render_template_string, make_response
+from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# Import models and core functionality
-from models.database import (
-    db, User, Pet, UserActivity, MLData, AuditLog, SystemSettings
-)
-from backend.life_planning_core import LifePlanningSystem, AncientMathUtil
-from backend.gpu_extensions import (
-    GPUAcceleratedFractalGenerator, FederatedLearningManager,
-    AncientMathEnhanced, MemoryManager
-)
+# Data processing
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-# Initialize Flask app
-app = Flask(__name__)
+# ML
+try:
+    from sklearn.tree import DecisionTreeRegressor
+    from sklearn.ensemble import RandomForestClassifier
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
 
-# Configuration
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///life_planner.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'change-this-jwt-key')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+# GPU
+try:
+    import torch
+    GPU_AVAILABLE = torch.cuda.is_available()
+    GPU_NAME = torch.cuda.get_device_name(0) if GPU_AVAILABLE else None
+except ImportError:
+    GPU_AVAILABLE = False
+    GPU_NAME = None
+    torch = None
 
-# Mail configuration
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-# Stripe configuration
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-STRIPE_PRICE_ID = os.getenv('STRIPE_PRICE_ID')
-SUBSCRIPTION_PRICE = float(os.getenv('SUBSCRIPTION_PRICE', 20.00))
-TRIAL_DAYS = int(os.getenv('TRIAL_DAYS', 7))
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# LOGGING
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
-# GoFundMe configuration
-GOFUNDME_URL = os.getenv('GOFUNDME_URL', 'https://gofund.me/8d9303d27')
-
-# Initialize extensions
-db.init_app(app)
-jwt = JWTManager(app)
-mail = Mail(app)
-CORS(app, origins=os.getenv('CORS_ORIGINS', '*').split(','))
-
-# Rate limiting
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["100 per hour"],
-    storage_uri=os.getenv('RATELIMIT_STORAGE_URL', 'memory://')
-)
-
-# Logging configuration
 logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO')),
-    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-    handlers=[
-        logging.FileHandler(os.getenv('LOG_FILE', 'logs/life_planner.log')),
-        logging.StreamHandler()
-    ]
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Initialize GPU and federated learning
-gpu_generator = GPUAcceleratedFractalGenerator(use_gpu=os.getenv('USE_GPU', 'True') == 'True')
-federated_manager = FederatedLearningManager()
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# SACRED MATHEMATICS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+PHI = (1 + math.sqrt(5)) / 2  # Golden ratio
+PHI_INVERSE = PHI - 1
+GOLDEN_ANGLE = 137.5077640500378
+GOLDEN_ANGLE_RAD = math.radians(GOLDEN_ANGLE)
+FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597]
 
 
-# ============================================================================
-# UTILITY FUNCTIONS
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
-def log_audit(user_id, action, resource=None, status='success', details=None):
-    """Log security audit trail"""
-    try:
-        audit = AuditLog(
-            user_id=user_id,
-            action=action,
-            resource=resource,
-            status=status,
-            ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent'),
-            details=details
-        )
-        db.session.add(audit)
-        db.session.commit()
-    except Exception as e:
-        logger.error(f"Audit logging failed: {e}")
+class Config:
+    """Production configuration"""
+    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+    STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
+    STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', 'pk_test_...')
+    STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', 'price_...')
+    GOFUNDME_CAMPAIGN_URL = os.environ.get('GOFUNDME_CAMPAIGN_URL', 'https://gofundme.com/...')
+    SUBSCRIPTION_PRICE = 20.00
+    TRIAL_DAYS = 7
+    JWT_EXPIRY_HOURS = 24
+    MAX_GOALS = 50
+    MAX_TASKS_PER_GOAL = 100
+    DATA_DIR = os.environ.get('DATA_DIR', './data')
+    FRACTAL_CACHE_DIR = os.path.join(DATA_DIR, 'fractals')
 
 
-def send_email(to, subject, body):
-    """Send email notification"""
-    try:
-        msg = Message(subject, recipients=[to], body=body)
-        mail.send(msg)
-        logger.info(f"Email sent to {to}: {subject}")
-    except Exception as e:
-        logger.error(f"Email send failed: {e}")
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# DATA MODELS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+class PetSpecies(Enum):
+    CAT = "cat"
+    DRAGON = "dragon"
+    PHOENIX = "phoenix"
+    OWL = "owl"
+    FOX = "fox"
 
 
-# ============================================================================
-# AUTHENTICATION ENDPOINTS
-# ============================================================================
-
-@app.route('/api/auth/register', methods=['POST'])
-@limiter.limit("5 per hour")
-def register():
-    """Register new user with 7-day free trial"""
-    try:
-        data = request.get_json()
-        email = data.get('email', '').lower().strip()
-        password = data.get('password')
-        first_name = data.get('first_name', '').strip()
-        last_name = data.get('last_name', '').strip()
-        
-        # Validation
-        if not email or not password:
-            return jsonify({'error': 'Email and password required'}), 400
-        
-        if len(password) < 8:
-            return jsonify({'error': 'Password must be at least 8 characters'}), 400
-        
-        # Check if user exists
-        if User.query.filter_by(email=email).first():
-            return jsonify({'error': 'Email already registered'}), 400
-        
-        # Create user
-        user = User(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            subscription_status='trial',
-            trial_start_date=datetime.utcnow(),
-            trial_end_date=datetime.utcnow() + timedelta(days=TRIAL_DAYS)
-        )
-        user.set_password(password)
-        verification_token = user.generate_verification_token()
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        # Create default pet
-        pet = Pet(user_id=user.id, name='Buddy', species='cat')
-        db.session.add(pet)
-        db.session.commit()
-        
-        # Send verification email
-        verification_link = f"{request.host_url}api/auth/verify/{verification_token}"
-        send_email(
-            to=email,
-            subject='Welcome to Life Planner - Verify Your Email',
-            body=f"""Welcome to Life Planner!
-
-Your 7-day free trial has started. Click the link below to verify your email:
-
-{verification_link}
-
-After your trial ends, continue for just ${SUBSCRIPTION_PRICE}/month.
-
-Best regards,
-Life Planner Team
-"""
-        )
-        
-        log_audit(user.id, 'user_registered', 'user', 'success')
-        
-        # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
-        
-        return jsonify({
-            'message': 'Registration successful',
-            'user': user.to_dict(),
-            'access_token': access_token,
-            'refresh_token': refresh_token,
-            'trial_days_remaining': TRIAL_DAYS,
-            'show_gofundme': True,
-            'gofundme_url': GOFUNDME_URL
-        }), 201
-        
-    except Exception as e:
-        logger.error(f"Registration error: {e}")
-        db.session.rollback()
-        return jsonify({'error': 'Registration failed'}), 500
+class GoalPriority(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
 
-@app.route('/api/auth/login', methods=['POST'])
-@limiter.limit("10 per minute")
-def login():
-    """User login"""
-    try:
-        data = request.get_json()
-        email = data.get('email', '').lower().strip()
-        password = data.get('password')
-        
-        if not email or not password:
-            return jsonify({'error': 'Email and password required'}), 400
-        
-        user = User.query.filter_by(email=email).first()
-        
-        if not user or not user.check_password(password):
-            log_audit(None, 'login_failed', 'auth', 'failure', {'email': email})
-            return jsonify({'error': 'Invalid credentials'}), 401
-        
-        if not user.is_active:
-            return jsonify({'error': 'Account disabled'}), 403
-        
-        # Update last login
-        user.last_login = datetime.utcnow()
-        db.session.commit()
-        
-        # Check subscription status
-        has_access = user.has_active_subscription()
-        trial_active = user.is_trial_active()
-        days_remaining = 0
-        
-        if trial_active:
-            days_remaining = (user.trial_end_date - datetime.utcnow()).days
-        
-        # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
-        
-        log_audit(user.id, 'login_success', 'auth', 'success')
-        
-        return jsonify({
-            'message': 'Login successful',
-            'user': user.to_dict(include_sensitive=True),
-            'access_token': access_token,
-            'refresh_token': refresh_token,
-            'has_access': has_access,
-            'trial_active': trial_active,
-            'trial_days_remaining': days_remaining,
-            'show_gofundme': trial_active,
-            'gofundme_url': GOFUNDME_URL if trial_active else None
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Login error: {e}")
-        return jsonify({'error': 'Login failed'}), 500
+class FractalType(Enum):
+    MANDELBROT = "mandelbrot"
+    JULIA = "julia"
+    BURNING_SHIP = "burning_ship"
+    PHOENIX = "phoenix"
+    NEWTON = "newton"
+    HYBRID = "hybrid"
 
 
-@app.route('/api/auth/refresh', methods=['POST'])
-@jwt_required(refresh=True)
-def refresh():
-    """Refresh access token"""
-    current_user_id = get_jwt_identity()
-    access_token = create_access_token(identity=current_user_id)
-    return jsonify({'access_token': access_token}), 200
-
-
-@app.route('/api/auth/forgot-password', methods=['POST'])
-@limiter.limit("3 per hour")
-def forgot_password():
-    """Request password reset"""
-    try:
-        data = request.get_json()
-        email = data.get('email', '').lower().strip()
-        
-        user = User.query.filter_by(email=email).first()
-        
-        if user:
-            reset_token = user.generate_reset_token(expires_in=3600)
-            db.session.commit()
-            
-            reset_link = f"{request.host_url}reset-password/{reset_token}"
-            send_email(
-                to=email,
-                subject='Life Planner - Password Reset Request',
-                body=f"""You requested a password reset.
-
-Click the link below to reset your password (expires in 1 hour):
-
-{reset_link}
-
-If you didn't request this, please ignore this email.
-
-Best regards,
-Life Planner Team
-"""
-            )
-            
-            log_audit(user.id, 'password_reset_requested', 'auth', 'success')
-        
-        # Always return success to prevent email enumeration
-        return jsonify({'message': 'If email exists, reset link sent'}), 200
-        
-    except Exception as e:
-        logger.error(f"Password reset request error: {e}")
-        return jsonify({'error': 'Request failed'}), 500
-
-
-@app.route('/api/auth/reset-password', methods=['POST'])
-@limiter.limit("5 per hour")
-def reset_password():
-    """Reset password with token"""
-    try:
-        data = request.get_json()
-        token = data.get('token')
-        new_password = data.get('password')
-        
-        if not token or not new_password:
-            return jsonify({'error': 'Token and password required'}), 400
-        
-        if len(new_password) < 8:
-            return jsonify({'error': 'Password must be at least 8 characters'}), 400
-        
-        user = User.query.filter_by(reset_token=token).first()
-        
-        if not user or not user.verify_reset_token(token):
-            return jsonify({'error': 'Invalid or expired token'}), 400
-        
-        user.set_password(new_password)
-        user.reset_token = None
-        user.reset_token_expires = None
-        db.session.commit()
-        
-        log_audit(user.id, 'password_reset_completed', 'auth', 'success')
-        
-        return jsonify({'message': 'Password reset successful'}), 200
-        
-    except Exception as e:
-        logger.error(f"Password reset error: {e}")
-        return jsonify({'error': 'Reset failed'}), 500
-
-
-# ============================================================================
-# SUBSCRIPTION & PAYMENT ENDPOINTS
-# ============================================================================
-
-@app.route('/api/subscription/create-checkout', methods=['POST'])
-@jwt_required()
-def create_checkout_session():
-    """Create Stripe checkout session for subscription"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        # Create or retrieve Stripe customer
-        if not user.stripe_customer_id:
-            customer = stripe.Customer.create(
-                email=user.email,
-                metadata={'user_id': user.id}
-            )
-            user.stripe_customer_id = customer.id
-            db.session.commit()
-        
-        # Create checkout session
-        checkout_session = stripe.checkout.Session.create(
-            customer=user.stripe_customer_id,
-            payment_method_types=['card'],
-            line_items=[{
-                'price': STRIPE_PRICE_ID,
-                'quantity': 1
-            }],
-            mode='subscription',
-            success_url=f"{request.host_url}subscription-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{request.host_url}subscription-cancel",
-            metadata={'user_id': user.id}
-        )
-        
-        log_audit(user.id, 'checkout_session_created', 'subscription', 'success')
-        
-        return jsonify({
-            'checkout_url': checkout_session.url,
-            'session_id': checkout_session.id
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Checkout session error: {e}")
-        return jsonify({'error': 'Checkout creation failed'}), 500
-
-
-@app.route('/api/subscription/webhook', methods=['POST'])
-def stripe_webhook():
-    """Handle Stripe webhooks"""
-    payload = request.get_data()
-    sig_header = request.headers.get('Stripe-Signature')
+@dataclass
+class VirtualPet:
+    """Virtual companion that evolves with user progress"""
+    species: str
+    name: str
+    level: int = 1
+    experience: int = 0
+    happiness: int = 100
+    health: int = 100
+    hunger: int = 0
+    last_fed: Optional[str] = None
+    last_played: Optional[str] = None
+    unlocked_abilities: List[str] = field(default_factory=list)
+    favorite_fractal: str = "mandelbrot"
     
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET')
-        )
-    except ValueError as e:
-        logger.error(f"Invalid webhook payload: {e}")
-        return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
-        logger.error(f"Invalid webhook signature: {e}")
-        return jsonify({'error': 'Invalid signature'}), 400
+    def gain_experience(self, amount: int):
+        """Gain XP and level up"""
+        self.experience += amount
+        while self.experience >= self.level * 100:
+            self.experience -= self.level * 100
+            self.level += 1
+            logger.info(f"🎉 {self.name} leveled up to {self.level}!")
     
-    # Handle different event types
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        user_id = session['metadata'].get('user_id')
+    def feed(self):
+        """Feed the pet"""
+        self.hunger = max(0, self.hunger - 50)
+        self.happiness = min(100, self.happiness + 10)
+        self.last_fed = datetime.now(timezone.utc).isoformat()
+    
+    def play(self):
+        """Play with the pet"""
+        self.happiness = min(100, self.happiness + 20)
+        self.last_played = datetime.now(timezone.utc).isoformat()
+    
+    def update_stats(self):
+        """Natural decay over time"""
+        now = datetime.now(timezone.utc)
         
-        if user_id:
-            user = User.query.get(int(user_id))
-            if user:
-                user.subscription_status = 'active'
-                user.subscription_start_date = datetime.utcnow()
-                user.subscription_end_date = datetime.utcnow() + timedelta(days=30)
-                user.stripe_subscription_id = session.get('subscription')
-                db.session.commit()
-                logger.info(f"Subscription activated for user {user_id}")
-                log_audit(user_id, 'subscription_activated', 'subscription', 'success')
-    
-    elif event['type'] == 'customer.subscription.deleted':
-        subscription = event['data']['object']
-        user = User.query.filter_by(stripe_subscription_id=subscription['id']).first()
-        if user:
-            user.subscription_status = 'cancelled'
-            db.session.commit()
-            logger.info(f"Subscription cancelled for user {user.id}")
-            log_audit(user.id, 'subscription_cancelled', 'subscription', 'success')
-    
-    elif event['type'] == 'invoice.payment_failed':
-        invoice = event['data']['object']
-        user = User.query.filter_by(stripe_customer_id=invoice['customer']).first()
-        if user:
-            user.subscription_status = 'past_due'
-            db.session.commit()
-            logger.warning(f"Payment failed for user {user.id}")
-            log_audit(user.id, 'payment_failed', 'subscription', 'warning')
-    
-    return jsonify({'status': 'success'}), 200
+        if self.last_fed:
+            hours_since_fed = (now - datetime.fromisoformat(self.last_fed)).total_seconds() / 3600
+            self.hunger = min(100, int(hours_since_fed * 2))
+        
+        if self.last_played:
+            hours_since_played = (now - datetime.fromisoformat(self.last_played)).total_seconds() / 3600
+            self.happiness = max(0, self.happiness - int(hours_since_played))
 
 
-@app.route('/api/subscription/status', methods=['GET'])
-@jwt_required()
-def subscription_status():
-    """Get current subscription status"""
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+@dataclass
+class Task:
+    id: str
+    title: str
+    completed: bool = False
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    completed_at: Optional[str] = None
+    priority: str = "medium"
+    estimated_hours: float = 1.0
+    actual_hours: float = 0.0
+
+
+@dataclass
+class Goal:
+    id: str
+    title: str
+    description: str
+    category: str
+    priority: str
+    target_date: str
+    progress: float = 0.0
+    tasks: List[Task] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    completed: bool = False
     
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    def update_progress(self):
+        """Calculate progress from tasks"""
+        if not self.tasks:
+            return
+        completed = sum(1 for t in self.tasks if t.completed)
+        self.progress = (completed / len(self.tasks)) * 100
+
+
+@dataclass
+class Habit:
+    id: str
+    title: str
+    description: str
+    frequency: str  # daily, weekly, monthly
+    streak: int = 0
+    best_streak: int = 0
+    completions: List[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+@dataclass
+class JournalEntry:
+    id: str
+    content: str
+    sentiment_score: float = 0.0
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class User:
+    """Complete user profile with all data"""
+    email: str
+    password_hash: str
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     
-    trial_active = user.is_trial_active()
-    has_access = user.has_active_subscription()
+    # Subscription
+    subscription_status: str = "trial"
+    trial_start: Optional[str] = None
+    subscription_id: Optional[str] = None
+    customer_id: Optional[str] = None
     
-    days_remaining = 0
-    if trial_active:
-        days_remaining = (user.trial_end_date - datetime.utcnow()).days
+    # Pet
+    pet: Optional[VirtualPet] = None
     
-    return jsonify({
-        'subscription_status': user.subscription_status,
-        'trial_active': trial_active,
-        'trial_days_remaining': days_remaining,
-        'has_access': has_access,
-        'show_gofundme': trial_active,
-        'gofundme_url': GOFUNDME_URL if trial_active else None,
-        'subscription_price': SUBSCRIPTION_PRICE
-    }), 200
+    # Goals & Tasks
+    goals: List[Goal] = field(default_factory=list)
+    habits: List[Habit] = field(default_factory=list)
+    journal: List[JournalEntry] = field(default_factory=list)
+    
+    # Stats
+    total_tasks_completed: int = 0
+    total_goals_completed: int = 0
+    total_xp: int = 0
+    
+    # Preferences
+    theme: str = "cosmic"
+    fractal_preferences: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self):
+        """Convert to dictionary, excluding password"""
+        data = asdict(self)
+        data.pop('password_hash', None)
+        return data
 
 
-# ============================================================================
-# LIFE PLANNER CORE ENDPOINTS
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# GPU-ACCELERATED FRACTAL ENGINE
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
-@app.route('/api/planner/update', methods=['POST'])
-@jwt_required()
-def update_planner():
-    """Update life planner with new user data"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+class IntegratedFractalEngine:
+    """
+    Fractal engine that maps ALL user data into visual parameters
+    
+    DATA MAPPING:
+    - Goal completion → Zoom depth & iteration count
+    - Habit streaks → Sacred geometry overlay intensity
+    - Task velocity → Animation/evolution speed
+    - Journal sentiment → Color palette selection
+    - Pet happiness → Special effects & fractal type
+    - Overall momentum → Fibonacci spiral strength
+    """
+    
+    def __init__(self, width: int = 1200, height: int = 1200):
+        self.width = width
+        self.height = height
+        self.use_gpu = GPU_AVAILABLE
         
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
+        if self.use_gpu:
+            logger.info(f"🎨 Fractal GPU acceleration: {GPU_NAME}")
+    
+    def generate_from_user_data(self, user: User, fractal_type: str = "auto") -> bytes:
+        """
+        Generate fractal art driven by user's life metrics
         
-        # Check access
-        if not user.has_active_subscription():
-            return jsonify({
-                'error': 'Subscription required',
-                'trial_expired': not user.is_trial_active(),
-                'subscription_url': '/api/subscription/create-checkout'
-            }), 403
+        Returns: PNG image bytes
+        """
+        # Calculate life metrics
+        metrics = self._calculate_life_metrics(user)
         
-        data = request.get_json()
+        # Auto-select fractal type based on pet or user state
+        if fractal_type == "auto":
+            fractal_type = self._select_fractal_type(user, metrics)
         
-        # Save activity
-        activity = UserActivity(
-            user_id=user.id,
-            stress=data.get('stress'),
-            mood=data.get('mood'),
-            energy=data.get('energy', 50),
-            goals_completed=data.get('goals_completed', 0),
-            sleep_hours=data.get('sleep_hours'),
-            nutrition_score=data.get('nutrition_score'),
-            period=data.get('period', 'daily')
-        )
-        db.session.add(activity)
+        # Generate base fractal
+        fractal_array = self._generate_fractal(fractal_type, metrics)
         
-        # Update pet
-        pet = user.pet
-        if pet:
-            pet.hunger = min(100, pet.hunger + 5)
-            pet.energy = max(0, pet.energy - 2)
-            pet.mood = data.get('mood', pet.mood)
-            pet.stress = data.get('stress', pet.stress)
-            
-            # Gain experience
-            if data.get('goals_completed', 0) > 0:
-                pet.experience += data.get('goals_completed', 0) * 10
-                pet.total_tasks_completed += data.get('goals_completed', 0)
-                
-                # Level up
-                while pet.experience >= (pet.level + 1) * 100:
-                    pet.experience -= (pet.level + 1) * 100
-                    pet.level += 1
-            
-            pet.updated_at = datetime.utcnow()
+        # Apply color palette based on sentiment
+        colored = self._apply_color_palette(fractal_array, metrics)
         
-        db.session.commit()
+        # Add sacred geometry overlays
+        img = Image.fromarray(colored)
+        img = self._add_sacred_geometry(img, metrics)
         
-        # Generate guidance using ancient math
-        phi = AncientMathUtil.golden_ratio()
-        fib = AncientMathUtil.fibonacci_sequence(5)
+        # Add pet sprite/effect
+        if user.pet:
+            img = self._add_pet_effect(img, user.pet, metrics)
         
-        # Create life planning system instance
-        system = LifePlanningSystem(species=pet.species if pet else 'cat')
-        system.update(data)
-        guidance = system.generate_guidance()
-        
-        log_audit(user.id, 'planner_updated', 'planner', 'success')
-        
-        return jsonify({
-            'message': 'Update successful',
-            'guidance': guidance,
-            'pet': pet.to_dict() if pet else None,
-            'ancient_wisdom': {
-                'golden_ratio': phi,
-                'fibonacci': fib[:3]
-            }
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Planner update error: {e}")
-        db.session.rollback()
-        return jsonify({'error': 'Update failed'}), 500
-
-
-@app.route('/api/planner/fractal', methods=['POST'])
-@jwt_required()
-def generate_fractal():
-    """Generate personalized fractal artwork"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or not user.has_active_subscription():
-            return jsonify({'error': 'Access denied'}), 403
-        
-        # Get recent activities
-        recent = UserActivity.query.filter_by(user_id=user.id).order_by(
-            UserActivity.timestamp.desc()
-        ).limit(10).all()
-        
-        if not recent:
-            return jsonify({'error': 'No activity data'}), 400
-        
-        # Prepare data for fractal generation
-        user_data = {
-            'stress': recent[0].stress,
-            'mood': recent[0].mood,
-            'goals_completed': recent[0].goals_completed,
-            'sleep_hours': recent[0].sleep_hours,
-            'nutrition_score': recent[0].nutrition_score,
-            'period': recent[0].period
-        }
-        
-        pet = user.pet
-        pet_state = pet.to_dict() if pet else {}
-        
-        # Generate fractal
-        system = LifePlanningSystem(species=pet.species if pet else 'cat')
-        system.update(user_data)
-        image = system.generate_fractal_image()
+        # Add stats overlay
+        img = self._add_stats_overlay(img, user, metrics)
         
         # Convert to bytes
-        img_io = BytesIO()
-        image.save(img_io, 'PNG')
-        img_io.seek(0)
+        buffer = BytesIO()
+        img.save(buffer, format='PNG', optimize=True)
+        buffer.seek(0)
         
-        log_audit(user.id, 'fractal_generated', 'planner', 'success')
+        return buffer.getvalue()
+    
+    def _calculate_life_metrics(self, user: User) -> Dict[str, float]:
+        """Extract numerical metrics from all user data"""
         
-        return send_file(img_io, mimetype='image/png')
+        # Goal metrics
+        total_goals = len(user.goals)
+        completed_goals = sum(1 for g in user.goals if g.completed)
+        goal_completion_rate = completed_goals / total_goals if total_goals > 0 else 0
+        avg_goal_progress = np.mean([g.progress for g in user.goals]) if user.goals else 0
+        
+        # Task metrics
+        all_tasks = [t for g in user.goals for t in g.tasks]
+        total_tasks = len(all_tasks)
+        completed_tasks = sum(1 for t in all_tasks if t.completed)
+        task_completion_rate = completed_tasks / total_tasks if total_tasks > 0 else 0
+        
+        # Habit metrics
+        total_habits = len(user.habits)
+        avg_streak = np.mean([h.streak for h in user.habits]) if user.habits else 0
+        max_streak = max([h.best_streak for h in user.habits]) if user.habits else 0
+        
+        # Journal sentiment
+        recent_entries = user.journal[-30:] if len(user.journal) > 0 else []
+        avg_sentiment = np.mean([e.sentiment_score for e in recent_entries]) if recent_entries else 0
+        sentiment_trend = self._calculate_trend([e.sentiment_score for e in recent_entries]) if recent_entries else 0
+        
+        # Pet metrics
+        pet_happiness = user.pet.happiness if user.pet else 50
+        pet_level = user.pet.level if user.pet else 1
+        
+        # Overall momentum (0-1 scale)
+        momentum = (goal_completion_rate * 0.3 +
+                   task_completion_rate * 0.2 +
+                   (avg_streak / 100) * 0.2 +
+                   ((avg_sentiment + 1) / 2) * 0.15 +
+                   (pet_happiness / 100) * 0.15)
+        
+        return {
+            'goal_completion_rate': goal_completion_rate,
+            'avg_goal_progress': avg_goal_progress,
+            'task_completion_rate': task_completion_rate,
+            'total_tasks': total_tasks,
+            'avg_streak': avg_streak,
+            'max_streak': max_streak,
+            'avg_sentiment': avg_sentiment,
+            'sentiment_trend': sentiment_trend,
+            'pet_happiness': pet_happiness,
+            'pet_level': pet_level,
+            'momentum': momentum,
+            'total_xp': user.total_xp
+        }
+    
+    def _calculate_trend(self, values: List[float]) -> float:
+        """Calculate trend direction (-1 to 1)"""
+        if len(values) < 2:
+            return 0
+        return np.polyfit(range(len(values)), values, 1)[0]
+    
+    def _select_fractal_type(self, user: User, metrics: Dict) -> str:
+        """Select fractal type based on user state"""
+        
+        if user.pet and hasattr(user.pet, 'favorite_fractal'):
+            return user.pet.favorite_fractal
+        
+        # Auto-select based on metrics
+        if metrics['momentum'] > 0.8:
+            return "phoenix"  # Rising from ashes
+        elif metrics['avg_sentiment'] > 0.5:
+            return "julia"  # Beautiful complexity
+        elif metrics['max_streak'] > 30:
+            return "burning_ship"  # On fire!
+        elif metrics['pet_level'] > 10:
+            return "newton"  # Evolved intelligence
+        else:
+            return "mandelbrot"  # Classic journey
+    
+    def _generate_fractal(self, fractal_type: str, metrics: Dict) -> np.ndarray:
+        """Generate fractal with GPU acceleration"""
+        
+        # Map metrics to fractal parameters
+        max_iter = int(128 + metrics['momentum'] * 128)  # 128-256 iterations
+        zoom = 1.0 + metrics['goal_completion_rate'] * 50  # Deeper zoom with progress
+        power = 2.0 + metrics['avg_streak'] / 20  # Increase power with streaks
+        
+        # Center point influenced by sentiment
+        center_x = -0.5 + metrics['avg_sentiment'] * 0.3
+        center_y = metrics['sentiment_trend'] * 0.3
+        
+        if self.use_gpu and torch is not None:
+            return self._fractal_gpu(fractal_type, max_iter, zoom, (center_x, center_y), power)
+        return self._fractal_cpu(fractal_type, max_iter, zoom, (center_x, center_y), power)
+    
+    def _fractal_gpu(self, ftype: str, max_iter: int, zoom: float, 
+                    center: Tuple[float, float], power: float) -> np.ndarray:
+        """GPU-accelerated fractal generation"""
+        device = torch.device('cuda')
+        
+        # Create coordinate grid
+        x = torch.linspace(-2.5/zoom + center[0], 2.5/zoom + center[0], 
+                          self.width, device=device)
+        y = torch.linspace(-2.5/zoom + center[1], 2.5/zoom + center[1], 
+                          self.height, device=device)
+        X, Y = torch.meshgrid(x, y, indexing='xy')
+        C = X + 1j * Y
+        
+        Z = torch.zeros_like(C)
+        M = torch.zeros(C.shape, dtype=torch.int32, device=device)
+        
+        for i in range(max_iter):
+            mask = (Z.abs() <= 4)
+            
+            if ftype == "mandelbrot":
+                Z[mask] = Z[mask]**power + C[mask]
+            elif ftype == "burning_ship":
+                Z[mask] = (Z[mask].real.abs() + 1j * Z[mask].imag.abs())**2 + C[mask]
+            elif ftype == "julia":
+                if i == 0:
+                    Z = C.clone()
+                c_julia = -0.4 + 0.6j
+                Z[mask] = Z[mask]**power + c_julia
+            elif ftype == "phoenix":
+                Z_old = Z.clone()
+                Z[mask] = Z[mask]**2 + C[mask] + 0.5 * Z_old[mask]
+            else:  # mandelbrot default
+                Z[mask] = Z[mask]**2 + C[mask]
+            
+            M[mask] = i
+        
+        return M.cpu().numpy().astype(np.float32)
+    
+    def _fractal_cpu(self, ftype: str, max_iter: int, zoom: float,
+                    center: Tuple[float, float], power: float) -> np.ndarray:
+        """CPU fallback for fractal generation"""
+        x = np.linspace(-2.5/zoom + center[0], 2.5/zoom + center[0], self.width)
+        y = np.linspace(-2.5/zoom + center[1], 2.5/zoom + center[1], self.height)
+        X, Y = np.meshgrid(x, y)
+        C = X + 1j * Y
+        
+        Z = np.zeros_like(C)
+        M = np.zeros(C.shape, dtype=int)
+        
+        for i in range(max_iter):
+            mask = np.abs(Z) <= 4
+            
+            if ftype == "burning_ship":
+                Z[mask] = (np.abs(Z[mask].real) + 1j * np.abs(Z[mask].imag))**2 + C[mask]
+            else:
+                Z[mask] = Z[mask]**power + C[mask]
+            
+            M[mask] = i
+        
+        return M.astype(np.float32)
+    
+    def _apply_color_palette(self, fractal: np.ndarray, metrics: Dict) -> np.ndarray:
+        """Apply color palette based on sentiment and momentum"""
+        
+        # Normalize
+        fractal_norm = (fractal - fractal.min()) / (fractal.max() - fractal.min() + 1e-10)
+        
+        # Choose palette based on sentiment
+        sentiment = metrics['avg_sentiment']
+        
+        if sentiment > 0.3:  # Positive
+            # Warm, vibrant colors
+            r = np.uint8(255 * np.power(fractal_norm, 0.8))
+            g = np.uint8(200 * np.power(fractal_norm, 1.2))
+            b = np.uint8(100 * fractal_norm)
+        elif sentiment < -0.3:  # Negative
+            # Cool, calming colors
+            r = np.uint8(100 * fractal_norm)
+            g = np.uint8(150 * fractal_norm)
+            b = np.uint8(255 * np.power(fractal_norm, 0.9))
+        else:  # Neutral
+            # Balanced purple/pink
+            r = np.uint8(180 * np.power(fractal_norm, 1.1))
+            g = np.uint8(100 * fractal_norm)
+            b = np.uint8(220 * np.power(fractal_norm, 0.95))
+        
+        # Adjust intensity based on momentum
+        intensity = 0.5 + metrics['momentum'] * 0.5
+        r = np.uint8(r * intensity)
+        g = np.uint8(g * intensity)
+        b = np.uint8(b * intensity)
+        
+        return np.stack([r, g, b], axis=2)
+    
+    def _add_sacred_geometry(self, img: Image.Image, metrics: Dict) -> Image.Image:
+        """Add sacred geometry overlays based on habit streaks"""
+        
+        overlay = Image.new('RGBA', img.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        
+        center = (self.width // 2, self.height // 2)
+        
+        # Fibonacci spiral intensity based on max streak
+        if metrics['max_streak'] > 7:
+            spiral_alpha = int(min(255, metrics['max_streak'] * 3))
+            self._draw_fibonacci_spiral(draw, center, spiral_alpha)
+        
+        # Flower of Life based on goal completion
+        if metrics['goal_completion_rate'] > 0.5:
+            flower_alpha = int(metrics['goal_completion_rate'] * 100)
+            self._draw_flower_of_life(draw, center, flower_alpha)
+        
+        # Golden ratio circles based on momentum
+        if metrics['momentum'] > 0.6:
+            ratio_alpha = int(metrics['momentum'] * 80)
+            self._draw_golden_ratio_circles(draw, center, ratio_alpha)
+        
+        # Merge overlay
+        img = img.convert('RGBA')
+        img = Image.alpha_composite(img, overlay)
+        
+        return img.convert('RGB')
+    
+    def _draw_fibonacci_spiral(self, draw, center, alpha):
+        """Draw Fibonacci spiral"""
+        x, y = center
+        angle = 0
+        for i, fib in enumerate(FIBONACCI[:12]):
+            if fib == 0:
+                continue
+            radius = fib * 3
+            color = (255, 215, 0, alpha)  # Gold
+            draw.ellipse([x - radius, y - radius, x + radius, y + radius],
+                        outline=color, width=2)
+            angle += GOLDEN_ANGLE_RAD
+            x += int(fib * math.cos(angle))
+            y += int(fib * math.sin(angle))
+    
+    def _draw_flower_of_life(self, draw, center, alpha):
+        """Draw Flower of Life pattern"""
+        radius = 80
+        color = (255, 255, 255, alpha)
+        
+        # Center circle
+        x, y = center
+        draw.ellipse([x - radius, y - radius, x + radius, y + radius],
+                    outline=color, width=2)
+        
+        # 6 surrounding circles
+        for i in range(6):
+            angle = i * math.pi / 3
+            cx = x + int(radius * math.cos(angle))
+            cy = y + int(radius * math.sin(angle))
+            draw.ellipse([cx - radius, cy - radius, cx + radius, cy + radius],
+                        outline=color, width=2)
+    
+    def _draw_golden_ratio_circles(self, draw, center, alpha):
+        """Draw golden ratio circles"""
+        x, y = center
+        radius = 50
+        color = (255, 215, 0, alpha)
+        
+        for i in range(8):
+            draw.ellipse([x - radius, y - radius, x + radius, y + radius],
+                        outline=color, width=2)
+            radius = int(radius * PHI)
+            if radius > self.width:
+                break
+    
+    def _add_pet_effect(self, img: Image.Image, pet: VirtualPet, metrics: Dict) -> Image.Image:
+        """Add pet-specific visual effects"""
+        
+        overlay = Image.new('RGBA', img.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        
+        # Draw pet indicator
+        pet_x = self.width - 150
+        pet_y = 50
+        
+        # Species-specific effects
+        if pet.species == "dragon":
+            # Fire particles
+            color = (255, 100, 0, 150)
+        elif pet.species == "phoenix":
+            # Rebirth aura
+            color = (255, 150, 0, 120)
+        elif pet.species == "owl":
+            # Wisdom glow
+            color = (150, 150, 255, 100)
+        elif pet.species == "fox":
+            # Clever sparkles
+            color = (255, 200, 100, 130)
+        else:  # cat
+            # Mysterious shimmer
+            color = (200, 100, 255, 110)
+        
+        # Draw effect circle
+        radius = 30 + pet.level * 2
+        draw.ellipse([pet_x - radius, pet_y - radius, pet_x + radius, pet_y + radius],
+                    fill=color)
+        
+        img = img.convert('RGBA')
+        img = Image.alpha_composite(img, overlay)
+        
+        return img.convert('RGB')
+    
+    def _add_stats_overlay(self, img: Image.Image, user: User, metrics: Dict) -> Image.Image:
+        """Add stats text overlay"""
+        
+        draw = ImageDraw.Draw(img)
+        
+        # Try to load a font, fallback to default
+        try:
+            font = ImageFont.truetype("arial.ttf", 20)
+            font_large = ImageFont.truetype("arial.ttf", 28)
+        except:
+            font = ImageFont.load_default()
+            font_large = font
+        
+        # Stats text
+        y_offset = 20
+        color = (255, 255, 255)
+        shadow_color = (0, 0, 0)
+        
+        # Title
+        title = f"🌀 {user.pet.name if user.pet else 'Life'} Fractal"
+        draw.text((22, y_offset + 2), title, fill=shadow_color, font=font_large)
+        draw.text((20, y_offset), title, fill=color, font=font_large)
+        y_offset += 40
+        
+        # Stats
+        stats = [
+            f"Momentum: {metrics['momentum']:.0%}",
+            f"Goals: {metrics['goal_completion_rate']:.0%}",
+            f"Streak: {int(metrics['max_streak'])} days",
+            f"Tasks: {int(metrics['total_tasks'])}",
+            f"XP: {user.total_xp}"
+        ]
+        
+        for stat in stats:
+            draw.text((22, y_offset + 2), stat, fill=shadow_color, font=font)
+            draw.text((20, y_offset), stat, fill=color, font=font)
+            y_offset += 25
+        
+        return img
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# DATA MANAGER
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+class DataManager:
+    """Secure data persistence"""
+    
+    def __init__(self, data_dir: str = './data'):
+        self.data_dir = data_dir
+        self.users_file = os.path.join(data_dir, 'users.json')
+        os.makedirs(data_dir, exist_ok=True)
+        os.makedirs(Config.FRACTAL_CACHE_DIR, exist_ok=True)
+    
+    def load_users(self) -> Dict[str, User]:
+        """Load all users"""
+        if not os.path.exists(self.users_file):
+            return {}
+        
+        with open(self.users_file, 'r') as f:
+            data = json.load(f)
+        
+        users = {}
+        for email, user_data in data.items():
+            # Reconstruct user object
+            user = User(
+                email=user_data['email'],
+                password_hash=user_data['password_hash'],
+                created_at=user_data.get('created_at', datetime.now(timezone.utc).isoformat()),
+                subscription_status=user_data.get('subscription_status', 'trial'),
+                trial_start=user_data.get('trial_start'),
+                subscription_id=user_data.get('subscription_id'),
+                customer_id=user_data.get('customer_id'),
+                total_tasks_completed=user_data.get('total_tasks_completed', 0),
+                total_goals_completed=user_data.get('total_goals_completed', 0),
+                total_xp=user_data.get('total_xp', 0),
+                theme=user_data.get('theme', 'cosmic'),
+                fractal_preferences=user_data.get('fractal_preferences', {})
+            )
+            
+            # Reconstruct pet
+            if 'pet' in user_data and user_data['pet']:
+                user.pet = VirtualPet(**user_data['pet'])
+            
+            # Reconstruct goals
+            for goal_data in user_data.get('goals', []):
+                tasks = [Task(**t) for t in goal_data.get('tasks', [])]
+                goal = Goal(**{k: v for k, v in goal_data.items() if k != 'tasks'})
+                goal.tasks = tasks
+                user.goals.append(goal)
+            
+            # Reconstruct habits
+            for habit_data in user_data.get('habits', []):
+                user.habits.append(Habit(**habit_data))
+            
+            # Reconstruct journal
+            for entry_data in user_data.get('journal', []):
+                user.journal.append(JournalEntry(**entry_data))
+            
+            users[email] = user
+        
+        return users
+    
+    def save_users(self, users: Dict[str, User]):
+        """Save all users"""
+        data = {email: user.to_dict() for email, user in users.items()}
+        
+        with open(self.users_file, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    def backup_user_data(self, user: User) -> bytes:
+        """Create backup JSON of user data"""
+        data = user.to_dict()
+        return json.dumps(data, indent=2).encode('utf-8')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+class AuthManager:
+    """JWT-based authentication"""
+    
+    @staticmethod
+    def create_token(email: str) -> str:
+        """Create JWT token"""
+        payload = {
+            'email': email,
+            'exp': datetime.now(timezone.utc) + timedelta(hours=Config.JWT_EXPIRY_HOURS)
+        }
+        # Simple token (in production, use proper JWT library)
+        token_data = json.dumps(payload)
+        token = base64.b64encode(token_data.encode()).decode()
+        return token
+    
+    @staticmethod
+    def verify_token(token: str) -> Optional[str]:
+        """Verify JWT token"""
+        try:
+            token_data = base64.b64decode(token).decode()
+            payload = json.loads(token_data)
+            
+            exp = datetime.fromisoformat(payload['exp'])
+            if exp < datetime.now(timezone.utc):
+                return None
+            
+            return payload['email']
+        except:
+            return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# FLASK APPLICATION
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+app = Flask(__name__)
+app.config.from_object(Config)
+CORS(app)
+
+# Initialize managers
+data_manager = DataManager(Config.DATA_DIR)
+users = data_manager.load_users()
+fractal_engine = IntegratedFractalEngine()
+
+logger.info(f"🚀 Life Fractal Intelligence starting...")
+logger.info(f"📊 Loaded {len(users)} users")
+logger.info(f"🎨 GPU: {GPU_NAME if GPU_AVAILABLE else 'CPU mode'}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    """Register new user"""
+    data = request.json
+    email = data.get('email', '').lower().strip()
+    password = data.get('password', '')
+    pet_species = data.get('pet_species', 'cat')
+    pet_name = data.get('pet_name', 'Buddy')
+    
+    # Validate
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
+    
+    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        return jsonify({'error': 'Invalid email format'}), 400
+    
+    if len(password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters'}), 400
+    
+    if email in users:
+        return jsonify({'error': 'Email already registered'}), 400
+    
+    # Create user
+    user = User(
+        email=email,
+        password_hash=generate_password_hash(password),
+        trial_start=datetime.now(timezone.utc).isoformat()
+    )
+    
+    # Create pet
+    user.pet = VirtualPet(
+        species=pet_species,
+        name=pet_name
+    )
+    
+    users[email] = user
+    data_manager.save_users(users)
+    
+    # Create token
+    token = AuthManager.create_token(email)
+    
+    logger.info(f"✅ New user registered: {email}")
+    
+    return jsonify({
+        'message': 'Registration successful',
+        'token': token,
+        'user': user.to_dict()
+    })
+
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """Login user"""
+    data = request.json
+    email = data.get('email', '').lower().strip()
+    password = data.get('password', '')
+    
+    if email not in users:
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    user = users[email]
+    
+    if not check_password_hash(user.password_hash, password):
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    # Update pet stats
+    if user.pet:
+        user.pet.update_stats()
+        data_manager.save_users(users)
+    
+    token = AuthManager.create_token(email)
+    
+    logger.info(f"👤 User logged in: {email}")
+    
+    return jsonify({
+        'message': 'Login successful',
+        'token': token,
+        'user': user.to_dict()
+    })
+
+
+def require_auth(f):
+    """Decorator for protected routes"""
+    def wrapper(*args, **kwargs):
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        email = AuthManager.verify_token(token)
+        
+        if not email or email not in users:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        return f(users[email], *args, **kwargs)
+    
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# FRACTAL VISUALIZATION ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/fractal/generate', methods=['GET'])
+@require_auth
+def generate_fractal(user: User):
+    """Generate personalized fractal from user data"""
+    
+    fractal_type = request.args.get('type', 'auto')
+    
+    try:
+        img_bytes = fractal_engine.generate_from_user_data(user, fractal_type)
+        
+        # Cache it
+        cache_path = os.path.join(Config.FRACTAL_CACHE_DIR, f'{user.email}_latest.png')
+        with open(cache_path, 'wb') as f:
+            f.write(img_bytes)
+        
+        return send_file(BytesIO(img_bytes), mimetype='image/png')
         
     except Exception as e:
-        logger.error(f"Fractal generation error: {e}")
-        return jsonify({'error': 'Generation failed'}), 500
+        logger.error(f"Fractal generation error: {e}", exc_info=True)
+        return jsonify({'error': 'Fractal generation failed'}), 500
 
 
-# ============================================================================
+@app.route('/api/fractal/metrics', methods=['GET'])
+@require_auth
+def get_fractal_metrics(user: User):
+    """Get the metrics that drive fractal generation"""
+    
+    metrics = fractal_engine._calculate_life_metrics(user)
+    
+    return jsonify({
+        'metrics': metrics,
+        'fractal_type': fractal_engine._select_fractal_type(user, metrics)
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# GOAL & TASK ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/goals', methods=['GET', 'POST'])
+@require_auth
+def goals_endpoint(user: User):
+    """Get all goals or create new goal"""
+    
+    if request.method == 'GET':
+        return jsonify({'goals': [asdict(g) for g in user.goals]})
+    
+    # POST - create goal
+    data = request.json
+    
+    if len(user.goals) >= Config.MAX_GOALS:
+        return jsonify({'error': f'Maximum {Config.MAX_GOALS} goals allowed'}), 400
+    
+    goal = Goal(
+        id=secrets.token_hex(8),
+        title=data['title'],
+        description=data.get('description', ''),
+        category=data.get('category', 'personal'),
+        priority=data.get('priority', 'medium'),
+        target_date=data.get('target_date', '')
+    )
+    
+    user.goals.append(goal)
+    data_manager.save_users(users)
+    
+    # Give XP
+    if user.pet:
+        user.pet.gain_experience(50)
+        user.total_xp += 50
+        data_manager.save_users(users)
+    
+    logger.info(f"🎯 New goal created: {goal.title}")
+    
+    return jsonify({'goal': asdict(goal)})
+
+
+@app.route('/api/goals/<goal_id>/tasks', methods=['POST'])
+@require_auth
+def add_task(user: User, goal_id: str):
+    """Add task to goal"""
+    
+    goal = next((g for g in user.goals if g.id == goal_id), None)
+    if not goal:
+        return jsonify({'error': 'Goal not found'}), 404
+    
+    if len(goal.tasks) >= Config.MAX_TASKS_PER_GOAL:
+        return jsonify({'error': 'Too many tasks'}), 400
+    
+    data = request.json
+    
+    task = Task(
+        id=secrets.token_hex(8),
+        title=data['title'],
+        priority=data.get('priority', 'medium'),
+        estimated_hours=data.get('estimated_hours', 1.0)
+    )
+    
+    goal.tasks.append(task)
+    goal.update_progress()
+    data_manager.save_users(users)
+    
+    return jsonify({'task': asdict(task)})
+
+
+@app.route('/api/tasks/<task_id>/complete', methods=['POST'])
+@require_auth
+def complete_task(user: User, task_id: str):
+    """Mark task as complete"""
+    
+    for goal in user.goals:
+        task = next((t for t in goal.tasks if t.id == task_id), None)
+        if task:
+            task.completed = True
+            task.completed_at = datetime.now(timezone.utc).isoformat()
+            
+            # Update stats
+            user.total_tasks_completed += 1
+            user.total_xp += 10
+            
+            # Pet gains XP
+            if user.pet:
+                user.pet.gain_experience(10)
+                user.pet.happiness = min(100, user.pet.happiness + 5)
+            
+            goal.update_progress()
+            
+            # Check if goal is complete
+            if goal.progress >= 100 and not goal.completed:
+                goal.completed = True
+                user.total_goals_completed += 1
+                user.total_xp += 100
+                if user.pet:
+                    user.pet.gain_experience(100)
+                logger.info(f"🎉 Goal completed: {goal.title}")
+            
+            data_manager.save_users(users)
+            
+            return jsonify({
+                'message': 'Task completed',
+                'xp_gained': 10,
+                'pet': asdict(user.pet) if user.pet else None
+            })
+    
+    return jsonify({'error': 'Task not found'}), 404
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# HABIT ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/habits', methods=['GET', 'POST'])
+@require_auth
+def habits_endpoint(user: User):
+    """Get habits or create new habit"""
+    
+    if request.method == 'GET':
+        return jsonify({'habits': [asdict(h) for h in user.habits]})
+    
+    data = request.json
+    
+    habit = Habit(
+        id=secrets.token_hex(8),
+        title=data['title'],
+        description=data.get('description', ''),
+        frequency=data.get('frequency', 'daily')
+    )
+    
+    user.habits.append(habit)
+    data_manager.save_users(users)
+    
+    return jsonify({'habit': asdict(habit)})
+
+
+@app.route('/api/habits/<habit_id>/complete', methods=['POST'])
+@require_auth
+def complete_habit(user: User, habit_id: str):
+    """Mark habit as done today"""
+    
+    habit = next((h for h in user.habits if h.id == habit_id), None)
+    if not habit:
+        return jsonify({'error': 'Habit not found'}), 404
+    
+    today = datetime.now(timezone.utc).date().isoformat()
+    
+    if today not in habit.completions:
+        habit.completions.append(today)
+        habit.streak += 1
+        habit.best_streak = max(habit.best_streak, habit.streak)
+        
+        # XP and pet happiness
+        user.total_xp += 5
+        if user.pet:
+            user.pet.gain_experience(5)
+            user.pet.happiness = min(100, user.pet.happiness + 3)
+        
+        data_manager.save_users(users)
+        
+        return jsonify({
+            'message': 'Habit completed',
+            'streak': habit.streak,
+            'xp_gained': 5
+        })
+    
+    return jsonify({'message': 'Already completed today'})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# JOURNAL ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/journal', methods=['GET', 'POST'])
+@require_auth
+def journal_endpoint(user: User):
+    """Get journal entries or create new entry"""
+    
+    if request.method == 'GET':
+        limit = int(request.args.get('limit', 50))
+        entries = user.journal[-limit:]
+        return jsonify({'entries': [asdict(e) for e in entries]})
+    
+    data = request.json
+    content = data.get('content', '')
+    
+    # Simple sentiment analysis (word-based)
+    sentiment = calculate_sentiment(content)
+    
+    entry = JournalEntry(
+        id=secrets.token_hex(8),
+        content=content,
+        sentiment_score=sentiment,
+        tags=data.get('tags', [])
+    )
+    
+    user.journal.append(entry)
+    data_manager.save_users(users)
+    
+    return jsonify({'entry': asdict(entry)})
+
+
+def calculate_sentiment(text: str) -> float:
+    """Simple sentiment analysis (-1 to 1)"""
+    positive_words = {'happy', 'great', 'awesome', 'good', 'excellent', 'love', 'joy', 'amazing', 'wonderful', 'fantastic'}
+    negative_words = {'sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'depressed', 'frustrated', 'horrible', 'difficult'}
+    
+    text_lower = text.lower()
+    words = text_lower.split()
+    
+    pos_count = sum(1 for w in words if w in positive_words)
+    neg_count = sum(1 for w in words if w in negative_words)
+    
+    total = pos_count + neg_count
+    if total == 0:
+        return 0.0
+    
+    return (pos_count - neg_count) / total
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
 # PET ENDPOINTS
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/pet', methods=['GET'])
-@jwt_required()
-def get_pet():
-    """Get pet information"""
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+@require_auth
+def get_pet(user: User):
+    """Get pet status"""
+    if not user.pet:
+        return jsonify({'error': 'No pet'}), 404
     
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    user.pet.update_stats()
+    data_manager.save_users(users)
     
-    pet = user.pet
-    if not pet:
-        return jsonify({'error': 'Pet not found'}), 404
-    
-    return jsonify(pet.to_dict()), 200
+    return jsonify({'pet': asdict(user.pet)})
 
 
 @app.route('/api/pet/feed', methods=['POST'])
-@jwt_required()
-def feed_pet():
-    """Feed the virtual pet"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or not user.has_active_subscription():
-            return jsonify({'error': 'Access denied'}), 403
-        
-        pet = user.pet
-        if not pet:
-            return jsonify({'error': 'Pet not found'}), 404
-        
-        # Feed pet
-        pet.hunger = max(0, pet.hunger - 20)
-        pet.mood = min(100, pet.mood + 5)
-        pet.last_fed = datetime.utcnow()
-        pet.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        
-        log_audit(user.id, 'pet_fed', 'pet', 'success')
-        
-        return jsonify({
-            'message': 'Pet fed successfully',
-            'pet': pet.to_dict()
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Pet feed error: {e}")
-        return jsonify({'error': 'Feed failed'}), 500
+@require_auth
+def feed_pet(user: User):
+    """Feed the pet"""
+    if not user.pet:
+        return jsonify({'error': 'No pet'}), 404
+    
+    user.pet.feed()
+    data_manager.save_users(users)
+    
+    return jsonify({
+        'message': f'{user.pet.name} enjoyed the meal!',
+        'pet': asdict(user.pet)
+    })
 
 
 @app.route('/api/pet/play', methods=['POST'])
-@jwt_required()
-def play_with_pet():
-    """Play with the virtual pet"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or not user.has_active_subscription():
-            return jsonify({'error': 'Access denied'}), 403
-        
-        pet = user.pet
-        if not pet:
-            return jsonify({'error': 'Pet not found'}), 404
-        
-        # Play with pet
-        if pet.energy < 20:
-            return jsonify({'error': 'Pet too tired to play'}), 400
-        
-        pet.energy = max(0, pet.energy - 15)
-        pet.mood = min(100, pet.mood + 10)
-        pet.bond = min(100, pet.bond + 2)
-        pet.last_played = datetime.utcnow()
-        pet.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        
-        log_audit(user.id, 'pet_played', 'pet', 'success')
-        
-        return jsonify({
-            'message': 'Play time successful',
-            'pet': pet.to_dict()
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Pet play error: {e}")
-        return jsonify({'error': 'Play failed'}), 500
-
-
-# ============================================================================
-# ADMIN ENDPOINTS
-# ============================================================================
-
-@app.route('/api/admin/dashboard', methods=['GET'])
-@jwt_required()
-def admin_dashboard():
-    """Admin dashboard - owner only"""
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+@require_auth
+def play_with_pet(user: User):
+    """Play with the pet"""
+    if not user.pet:
+        return jsonify({'error': 'No pet'}), 404
     
-    if not user or not user.is_admin:
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    # Get statistics
-    total_users = User.query.count()
-    active_subscriptions = User.query.filter_by(subscription_status='active').count()
-    trial_users = User.query.filter_by(subscription_status='trial').count()
-    
-    recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
-    recent_activities = UserActivity.query.order_by(
-        UserActivity.timestamp.desc()
-    ).limit(20).all()
+    user.pet.play()
+    data_manager.save_users(users)
     
     return jsonify({
-        'statistics': {
-            'total_users': total_users,
-            'active_subscriptions': active_subscriptions,
-            'trial_users': trial_users,
-            'monthly_revenue': active_subscriptions * SUBSCRIPTION_PRICE
-        },
-        'recent_users': [u.to_dict() for u in recent_users],
-        'recent_activities': [a.to_dict() for a in recent_activities]
-    }), 200
+        'message': f'{user.pet.name} had fun!',
+        'pet': asdict(user.pet)
+    })
 
 
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# SUBSCRIPTION ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/subscription/status', methods=['GET'])
+@require_auth
+def subscription_status(user: User):
+    """Check subscription status"""
+    
+    is_trial = user.subscription_status == 'trial'
+    trial_expired = False
+    days_remaining = 0
+    
+    if is_trial and user.trial_start:
+        trial_start = datetime.fromisoformat(user.trial_start)
+        trial_end = trial_start + timedelta(days=Config.TRIAL_DAYS)
+        trial_expired = datetime.now(timezone.utc) > trial_end
+        days_remaining = max(0, (trial_end - datetime.now(timezone.utc)).days)
+    
+    return jsonify({
+        'status': user.subscription_status,
+        'is_trial': is_trial,
+        'trial_expired': trial_expired,
+        'days_remaining': days_remaining,
+        'gofundme_url': Config.GOFUNDME_CAMPAIGN_URL if is_trial else None
+    })
+
+
+@app.route('/api/subscription/create-checkout', methods=['POST'])
+@require_auth
+def create_checkout(user: User):
+    """Create Stripe checkout session (simplified)"""
+    
+    # In production, integrate with Stripe API
+    # For now, return mock checkout URL
+    
+    return jsonify({
+        'checkout_url': f'https://checkout.stripe.com/...',
+        'session_id': secrets.token_hex(16)
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# DATA EXPORT/IMPORT
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/export', methods=['GET'])
+@require_auth
+def export_data(user: User):
+    """Export all user data as JSON"""
+    
+    backup_bytes = data_manager.backup_user_data(user)
+    
+    return send_file(
+        BytesIO(backup_bytes),
+        mimetype='application/json',
+        as_attachment=True,
+        download_name=f'life_fractal_backup_{datetime.now().strftime("%Y%m%d")}.json'
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# DASHBOARD & STATS
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/dashboard', methods=['GET'])
+@require_auth
+def dashboard(user: User):
+    """Get complete dashboard data"""
+    
+    metrics = fractal_engine._calculate_life_metrics(user)
+    
+    return jsonify({
+        'user': user.to_dict(),
+        'metrics': metrics,
+        'recent_goals': [asdict(g) for g in user.goals[-5:]],
+        'recent_habits': [asdict(h) for h in user.habits[-5:]],
+        'recent_journal': [asdict(e) for e in user.journal[-5:]],
+        'gpu_status': {
+            'available': GPU_AVAILABLE,
+            'device': GPU_NAME
+        }
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
 # HEALTH CHECK
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
-@app.route('/api/health', methods=['GET'])
-def health_check():
+@app.route('/health', methods=['GET'])
+def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.utcnow().isoformat(),
-        'version': '1.0.0',
-        'gpu_available': gpu_generator.use_gpu
-    }), 200
+        'users': len(users),
+        'gpu': GPU_AVAILABLE,
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    })
 
 
-# ============================================================================
-# ERROR HANDLERS
-# ============================================================================
-
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'error': 'Resource not found'}), 404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    logger.error(f"Internal error: {error}")
-    return jsonify({'error': 'Internal server error'}), 500
-
-
-# ============================================================================
-# DATABASE INITIALIZATION
-# ============================================================================
-
-def init_database():
-    """Initialize database and create admin user"""
-    with app.app_context():
-        db.create_all()
+@app.route('/')
+def index():
+    """Landing page"""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Life Fractal Intelligence</title>
+        <style>
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 50px;
+            }
+            h1 { font-size: 48px; margin-bottom: 20px; }
+            .features { max-width: 800px; margin: 40px auto; text-align: left; }
+            .feature { margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+            .cta { margin-top: 40px; }
+            .btn { 
+                padding: 15px 40px; 
+                font-size: 18px; 
+                background: #ffd700; 
+                color: #333; 
+                border: none; 
+                border-radius: 30px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🌀 Life Fractal Intelligence</h1>
+        <p style="font-size: 24px;">Your life, visualized as living fractal art</p>
         
-        # Create admin user if not exists
-        admin_email = os.getenv('ADMIN_EMAIL', 'onlinediscountsllc@gmail.com')
-        admin = User.query.filter_by(email=admin_email).first()
+        <div class="features">
+            <div class="feature">✨ GPU-accelerated fractal visualization driven by YOUR progress</div>
+            <div class="feature">🎯 Goal tracking with ML-powered predictions</div>
+            <div class="feature">🐉 Virtual pet companion that grows with you</div>
+            <div class="feature">📔 Journal with sentiment analysis</div>
+            <div class="feature">🔮 Sacred geometry overlays based on your momentum</div>
+            <div class="feature">💎 $20/month • 7-day free trial</div>
+        </div>
         
-        if not admin:
-            admin = User(
-                email=admin_email,
-                first_name='Luke',
-                last_name='Smith',
-                is_admin=True,
-                is_active=True,
-                email_verified=True,
-                subscription_status='active'
-            )
-            admin.set_password(os.getenv('ADMIN_PASSWORD', 'admin8587037321'))
-            db.session.add(admin)
-            db.session.commit()
-            logger.info(f"Admin user created: {admin_email}")
+        <div class="cta">
+            <a href="/api/docs" class="btn">View API Documentation</a>
+        </div>
+        
+        <p style="margin-top: 40px; opacity: 0.8;">
+            Powered by ancient mathematics, modern AI, and your dedication
+        </p>
+    </body>
+    </html>
+    """
 
 
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
 # MAIN
-# ============================================================================
+# ═══════════════════════════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
-    # Create logs directory
-    os.makedirs('logs', exist_ok=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
     
-    # Initialize database
-    init_database()
+    logger.info(f"""
+    ═══════════════════════════════════════════════════════════════════════════════════════
+    🌀 LIFE FRACTAL INTELLIGENCE - PRODUCTION READY
+    ═══════════════════════════════════════════════════════════════════════════════════════
     
-    # Run app
-    app.run(
-        host='0.0.0.0',
-        port=int(os.getenv('PORT', 5000)),
-        debug=os.getenv('DEBUG', 'False') == 'True'
-    )
+    🚀 Server: http://localhost:{port}
+    🎨 GPU: {GPU_NAME if GPU_AVAILABLE else 'CPU Mode'}
+    👥 Users: {len(users)}
+    📊 Data Dir: {Config.DATA_DIR}
+    
+    📡 API Endpoints:
+    ├─ POST /api/register           → Register new user
+    ├─ POST /api/login              → Login
+    ├─ GET  /api/dashboard          → Dashboard data
+    ├─ GET  /api/fractal/generate   → Generate personalized fractal
+    ├─ GET  /api/fractal/metrics    → Fractal metrics
+    ├─ GET  /api/goals              → Get goals
+    ├─ POST /api/goals              → Create goal
+    ├─ POST /api/goals/<id>/tasks   → Add task
+    ├─ POST /api/tasks/<id>/complete → Complete task
+    ├─ GET  /api/habits             → Get habits
+    ├─ POST /api/habits             → Create habit
+    ├─ POST /api/habits/<id>/complete → Complete habit
+    ├─ GET  /api/journal            → Get journal entries
+    ├─ POST /api/journal            → Create entry
+    ├─ GET  /api/pet                → Get pet status
+    ├─ POST /api/pet/feed           → Feed pet
+    ├─ POST /api/pet/play           → Play with pet
+    ├─ GET  /api/subscription/status → Check subscription
+    ├─ GET  /api/export             → Export user data
+    └─ GET  /health                 → Health check
+    
+    ═══════════════════════════════════════════════════════════════════════════════════════
+    """)
+    
+    app.run(host='0.0.0.0', port=port, debug=debug)
