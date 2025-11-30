@@ -150,7 +150,12 @@ def retry_on_failure(max_attempts=3, delay=1.0, fallback=None, component="unknow
     return decorator
 
 def safe_execute(fallback_value=None, log_errors=True, component="unknown"):
-    """Safe execution with automatic error handling"""
+    """Safe execution with automatic error handling
+    
+    Note: fallback_value can be a callable (like a lambda) to defer evaluation
+    until runtime. This is important for Flask functions like jsonify() that
+    require application context.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -163,6 +168,9 @@ def safe_execute(fallback_value=None, log_errors=True, component="unknown"):
                 if log_errors:
                     logger.error(f"Error in {func.__name__}: {e}")
                     logger.debug(traceback.format_exc())
+                # If fallback_value is callable, call it to get the actual value
+                if callable(fallback_value):
+                    return fallback_value()
                 return fallback_value
         return wrapper
     return decorator
@@ -633,7 +641,7 @@ def require_verified_email(f):
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @app.route('/api/auth/register', methods=['POST'])
-@safe_execute(fallback_value=jsonify({'error': 'Registration failed'}), component="register")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Registration failed'}), 500), component="register")
 def register():
     """Register new user with email verification"""
     data = request.get_json()
@@ -767,7 +775,7 @@ def verify_email():
 
 @app.route('/api/auth/resend-verification', methods=['POST'])
 @require_auth
-@safe_execute(fallback_value=jsonify({'error': 'Failed to resend'}), component="resend_verification")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to resend'}), 500), component="resend_verification")
 def resend_verification():
     """Resend verification email"""
     users = db.select('users', {'id': session['user_id']})
@@ -798,7 +806,7 @@ def resend_verification():
     }), 200
 
 @app.route('/api/auth/login', methods=['POST'])
-@safe_execute(fallback_value=jsonify({'error': 'Login failed'}), component="login")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Login failed'}), 500), component="login")
 def login():
     """User login"""
     data = request.get_json()
@@ -936,7 +944,7 @@ def generate_simple_fractal(user_data: dict, size: int = 800) -> bytes:
 
 @app.route('/api/fractal/generate', methods=['GET'])
 @require_verified_email
-@safe_execute(fallback_value=jsonify({'error': 'Generation failed'}), component="fractal_api")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Generation failed'}), 500), component="fractal_api")
 def api_generate_fractal():
     """Generate personalized fractal"""
     user_id = session['user_id']
@@ -977,7 +985,7 @@ def get_goals():
 
 @app.route('/api/goals', methods=['POST'])
 @require_verified_email
-@safe_execute(fallback_value=jsonify({'error': 'Failed to create goal'}), component="create_goal")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create goal'}), 500), component="create_goal")
 def create_goal():
     """Create new goal"""
     data = request.get_json()
@@ -1003,7 +1011,7 @@ def create_goal():
 
 @app.route('/api/goals/<goal_id>', methods=['PUT'])
 @require_verified_email
-@safe_execute(fallback_value=jsonify({'error': 'Failed to update goal'}), component="update_goal")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to update goal'}), 500), component="update_goal")
 def update_goal(goal_id):
     """Update goal"""
     data = request.get_json()
@@ -1043,7 +1051,7 @@ def get_habits():
 
 @app.route('/api/habits', methods=['POST'])
 @require_verified_email
-@safe_execute(fallback_value=jsonify({'error': 'Failed to create habit'}), component="create_habit")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create habit'}), 500), component="create_habit")
 def create_habit():
     """Create new habit"""
     data = request.get_json()
@@ -1081,7 +1089,7 @@ def get_pet():
 
 @app.route('/api/pet/create', methods=['POST'])
 @require_verified_email
-@safe_execute(fallback_value=jsonify({'error': 'Failed to create pet'}), component="create_pet")
+@safe_execute(fallback_value=lambda: (jsonify({'error': 'Failed to create pet'}), 500), component="create_pet")
 def create_pet():
     """Create virtual pet"""
     data = request.get_json()
