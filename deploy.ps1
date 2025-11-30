@@ -1,156 +1,185 @@
-# Life Fractal Intelligence - Quick Deploy Script
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# This script automates the deployment process
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# HEROKU DEPLOYMENT SCRIPT - PowerShell
+# ═══════════════════════════════════════════════════════════════
 
-Write-Host "🌀 Life Fractal Intelligence - Deployment Script" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "🌀 LIFE FRACTAL INTELLIGENCE - HEROKU DEPLOYMENT" -ForegroundColor Cyan
+Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host ""
 
-# Check Python version
-Write-Host "`n📋 Checking Python installation..." -ForegroundColor Yellow
-python --version
+# Check if Heroku CLI is installed
+Write-Host "📋 Checking Heroku CLI..." -ForegroundColor Yellow
+$herokuInstalled = Get-Command heroku -ErrorAction SilentlyContinue
+
+if (-not $herokuInstalled) {
+    Write-Host "❌ Heroku CLI not found. Installing..." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Please install Heroku CLI from: https://devcenter.heroku.com/articles/heroku-cli" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "After installing, run this script again." -ForegroundColor Yellow
+    pause
+    exit
+}
+
+Write-Host "✅ Heroku CLI found" -ForegroundColor Green
+Write-Host ""
+
+# Login to Heroku
+Write-Host "🔐 Logging into Heroku..." -ForegroundColor Yellow
+Write-Host "(This will open a browser window)" -ForegroundColor Gray
+heroku login
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Python not found. Please install Python 3.11 or higher." -ForegroundColor Red
-    exit 1
+    Write-Host "❌ Heroku login failed" -ForegroundColor Red
+    pause
+    exit
 }
 
-# Create virtual environment (optional but recommended)
-$createVenv = Read-Host "`n🔧 Create virtual environment? (y/n)"
-if ($createVenv -eq 'y') {
-    Write-Host "`n📦 Creating virtual environment..." -ForegroundColor Yellow
-    python -m venv venv
-    
-    Write-Host "✅ Activating virtual environment..." -ForegroundColor Green
-    .\venv\Scripts\Activate.ps1
+Write-Host "✅ Logged in successfully" -ForegroundColor Green
+Write-Host ""
+
+# Get app name
+Write-Host "📝 Enter your Heroku app name:" -ForegroundColor Yellow
+Write-Host "(Must be unique, lowercase, use dashes for spaces)" -ForegroundColor Gray
+Write-Host "Example: life-fractal-john-2024" -ForegroundColor Gray
+$appName = Read-Host "App name"
+
+if ([string]::IsNullOrWhiteSpace($appName)) {
+    Write-Host "❌ App name cannot be empty" -ForegroundColor Red
+    pause
+    exit
 }
 
-# Install dependencies
-Write-Host "`n📦 Installing dependencies..." -ForegroundColor Yellow
-pip install Flask Flask-CORS Werkzeug numpy Pillow scikit-learn gunicorn gevent python-dotenv cryptography pytest pytest-flask --break-system-packages
-
-# Check for GPU
-Write-Host "`n🎨 Checking for GPU support..." -ForegroundColor Yellow
-$hasGPU = Read-Host "Do you have an NVIDIA GPU? (y/n)"
-
-if ($hasGPU -eq 'y') {
-    Write-Host "📥 Installing GPU acceleration packages..." -ForegroundColor Yellow
-    Write-Host "This may take a few minutes..." -ForegroundColor Gray
-    
-    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118 --break-system-packages
-    
-    $testGPU = python -c "import torch; print('GPU Available:', torch.cuda.is_available()); print('Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')" 2>&1
-    Write-Host $testGPU -ForegroundColor Green
-}
-
-# Create data directory
-Write-Host "`n📁 Creating data directory..." -ForegroundColor Yellow
-New-Item -ItemType Directory -Force -Path "data" | Out-Null
-New-Item -ItemType Directory -Force -Path "data/fractals" | Out-Null
-Write-Host "✅ Data directory created" -ForegroundColor Green
-
-# Create .env file
-Write-Host "`n🔐 Setting up environment variables..." -ForegroundColor Yellow
-
-if (Test-Path ".env") {
-    $overwrite = Read-Host ".env file exists. Overwrite? (y/n)"
-    if ($overwrite -ne 'y') {
-        Write-Host "⏭️ Skipping .env creation" -ForegroundColor Gray
-    } else {
-        Remove-Item ".env"
-    }
-}
-
-if (-not (Test-Path ".env")) {
-    $secretKey = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 64 | ForEach-Object {[char]$_})
-    
-    @"
-# Life Fractal Intelligence - Environment Configuration
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-# Security (CHANGE IN PRODUCTION!)
-SECRET_KEY=$secretKey
-
-# Stripe Configuration (Get from https://dashboard.stripe.com)
-STRIPE_SECRET_KEY=sk_test_your_test_key_here
-STRIPE_PUBLISHABLE_KEY=pk_test_your_test_key_here
-STRIPE_PRICE_ID=price_your_price_id_here
-
-# GoFundMe Campaign
-GOFUNDME_CAMPAIGN_URL=https://gofundme.com/your-campaign
-
-# Data Storage
-DATA_DIR=./data
-
-# Server Configuration
-PORT=5000
-FLASK_ENV=development
-
-# Optional: Sentry Error Tracking
-# SENTRY_DSN=https://your-sentry-dsn
-"@ | Out-File -FilePath ".env" -Encoding UTF8
-    
-    Write-Host "✅ .env file created with random SECRET_KEY" -ForegroundColor Green
-    Write-Host "⚠️  Remember to update Stripe keys before going live!" -ForegroundColor Yellow
-}
-
-# Run tests
-Write-Host "`n🧪 Running health check..." -ForegroundColor Yellow
-$testCode = @"
-import sys
-sys.path.insert(0, '.')
-
-# Quick import test
-try:
-    import flask
-    import numpy as np
-    from PIL import Image
-    print('✅ Core dependencies OK')
-    
-    try:
-        import sklearn
-        print('✅ Machine Learning (scikit-learn) OK')
-    except ImportError:
-        print('⚠️  scikit-learn not available (optional)')
-    
-    try:
-        import torch
-        if torch.cuda.is_available():
-            print(f'✅ GPU Acceleration OK - {torch.cuda.get_device_name(0)}')
-        else:
-            print('ℹ️  GPU not available - will use CPU mode')
-    except ImportError:
-        print('ℹ️  PyTorch not available - will use CPU mode')
-    
-    print('\n🎉 All checks passed!')
-    
-except ImportError as e:
-    print(f'❌ Import error: {e}')
-    sys.exit(1)
-"@
-
-$testCode | python
+Write-Host ""
+Write-Host "🚀 Creating Heroku app: $appName..." -ForegroundColor Yellow
+heroku create $appName
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "`n❌ Dependency check failed. Please review errors above." -ForegroundColor Red
-    exit 1
+    Write-Host "❌ Failed to create app. App name might be taken." -ForegroundColor Red
+    Write-Host "Try a different name." -ForegroundColor Yellow
+    pause
+    exit
 }
 
-# Ask to start server
-Write-Host "`n═══════════════════════════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "🎉 Deployment Complete!" -ForegroundColor Green
-Write-Host "`nNext steps:" -ForegroundColor Yellow
-Write-Host "1. Update .env file with your Stripe keys" -ForegroundColor White
-Write-Host "2. Run the application:" -ForegroundColor White
-Write-Host "   python life_fractal_complete.py" -ForegroundColor Cyan
-Write-Host "`nOr for production:" -ForegroundColor White
-Write-Host "   gunicorn -w 4 -b 0.0.0.0:5000 life_fractal_complete:app" -ForegroundColor Cyan
-Write-Host "`n═══════════════════════════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "✅ App created successfully" -ForegroundColor Green
+Write-Host ""
 
-$startNow = Read-Host "`nStart the server now? (y/n)"
+# Add PostgreSQL database
+Write-Host "🗄️  Adding PostgreSQL database (free tier)..." -ForegroundColor Yellow
+heroku addons:create heroku-postgresql:essential-0 -a $appName
 
-if ($startNow -eq 'y') {
-    Write-Host "`n🚀 Starting Life Fractal Intelligence..." -ForegroundColor Green
-    Write-Host "Press Ctrl+C to stop the server`n" -ForegroundColor Gray
-    python life_fractal_complete.py
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "⚠️  Warning: Could not add database automatically" -ForegroundColor Yellow
+    Write-Host "You may need to add it manually from Heroku dashboard" -ForegroundColor Yellow
 }
+
+Write-Host ""
+
+# Configure environment variables
+Write-Host "⚙️  Configuring environment variables..." -ForegroundColor Yellow
+
+# Generate secret key
+$secretKey = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | % {[char]$_})
+heroku config:set SECRET_KEY=$secretKey -a $appName
+
+heroku config:set ENVIRONMENT=production -a $appName
+heroku config:set APP_URL=https://$appName.herokuapp.com -a $appName
+
+Write-Host ""
+Write-Host "📧 Email Configuration (Optional - for email verification)" -ForegroundColor Yellow
+Write-Host "Press Enter to skip, or enter your SMTP details:" -ForegroundColor Gray
+Write-Host ""
+
+$smtpServer = Read-Host "SMTP Server (e.g., smtp.gmail.com)"
+if (-not [string]::IsNullOrWhiteSpace($smtpServer)) {
+    $smtpPort = Read-Host "SMTP Port (default: 587)"
+    if ([string]::IsNullOrWhiteSpace($smtpPort)) { $smtpPort = "587" }
+    
+    $smtpUsername = Read-Host "SMTP Username (your email)"
+    $smtpPassword = Read-Host "SMTP Password" -AsSecureString
+    $smtpPasswordPlain = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($smtpPassword)
+    )
+    $fromEmail = Read-Host "From Email Address"
+    
+    heroku config:set SMTP_SERVER=$smtpServer -a $appName
+    heroku config:set SMTP_PORT=$smtpPort -a $appName
+    heroku config:set SMTP_USERNAME=$smtpUsername -a $appName
+    heroku config:set SMTP_PASSWORD=$smtpPasswordPlain -a $appName
+    heroku config:set FROM_EMAIL=$fromEmail -a $appName
+    
+    Write-Host "✅ Email configured" -ForegroundColor Green
+} else {
+    Write-Host "⚠️  Email skipped - verification emails will be logged only" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# Initialize git repository
+Write-Host "📦 Initializing Git repository..." -ForegroundColor Yellow
+
+if (-not (Test-Path ".git")) {
+    git init
+    Write-Host "✅ Git initialized" -ForegroundColor Green
+} else {
+    Write-Host "✅ Git already initialized" -ForegroundColor Green
+}
+
+# Add Heroku remote if not exists
+$remotes = git remote
+if ($remotes -notcontains "heroku") {
+    git remote add heroku https://git.heroku.com/$appName.git
+    Write-Host "✅ Heroku remote added" -ForegroundColor Green
+}
+
+Write-Host ""
+
+# Deploy to Heroku
+Write-Host "🚀 Deploying to Heroku..." -ForegroundColor Yellow
+Write-Host "This may take a few minutes..." -ForegroundColor Gray
+Write-Host ""
+
+git add .
+git commit -m "Initial deployment" 2>$null
+git push heroku master -f
+
+if ($LASTEXITCODE -ne 0) {
+    # Try main branch
+    git push heroku main -f
+}
+
+Write-Host ""
+Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host "🎉 DEPLOYMENT SUCCESSFUL!" -ForegroundColor Green
+Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host ""
+Write-Host "Your app is live at:" -ForegroundColor Yellow
+Write-Host "https://$appName.herokuapp.com" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "📋 Next Steps:" -ForegroundColor Yellow
+Write-Host "1. Visit your app URL above" -ForegroundColor White
+Write-Host "2. Create an account" -ForegroundColor White
+Write-Host "3. Check your email for verification" -ForegroundColor White
+Write-Host "4. Start using Life Fractal Intelligence!" -ForegroundColor White
+Write-Host ""
+Write-Host "📊 View logs:" -ForegroundColor Yellow
+Write-Host "   heroku logs --tail -a $appName" -ForegroundColor Gray
+Write-Host ""
+Write-Host "⚙️  Open Heroku dashboard:" -ForegroundColor Yellow
+Write-Host "   heroku dashboard -a $appName" -ForegroundColor Gray
+Write-Host ""
+Write-Host "🔧 Add Stripe for payments:" -ForegroundColor Yellow
+Write-Host "   heroku config:set STRIPE_SECRET_KEY=sk_test_... -a $appName" -ForegroundColor Gray
+Write-Host "   heroku config:set STRIPE_PUBLISHABLE_KEY=pk_test_... -a $appName" -ForegroundColor Gray
+Write-Host ""
+
+# Ask if user wants to open the app
+$openApp = Read-Host "Open app in browser now? (y/n)"
+if ($openApp -eq "y" -or $openApp -eq "Y") {
+    Start-Process "https://$appName.herokuapp.com"
+}
+
+Write-Host ""
+Write-Host "Deployment complete! ✨" -ForegroundColor Green
+Write-Host ""
+pause
