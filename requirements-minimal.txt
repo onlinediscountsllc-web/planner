@@ -1,0 +1,23 @@
+# ULTRA-MINIMAL DEPENDENCIES - Pure Python Math Engine
+# Zero numpy, zero pillow, zero heavy libraries!
+# Works on ANY Python version 3.8+
+
+# Core Web Framework (required)
+flask==3.0.0
+flask-cors==4.0.0
+werkzeug==3.0.0
+
+# Security (lightweight, pure Python)
+pyjwt==2.8.0
+
+# Password hashing (has pure Python fallback)
+bcrypt==4.1.2
+
+# Payments (pure Python client)
+stripe==8.0.0
+
+# Server
+gunicorn==21.2.0
+
+# That's it! Only 7 dependencies total!
+# Everything else is pure Python in pure_python_math.py
