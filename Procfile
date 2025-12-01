@@ -1,1 +1,1 @@
-﻿web: gunicorn app:app
+web: gunicorn life_planner_unified_master:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120

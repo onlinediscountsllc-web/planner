@@ -1,0 +1,84 @@
+# Ultimate Life Planner v6.0 - Dependencies
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# CORE DEPENDENCIES (REQUIRED)
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+Flask==3.0.0
+Flask-CORS==4.0.0
+Werkzeug==3.0.1
+numpy==1.26.2
+Pillow==10.1.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# OPTIONAL DEPENDENCIES (Recommended for full features)
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+# GPU Acceleration (3-5x faster fractals)
+# Install with: --index-url https://download.pytorch.org/whl/cu118
+torch>=2.0.0
+
+# Machine Learning (predictions)
+scikit-learn==1.3.2
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# PRODUCTION DEPLOYMENT (Optional)
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+# Linux/Mac production server
+gunicorn==21.2.0
+
+# Windows production server
+waitress==2.1.2
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# INSTALLATION NOTES
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+# Install core only:
+# pip install flask flask-cors numpy pillow --break-system-packages
+
+# Install everything:
+# pip install -r requirements.txt --break-system-packages
+
+# Install with GPU:
+# pip install torch --break-system-packages --index-url https://download.pytorch.org/whl/cu118
+# pip install flask flask-cors numpy pillow scikit-learn --break-system-packages
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# COMPATIBILITY
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+# Python: 3.9+
+# OS: Windows, Linux, macOS
+# Architecture: x86_64, ARM64
+
+# GPU Requirements (optional):
+# - NVIDIA GPU with CUDA 11.8+
+# - 2GB+ VRAM for 3D fractals
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════
+# FEATURE MATRIX
+# ═══════════════════════════════════════════════════════════════════════════════════════
+
+# Core features (Flask, numpy, Pillow):
+# ✅ Goal tracking
+# ✅ Progress visualization
+# ✅ Text-based charts
+# ✅ 2D fractals (CPU)
+# ✅ Database
+# ✅ API
+
+# With torch (GPU):
+# ✅ Fast 2D fractals
+# ✅ 3D Mandelbulb
+
+# With scikit-learn:
+# ✅ Progress predictions
+# ✅ Completion estimates
+# ✅ Trend analysis

@@ -1,6 +1,18 @@
-﻿Flask==3.0.0
-Flask-CORS==4.0.0
-Werkzeug==3.0.1
-numpy==2.0.0
-Pillow==10.4.0
+# Core Flask
+flask==3.0.0
+flask-cors==4.0.0
+werkzeug==3.0.0
+
+# Data Processing
+numpy==1.24.0
+pillow==10.0.0
+
+# Security
+pyjwt==2.8.0
+bcrypt==4.0.1
+
+# Payments
+stripe==5.5.0
+
+# Server
 gunicorn==21.2.0

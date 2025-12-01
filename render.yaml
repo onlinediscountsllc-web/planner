@@ -1,21 +1,15 @@
 services:
   - type: web
-    name: life-fractal-intelligence
+    name: life-fractal-v8
     env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.7
       - key: SECRET_KEY
         generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: life-fractal-db
-          property: connectionString
-    healthCheckPath: /health
-
-databases:
-  - name: life-fractal-db
-    databaseName: life_fractal
-    user: life_fractal_user
+      - key: DATABASE_PATH
+        value: /tmp/life_fractal_v8.db
+      - key: OLLAMA_URL
+        value: http://localhost:11434

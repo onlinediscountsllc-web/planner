@@ -35,24 +35,6 @@ from flask import Flask, request, jsonify, send_file, render_template_string
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Enhanced features import
-try:
-    from life_fractal_enhanced_implementation import (
-        EmotionalPetAI,
-        FractalTimeCalendar,
-        FibonacciTaskScheduler,
-        ExecutiveFunctionSupport,
-        AutismSafeColors,
-        AphantasiaSupport,
-        PrivacyPreservingML
-    )
-    ENHANCED_FEATURES_AVAILABLE = True
-    print("Enhanced features loaded successfully")
-except ImportError as e:
-    ENHANCED_FEATURES_AVAILABLE = False
-    print(f"Enhanced features not available: {e}")
-
-
 # Data processing
 import numpy as np
 from PIL import Image
