@@ -16,8 +16,7 @@ Copy these classes into your existing application!
 ═══════════════════════════════════════════════════════════════════════════════════════
 """
 
-# Using pure Python math - zero dependencies!
-import pure_python_math as math_engine
+import numpy as np
 import math
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Any, Optional
@@ -106,7 +105,7 @@ class EmotionalPetAI:
         
         # Hunger dynamics: dH/dt = -δ_H · H + α · U(t)
         dH_dt = -self.params['hunger_decay'] * self.state['hunger'] / 100
-        self.state['hunger'] = math_engine.clip(
+        self.state['hunger'] = np.clip(
             self.state['hunger'] + dH_dt * dt,
             0, 100
         )
@@ -116,7 +115,7 @@ class EmotionalPetAI:
             -self.params['energy_decay'] * self.state['energy'] / 100 +
             0.05 * sleep_quality
         )
-        self.state['energy'] = math_engine.clip(
+        self.state['energy'] = np.clip(
             self.state['energy'] + dE_dt * dt,
             0, 100
         )
@@ -134,7 +133,7 @@ class EmotionalPetAI:
             hunger_penalty
         )
         
-        self.state['mood'] = math_engine.clip(
+        self.state['mood'] = np.clip(
             self.state['mood'] + dM_dt * dt,
             0, 100
         )
@@ -144,7 +143,7 @@ class EmotionalPetAI:
             self.params['bond_growth'] * self.state['mood'] / 100 -
             0.01 * self.state['age_days']
         )
-        self.state['bond'] = math_engine.clip(
+        self.state['bond'] = np.clip(
             self.state['bond'] + dB_dt * dt,
             0, 100
         )
@@ -168,14 +167,14 @@ class EmotionalPetAI:
         Update 3D emotional space: [Valence, Arousal, Dominance]
         Used for advanced emotional AI
         """
-        current = math_engine.array(self.state['emotional_vector'])
+        current = np.array(self.state['emotional_vector'])
         
         # Target emotional state based on mood/energy
         target_valence = self.state['mood'] / 100
         target_arousal = self.state['energy'] / 100
         target_dominance = self.state['bond'] / 100
         
-        target = math_engine.array([target_valence, target_arousal, target_dominance])
+        target = np.array([target_valence, target_arousal, target_dominance])
         
         # Smooth transition (exponential moving average)
         alpha = 0.3
@@ -357,8 +356,8 @@ class FractalTimeCalendar:
         """
         
         # Sinusoidal circadian rhythm
-        phase_angle = 2 * math_engine.pi * (hour - 6) / 24
-        energy = 50 + pattern['amplitude'] * math_engine.sin(phase_angle - math_engine.pi/2)
+        phase_angle = 2 * np.pi * (hour - 6) / 24
+        energy = 50 + pattern['amplitude'] * np.sin(phase_angle - np.pi/2)
         
         if energy > 75:
             phase = 'peak'
@@ -535,31 +534,31 @@ class ExecutiveFunctionSupport:
             }
         
         # Extract completion times
-        completion_times = math_engine.array([
+        completion_times = np.array([
             entry.get('task_completion_time', 30)
             for entry in behavior_history[-30:]  # Last 30 days
         ])
         
         # Pad to power of 2 for FFT efficiency
         n = len(completion_times)
-        padded_n = 2 ** int(math_engine.ceil(math_engine.log2(n)))
-        padded = math_engine.pad(completion_times, (0, padded_n - n), mode='constant')
+        padded_n = 2 ** int(np.ceil(np.log2(n)))
+        padded = np.pad(completion_times, (0, padded_n - n), mode='constant')
         
         # FFT to frequency domain
-        fft = math_engine.fft.fft(padded)
-        frequencies = math_engine.fft.fftfreq(padded_n)
-        power_spectrum = math_engine.abs(fft) ** 2
+        fft = np.fft.fft(padded)
+        frequencies = np.fft.fftfreq(padded_n)
+        power_spectrum = np.abs(fft) ** 2
         
         # Analyze frequency components
-        high_freq_power = math_engine.sum(power_spectrum[math_engine.abs(frequencies) > 0.1])
-        low_freq_power = math_engine.sum(power_spectrum[math_engine.abs(frequencies) < 0.05])
+        high_freq_power = np.sum(power_spectrum[np.abs(frequencies) > 0.1])
+        low_freq_power = np.sum(power_spectrum[np.abs(frequencies) < 0.05])
         
         # Check for weekly routine (fundamental frequency)
-        weekly_freq_idx = math_engine.argmin(math_engine.abs(frequencies - 1/7))
+        weekly_freq_idx = np.argmin(np.abs(frequencies - 1/7))
         fundamental_power = power_spectrum[weekly_freq_idx]
         
         # Calculate dysfunction score
-        total_power = math_engine.sum(power_spectrum)
+        total_power = np.sum(power_spectrum)
         dysfunction_score = (
             (high_freq_power / max(1, low_freq_power)) *
             (1 - fundamental_power / max(1, total_power))
@@ -655,7 +654,7 @@ class ExecutiveFunctionSupport:
         task_type = task.get('type', 'general')
         
         # Calculate number of steps using Fibonacci
-        num_steps = max(3, int(math_engine.ceil(estimated_minutes / max_step_minutes)))
+        num_steps = max(3, int(np.ceil(estimated_minutes / max_step_minutes)))
         
         # Predefined scaffolds by task type
         scaffolds = {
@@ -916,43 +915,43 @@ class PrivacyPreservingML:
         
         # Add differential privacy noise
         for key in patterns:
-            if isinstance(patterns[key], (list, math_engine.ndarray)):
+            if isinstance(patterns[key], (list, np.ndarray)):
                 patterns[key] = self._add_noise(patterns[key])
         
         return patterns
     
     def _fit_polynomial(self, values, degree=2):
         """Fit polynomial to data"""
-        x = math_engine.arange(len(values))
-        coeffs = math_engine.polyfit(x, values, degree)
+        x = np.arange(len(values))
+        coeffs = np.polyfit(x, values, degree)
         return coeffs.tolist()
     
     def _fft_features(self, values, n_components=3):
         """Extract frequency features"""
-        fft = math_engine.fft.fft(values)
-        magnitudes = math_engine.abs(fft[:n_components])
+        fft = np.fft.fft(values)
+        magnitudes = np.abs(fft[:n_components])
         return magnitudes.tolist()
     
     def _exponential_fit(self, values):
         """Fit exponential model"""
-        x = math_engine.arange(len(values))
-        y = math_engine.array(values)
+        x = np.arange(len(values))
+        y = np.array(values)
         
         # Avoid log of zero/negative
-        y = math_engine.maximum(y, 0.1)
+        y = np.maximum(y, 0.1)
         
-        log_y = math_engine.log(y)
-        coeffs = math_engine.polyfit(x, log_y, 1)
+        log_y = np.log(y)
+        coeffs = np.polyfit(x, log_y, 1)
         
         return {
             'rate': float(coeffs[0]),
-            'baseline': float(math_engine.exp(coeffs[1]))
+            'baseline': float(np.exp(coeffs[1]))
         }
     
     def _add_noise(self, data):
         """Add Laplacian noise for differential privacy"""
-        noise = math_engine.random.laplace(0, self.noise_level, size=len(data))
-        return (math_engine.array(data) + noise).tolist()
+        noise = np.random.laplace(0, self.noise_level, size=len(data))
+        return (np.array(data) + noise).tolist()
     
     def get_insights(self, user_patterns, global_patterns):
         """
@@ -969,9 +968,9 @@ class PrivacyPreservingML:
         insights = []
         
         # Example insight generation
-        user_completion = math_engine.mean(user_patterns.get('completion_time_trend', [30]))
-        global_completion = math_engine.mean([
-            math_engine.mean(p.get('completion_time_trend', [30]))
+        user_completion = np.mean(user_patterns.get('completion_time_trend', [30]))
+        global_completion = np.mean([
+            np.mean(p.get('completion_time_trend', [30]))
             for p in global_patterns
         ])
         
@@ -1121,7 +1120,7 @@ if __name__ == "__main__":
     # 4. Executive Dysfunction Detection Demo
     print("\n4. EXECUTIVE DYSFUNCTION DETECTION")
     demo_history = [
-        {'task_completion_time': 45 + i * math_engine.sin(i) * 10}
+        {'task_completion_time': 45 + i * np.sin(i) * 10}
         for i in range(20)
     ]
     
