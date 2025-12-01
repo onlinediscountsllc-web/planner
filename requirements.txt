@@ -1,4 +1,4 @@
-# ULTRA-MINIMAL DEPENDENCIES - Pure Python Math Engine
+﻿# ULTRA-MINIMAL DEPENDENCIES - Pure Python Math Engine
 # Zero numpy, zero pillow, zero heavy libraries!
 # Works on ANY Python version 3.8+
 
@@ -16,5 +16,3 @@ stripe==8.0.0
 
 # Server
 gunicorn==21.2.0
-
-# That's it! Only 7 dependencies!
