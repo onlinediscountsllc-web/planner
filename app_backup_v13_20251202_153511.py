@@ -2392,24 +2392,12 @@ def print_banner():
     print("=" * 80)
 
 
-# ════════════════════════════════════════════════════════════════════════════════
-# DATABASE INITIALIZATION (runs on import for gunicorn/Render)
-# ════════════════════════════════════════════════════════════════════════════════
-
-def ensure_db_initialized():
-    """Ensure database is initialized - safe to call multiple times."""
-    try:
-        init_db()
-        logger.info("✅ Database initialization complete")
-    except Exception as e:
-        logger.error(f"Database initialization error: {e}")
-
-# Initialize database when module is imported (for gunicorn)
-with app.app_context():
-    ensure_db_initialized()
-
 if __name__ == '__main__':
     print_banner()
+    
+    with app.app_context():
+        init_db()
+    
     port = int(os.environ.get('PORT', 5000))
     print(f"\n🚀 Starting server at http://localhost:{port}\n")
     app.run(host='0.0.0.0', port=port, debug=False)

@@ -1,375 +1,402 @@
-# 🌀 Life Fractal Intelligence v7.0 - Complete Production System
+# Life Fractal Intelligence v8.0 - Secure Authentication Update
 
-## 🎯 ALL FEATURES IMPLEMENTED - ZERO PLACEHOLDERS
+## 🔒 What's New in v8.0
 
-This is the complete, production-ready Life Fractal Intelligence application with every feature from our previous discussions fully implemented.
+This is a **major security and authentication update** for Life Fractal Intelligence, adding enterprise-grade security features while maintaining all the neurodivergent-friendly features you love.
+
+### ✨ New Features
+
+1. **Argon2 Password Hashing**
+   - Industry best-practice password security
+   - Replaces pbkdf2 with more secure Argon2id algorithm
+   - Prevents rainbow table and brute-force attacks
+
+2. **CAPTCHA Protection**
+   - Math-based challenges to prevent bots
+   - Protects registration and login
+   - 5-minute expiration for security
+
+3. **Email Notifications**
+   - Welcome email with trial information
+   - Trial ending warnings (2 days before)
+   - Trial expired notifications
+   - Password reset emails
+   - All emails include GoFundMe link
+
+4. **Password Reset System**
+   - Secure token-based reset
+   - 30-minute expiration
+   - One-time use tokens
+   - Email verification required
+
+5. **Rate Limiting**
+   - 5 failed attempts per IP per 15 minutes
+   - Prevents brute-force attacks
+   - Login attempt tracking
+
+6. **Account Security**
+   - Automatic lockout after 5 failed attempts
+   - Session management with 24-hour expiration
+   - Secure token generation
+   - IP address tracking
+
+7. **Returning User Check**
+   - Separate endpoint to check if email exists
+   - Better UX for returning vs new users
+   - Prevents accidental duplicate accounts
+
+8. **Comprehensive Testing**
+   - Full bug test suite included
+   - Tests all authentication flows
+   - Validates security features
+   - Production-ready verification
 
 ---
 
-## ✅ What's Included
+## 📦 What's Included
 
-### 1. **Emotional Pet AI** 🐾
-- 8 species: Cat, Dog, Dragon, Phoenix, Owl, Fox, Axolotl, Unicorn
-- Differential equations for realistic emotional behavior
-- Species-specific personality traits
-- Leveling system with Fibonacci XP
-- Achievements system
-- Bond meter that grows with interaction
-
-### 2. **Spoon Theory Energy Management** 🥄
-- Track mental energy as "spoons"
-- Default 12 spoons per day
-- Activity costs (shower: 2, deep work: 4, etc.)
-- Burnout risk detection
-- Sleep quality affects daily spoon allocation
-- Encouragement based on energy levels
-
-### 3. **Fractal Time Calendar** 📅
-- Fibonacci time blocks (1, 1, 2, 3, 5 hours)
-- Circadian rhythm alignment
-- Energy phase tracking (morning peak, midday dip, etc.)
-- Optimal activity suggestions per time block
-- Spoon capacity per block
-
-### 4. **Fibonacci Task Scheduler** 📋
-- Golden ratio priority calculation
-- Importance × Urgency / Effort formula
-- Spoon-aware task recommendations
-- "What's Next?" feature respects energy levels
-- Category-based organization
-
-### 5. **Executive Function Support** 🧠
-- Behavior pattern logging
-- Dysfunction indicator tracking:
-  - Task switching difficulty
-  - Initiation problems
-  - Time blindness
-  - Working memory issues
-  - Emotional regulation
-- Task scaffolding into micro-steps (<5 min each)
-- Personalized recommendations
-
-### 6. **Full Accessibility System** ♿
-- 5 autism-safe color palettes
-- High contrast mode
-- Large text option
-- Dyslexia-friendly fonts
-- Reduced motion
-- Screen reader support
-- Aphantasia mode (no "visualize" language)
-- Keyboard navigation
-- Voice input support for dysgraphia
-
-### 7. **2D/3D Fractal Visualization** 🌀
-- Mandelbrot set generation
-- 3D Mandelbulb ray marching
-- Wellness-based coloring
-- Mood affects fractal complexity
-- Stress affects zoom/position
-
-### 8. **Mayan Calendar Integration** 🗓️
-- Tzolkin day signs (20 signs × 13 numbers)
-- Energy quality descriptions
-- Daily guidance based on Mayan wisdom
-
-### 9. **Complete Authentication** 🔐
-- Secure registration with password hashing
-- Session-based authentication
-- 7-day free trial
-- Stripe payment integration ready
-
-### 10. **SQLite Database** 💾
-- Users table
-- Goals table with detailed fields
-- Tasks table with Fibonacci priority
-- Habits table
-- Daily entries table
-- Pet state table
-- Behavior history table
-- Sessions table
+```
+life-fractal-v8-secure/
+├── secure_auth_module.py       # Complete authentication system
+├── life_fractal_v8_secure.py   # Enhanced main application
+├── requirements.txt             # All dependencies
+├── test_bugs.py                 # Comprehensive test suite
+├── setup_local.py               # Local setup script
+├── DEPLOYMENT_GUIDE.md          # Full deployment instructions
+└── README.md                    # This file
+```
 
 ---
 
 ## 🚀 Quick Start
 
-### Local Development
+### Option 1: Local Testing (5 minutes)
 
 ```bash
 # 1. Install dependencies
-pip install -r requirements.txt
+python setup_local.py
 
-# 2. Run the application
-python app.py
+# 2. Edit .env file with your SMTP password
+nano .env
 
-# 3. Open browser
-# Go to: http://localhost:5000
+# 3. Run the application
+python life_fractal_v8_secure.py
+
+# 4. Test it
+python test_bugs.py http://localhost:8080
 ```
 
-### Deploy to Render.com
+### Option 2: Deploy to Render (10 minutes)
 
-1. Push to GitHub:
 ```bash
-git init
-git add .
-git commit -m "Life Fractal v7.0 - Complete Production"
-git remote add origin https://github.com/YOUR_USERNAME/life-fractal.git
-git push -u origin main
-```
+# 1. Copy files to your GitHub repo
+cp *.py ../planner/
+cp requirements.txt ../planner/
+cd ../planner
 
-2. On Render.com:
-   - Create new Web Service
-   - Connect your GitHub repo
-   - Build command: `pip install -r requirements.txt`
-   - Start command: `gunicorn app:app`
+# 2. Commit and push
+git add .
+git commit -m "Deploy v8.0 with secure authentication"
+git push origin main
+
+# 3. Configure Render (see DEPLOYMENT_GUIDE.md)
+# 4. Deploy and test
+```
 
 ---
 
-## 📡 API Endpoints
+## 🔧 Configuration
+
+### Required Environment Variables
+
+```bash
+# Flask
+SECRET_KEY=<generate-with-secrets.token_hex(32)>
+PORT=8080
+DEBUG=False
+
+# SMTP (for emails)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=onlinediscountsllc@gmail.com
+SMTP_PASSWORD=<your-gmail-app-password>
+```
+
+### Gmail App Password Setup
+
+1. Go to Google Account → Security
+2. Enable 2-Factor Authentication
+3. Generate App Password:
+   - Security → App passwords
+   - Select "Mail" and your device
+   - Copy the 16-character password
+4. Use this password as SMTP_PASSWORD
+
+---
+
+## 🧪 Testing
+
+### Run Full Test Suite
+
+```bash
+python test_bugs.py http://localhost:8080
+```
+
+Tests include:
+- ✅ Health check
+- ✅ CAPTCHA generation
+- ✅ Registration validation
+- ✅ Email checking
+- ✅ User registration
+- ✅ Duplicate prevention
+- ✅ Login security
+- ✅ CAPTCHA verification
+- ✅ Password validation
+- ✅ Session management
+- ✅ Rate limiting
+- ✅ Password reset
+- ✅ Dashboard access
+- ✅ CORS headers
+
+### Expected Output
+
+```
+==================================================
+LIFE FRACTAL INTELLIGENCE - BUG TEST SUITE
+==================================================
+
+[TEST] Health Check
+  ✓ PASS: Server is healthy
+
+[TEST] CAPTCHA Generation
+  ✓ PASS: CAPTCHA generated: Security Check: What is 47 + 83?
+
+...
+
+==================================================
+TEST SUMMARY
+==================================================
+
+Total Tests: 15
+Passed: 15
+Failed: 0
+Pass Rate: 100.0%
+
+🎉 ALL TESTS PASSED! System is ready for deployment.
+```
+
+---
+
+## 📧 Email Templates
+
+### 1. Welcome Email (Registration)
+- **Subject:** "Welcome to Life Fractal Intelligence - Your 7-Day Trial Starts Now!"
+- **Includes:**
+  - Trial information (7 days)
+  - Feature list
+  - Subscription details ($20/month)
+  - GoFundMe link
+
+### 2. Trial Ending Soon (2 days before)
+- **Subject:** "Your Life Fractal Intelligence Trial Ends in X Days"
+- **Includes:**
+  - Days remaining
+  - Subscription prompt
+  - GoFundMe alternative
+
+### 3. Trial Expired
+- **Subject:** "Your Life Fractal Intelligence Trial Has Ended"
+- **Includes:**
+  - Subscription requirement
+  - Data preservation notice
+  - GoFundMe link
+
+### 4. Password Reset
+- **Subject:** "Reset Your Life Fractal Intelligence Password"
+- **Includes:**
+  - Reset link (30-minute expiration)
+  - Security notice
+
+---
+
+## 🔐 Security Features
+
+### Password Security
+- Argon2id hashing (best-in-class)
+- Minimum 8 characters required
+- No plaintext storage
+- Secure password reset flow
+
+### Account Protection
+- Rate limiting (5 attempts per 15 min)
+- Account lockout after 5 failures
+- CAPTCHA on registration and login
+- Session expiration (24 hours)
+
+### Data Security
+- Parameterized queries (SQL injection prevention)
+- Secure session tokens
+- IP address tracking
+- Login attempt logging
+
+---
+
+## 📊 API Endpoints
 
 ### Authentication
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | Create new account |
-| `/api/auth/login` | POST | Log in |
-| `/api/auth/logout` | POST | Log out |
-| `/api/auth/me` | GET | Get current user |
-
-### Pet System
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/pet` | GET | Get pet state |
-| `/api/pet/feed` | POST | Feed the pet |
-| `/api/pet/play` | POST | Play with pet |
-| `/api/pet/rest` | POST | Let pet rest |
-| `/api/pet/species` | GET | List available species |
-| `/api/pet/change` | POST | Change pet species |
-
-### Spoon Theory
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/spoons` | GET | Get spoon state |
-| `/api/spoons/use` | POST | Use spoons for activity |
-| `/api/spoons/rest` | POST | Recover spoons |
-| `/api/spoons/new-day` | POST | Reset for new day |
-| `/api/spoons/costs` | GET | Get activity costs |
-
-### Goals & Tasks
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/goals` | GET | List goals |
-| `/api/goals` | POST | Create goal |
-| `/api/goals/<id>` | PUT | Update goal |
-| `/api/goals/<id>` | DELETE | Delete goal |
-| `/api/tasks` | GET | List tasks |
-| `/api/tasks` | POST | Create task |
-| `/api/tasks/<id>/complete` | POST | Complete task |
-| `/api/tasks/next` | GET | Get next recommended task |
-
-### Calendar
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/calendar/today` | GET | Get today's plan |
-| `/api/calendar/date/<date>` | GET | Get specific date plan |
-| `/api/calendar/mayan` | GET | Get Mayan day info |
-
-### Executive Function
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/executive/state` | GET | Get dysfunction indicators |
-| `/api/executive/log` | POST | Log behavior |
-| `/api/executive/scaffold/<task_id>` | GET | Get micro-steps |
-
-### Accessibility
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/accessibility` | GET | Get settings |
-| `/api/accessibility` | PUT | Update settings |
-| `/api/accessibility/css` | GET | Get CSS variables |
-| `/api/accessibility/palettes` | GET | List color palettes |
-
-### Fractals
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/fractal/2d` | GET | Generate 2D fractal |
-| `/api/fractal/3d` | GET | Generate 3D fractal |
-
-### Daily Check-in
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/checkin` | POST | Submit check-in |
-| `/api/checkin/history` | GET | Get check-in history |
-
-### System
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/system/status` | GET | System status |
-
----
-
-## 🧮 Sacred Mathematics
-
-All calculations use these constants:
-
-```python
-PHI = 1.618033988749895  # Golden Ratio
-PHI_INVERSE = 0.618033988749895
-GOLDEN_ANGLE = 137.5077640500378°
-FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597]
+```
+GET  /api/auth/captcha          - Generate CAPTCHA challenge
+POST /api/auth/check-email      - Check if email exists
+POST /api/auth/register         - Register new user
+POST /api/auth/login            - Login user
+POST /api/auth/forgot-password  - Request password reset
+POST /api/auth/reset-password   - Reset password with token
+POST /api/auth/verify-session   - Verify session token
 ```
 
-### Task Priority Formula
+### User Data
 ```
-Priority = (Importance_fib × φ + Urgency_fib) / (Effort_fib × φ⁻¹ + 1)
-```
-
-Where:
-- `Importance_fib = fibonacci(importance + 3)`
-- `Urgency_fib = fibonacci(urgency + 2)`
-- `Effort_fib = fibonacci(effort + 1)`
-
----
-
-## 🎨 Color Palettes
-
-### Calm Ocean (Default)
-- Primary: #5B8A9A
-- Secondary: #8BB4C2
-- Background: #F5F9FA
-- Text: #2C4A52
-
-### Forest Peace
-- Primary: #6B8E6B
-- Secondary: #9CB89C
-- Background: #F5F8F5
-- Text: #3A4D3A
-
-### Gentle Lavender
-- Primary: #8B7B9B
-- Secondary: #B4A8C2
-- Background: #FAF8FC
-- Text: #4A3D52
-
-### Warm Sand
-- Primary: #A89078
-- Secondary: #C8B8A8
-- Background: #FDFBF8
-- Text: #5A4A3A
-
-### High Contrast
-- Primary: #000000
-- Background: #FFFFFF
-- Text: #000000
-- Accent: #0066CC
-
----
-
-## 🐾 Pet Species
-
-| Species | Emoji | Personality |
-|---------|-------|-------------|
-| Cat | 🐱 | Independent but secretly affectionate |
-| Dog | 🐕 | Loyal and eager to please |
-| Dragon | 🐉 | Proud but fiercely protective |
-| Phoenix | 🔥 | Transformative and inspiring |
-| Owl | 🦉 | Wise and observant |
-| Fox | 🦊 | Clever and playful |
-| Axolotl | 🦎 | Calm and regenerative |
-| Unicorn | 🦄 | Magical and pure-hearted |
-
----
-
-## 🥄 Default Spoon Costs
-
-| Activity | Cost |
-|----------|------|
-| Shower | 2 |
-| Meal prep | 2 |
-| Eating | 1 |
-| Email | 1 |
-| Phone call | 2 |
-| Meeting | 3 |
-| Deep work | 4 |
-| Exercise | 3 |
-| Socializing | 3 |
-| Commute | 2 |
-| Chores | 2 |
-| Creative work | 2 |
-| Rest | 0 |
-| Meditation | 0 |
-
----
-
-## 📁 File Structure
-
-```
-life_fractal_final/
-├── app.py              # Complete application (2,400+ lines)
-├── requirements.txt    # Python dependencies
-├── README.md           # This file
-├── .env.example        # Environment variables template
-└── life_fractal.db     # SQLite database (auto-created)
+GET  /api/user/<user_id>              - Get user profile
+GET  /api/user/<user_id>/dashboard    - Get dashboard data
+GET  /api/user/<user_id>/today        - Get today's entry
+POST /api/user/<user_id>/today        - Update today's entry
 ```
 
 ---
 
-## 🔐 Environment Variables
+## 🐛 Troubleshooting
 
-Create a `.env` file:
+### Email Not Sending?
+- Check SMTP_PASSWORD is correct (16-char App Password)
+- Verify SMTP_USER matches your Gmail
+- Check Render logs for SMTP errors
 
-```env
-SECRET_KEY=your-secret-key-here
-DEBUG=False
-PORT=5000
-STRIPE_PAYMENT_LINK=https://buy.stripe.com/your-link
-```
+### CAPTCHA Not Working?
+- Clear browser cache
+- Check /api/auth/captcha endpoint
+- Verify challenge_id is being passed
 
----
+### Login Failing?
+- Check if account is locked (5 failed attempts)
+- Verify CAPTCHA answer
+- Check rate limiting status
 
-## 🆘 Troubleshooting
-
-### "NumPy not available"
-Fractals will be disabled. Install with:
-```bash
-pip install numpy>=2.0.0
-```
-
-### "Pillow not available"
-Image generation disabled. Install with:
-```bash
-pip install Pillow>=10.1.0
-```
-
-### Database errors
-Delete `life_fractal.db` and restart - it will be recreated.
-
-### Port already in use
-Change port in `.env` or:
-```bash
-PORT=5001 python app.py
-```
+### Database Issues?
+- Ensure write permissions
+- Check SQLite compatibility
+- Verify table creation in logs
 
 ---
 
-## 🎉 Summary
+## 💡 Key Improvements Over v7.1
 
-**This is the COMPLETE Life Fractal Intelligence application with:**
+| Feature | v7.1 | v8.0 |
+|---------|------|------|
+| Password Hashing | pbkdf2 | Argon2id ✅ |
+| CAPTCHA | None | Math-based ✅ |
+| Email Notifications | None | Full system ✅ |
+| Password Reset | None | Secure tokens ✅ |
+| Rate Limiting | None | IP-based ✅ |
+| Account Lockout | None | After 5 attempts ✅ |
+| Session Management | Basic | Token-based ✅ |
+| Security Testing | None | Comprehensive ✅ |
 
-- ✅ All features from previous discussions implemented
-- ✅ Zero placeholders - everything is real, working code
-- ✅ 2,400+ lines of production-ready Python
-- ✅ Complete frontend dashboard
-- ✅ Full API with 30+ endpoints
-- ✅ SQLite database with 8 tables
-- ✅ Sacred mathematics throughout
-- ✅ Neurodivergent-first design
-- ✅ Ready for immediate deployment
+---
 
-**Run it with:**
-```bash
-python app.py
-```
+## 🎯 Production Checklist
 
-**Then open:** http://localhost:5000
+Before deploying to production:
 
-🌀 Your Life Fractal Intelligence awaits! 🌀
+- [ ] Set up Gmail App Password
+- [ ] Configure all environment variables
+- [ ] Test email delivery
+- [ ] Run full bug test suite
+- [ ] Verify CAPTCHA works
+- [ ] Test password reset
+- [ ] Confirm rate limiting active
+- [ ] Check trial notifications send
+- [ ] Verify GoFundMe links work
+- [ ] Test on mobile devices
+- [ ] Set up database backups
+- [ ] Monitor logs for errors
+
+---
+
+## 🌟 User Experience Flow
+
+### New User Journey
+1. Visit site, see registration form
+2. Solve CAPTCHA challenge
+3. Register with email/password
+4. Receive welcome email with trial info
+5. Login with CAPTCHA
+6. Access dashboard with virtual pet
+7. Use all features for 7 days
+8. Receive trial ending email (day 5)
+9. Subscribe or see trial expired notice
+
+### Returning User Journey
+1. Visit site, enter email
+2. System recognizes returning user
+3. Solve CAPTCHA challenge
+4. Login successfully
+5. Check trial days remaining
+6. Continue using features
+
+### Password Reset Journey
+1. Click "Forgot Password"
+2. Enter email address
+3. Receive reset email
+4. Click reset link
+5. Enter new password
+6. Login with new password
+
+---
+
+## 📞 Support
+
+- **Email:** onlinediscountsllc@gmail.com
+- **GoFundMe:** https://gofund.me/8d9303d27
+- **GitHub:** onlinediscountsllc-web/planner
+
+---
+
+## 🙏 Supporting Development
+
+Life Fractal Intelligence is built by someone with autism, ADHD, and aphantasia - for others like us. If you'd like to support continued development:
+
+**GoFundMe:** https://gofund.me/8d9303d27
+
+Your support helps us:
+- Add more neurodivergent-friendly features
+- Improve accessibility
+- Expand pet species and behaviors
+- Create more visualization options
+- Keep the service affordable
+
+---
+
+## 📝 License & Attribution
+
+Life Fractal Intelligence v8.0
+© 2025 Online Discounts LLC
+All rights reserved.
+
+Built with:
+- Sacred mathematics and ancient geometry
+- Compassion for neurodivergent minds
+- Industry best-practice security
+- Love for virtual pets 🐱🐉🦊
+
+---
+
+## 🎉 Thank You!
+
+Thank you for using Life Fractal Intelligence! Your trust in our secure authentication system means everything. We're committed to protecting your data while providing the best neurodivergent-focused planning experience.
+
+**Ready to deploy?** Follow the DEPLOYMENT_GUIDE.md for step-by-step instructions!
+
+---
+
+*Version 8.0 - December 2025*
+*"Sacred Mathematics for Neurodivergent Minds"*
