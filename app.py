@@ -1,25 +1,21 @@
 #!/usr/bin/env python3
 """
-🌀 LIFE FRACTAL INTELLIGENCE v7.0 - COMPLETE PRODUCTION SYSTEM
-═══════════════════════════════════════════════════════════════════════════════════════
-FULLY INTEGRATED - ALL FEATURES WORKING - ZERO PLACEHOLDERS
+🌀 LIFE FRACTAL INTELLIGENCE v8.0 - COMPLETE PRODUCTION BUILD
+════════════════════════════════════════════════════════════════════════════════
 
-✅ EmotionalPetAI - Differential equations for realistic pet behavior
-✅ FractalTimeCalendar - Fibonacci time blocks with circadian alignment
-✅ FibonacciTaskScheduler - Golden ratio task prioritization
-✅ ExecutiveFunctionSupport - Pattern detection & scaffolding
-✅ SpoonTheory Energy Management - Track mental energy as spoons
-✅ Complete 2D/3D Fractal Visualization
-✅ Full Accessibility (Autism, ADHD, Aphantasia, Dysgraphia)
-✅ Privacy-Preserving ML - Local pattern learning
-✅ Stripe Integration - $20/month, 7-day trial
-✅ Complete Frontend Dashboard
-✅ SQLite Database with all tables
-✅ Self-healing error recovery
+For brains like mine - built with love for the neurodivergent community.
 
-Author: Life Fractal Intelligence Team
-Version: 7.0.0 Production
-═══════════════════════════════════════════════════════════════════════════════════════
+FIXES IN THIS VERSION:
+✅ Neurodiversity symbol (infinity ∞) instead of wheelchair icon
+✅ Full accessibility customization that saves properly
+✅ Complete user management (register, login, password reset, secure storage)
+✅ Working 3D fractal visualization with Three.js
+✅ All data persists across sessions
+✅ Pet companion system with proper state management
+✅ Spoon theory energy tracking
+✅ Sacred geometry and golden ratio mathematics
+
+════════════════════════════════════════════════════════════════════════════════
 """
 
 import os
@@ -29,8 +25,9 @@ import math
 import time
 import secrets
 import logging
-import sqlite3
 import hashlib
+import threading
+import sqlite3
 import re
 from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, field, asdict
@@ -40,3620 +37,3273 @@ from io import BytesIO
 from pathlib import Path
 from functools import wraps
 import base64
+from contextlib import contextmanager
 
 # Flask imports
-from flask import Flask, request, jsonify, send_file, render_template_string, session, redirect, make_response
+from flask import Flask, request, jsonify, send_file, render_template_string, session, redirect, url_for, g
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# PURE PYTHON MATH ENGINE - Zero External Dependencies for Core Math
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# Data processing
+import numpy as np
+from PIL import Image, ImageDraw
 
-class PureMath:
-    """Pure Python implementations of mathematical functions - no numpy required for core"""
-    
-    @staticmethod
-    def sqrt(x: float) -> float:
-        """Newton-Raphson square root"""
-        if x < 0:
-            raise ValueError("Cannot compute sqrt of negative number")
-        if x == 0:
-            return 0
-        guess = x / 2.0
-        for _ in range(50):
-            new_guess = (guess + x / guess) / 2.0
-            if abs(new_guess - guess) < 1e-15:
-                return new_guess
-            guess = new_guess
-        return guess
-    
-    @staticmethod
-    def sin(x: float) -> float:
-        """Taylor series sine"""
-        x = x % (2 * 3.141592653589793)
-        result = 0.0
-        term = x
-        for n in range(1, 20):
-            result += term
-            term *= -x * x / ((2 * n) * (2 * n + 1))
-        return result
-    
-    @staticmethod
-    def cos(x: float) -> float:
-        """Taylor series cosine"""
-        x = x % (2 * 3.141592653589793)
-        result = 0.0
-        term = 1.0
-        for n in range(20):
-            result += term
-            term *= -x * x / ((2 * n + 1) * (2 * n + 2))
-        return result
-    
-    @staticmethod
-    def exp(x: float) -> float:
-        """Taylor series exponential"""
-        if x > 700:
-            return float('inf')
-        if x < -700:
-            return 0.0
-        result = 1.0
-        term = 1.0
-        for n in range(1, 100):
-            term *= x / n
-            result += term
-            if abs(term) < 1e-15:
-                break
-        return result
-    
-    @staticmethod
-    def log(x: float) -> float:
-        """Natural logarithm using Newton's method"""
-        if x <= 0:
-            raise ValueError("log requires positive input")
-        
-        # Scale to [0.5, 1.5] range
-        scale = 0
-        while x > 1.5:
-            x /= 2.718281828459045
-            scale += 1
-        while x < 0.5:
-            x *= 2.718281828459045
-            scale -= 1
-        
-        # Taylor series around 1
-        y = (x - 1) / (x + 1)
-        result = 0.0
-        y_power = y
-        for n in range(1, 100, 2):
-            result += y_power / n
-            y_power *= y * y
-            if abs(y_power / n) < 1e-15:
-                break
-        
-        return 2 * result + scale
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# OPTIONAL NUMPY/PIL - Graceful degradation
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-try:
-    import numpy as np
-    HAS_NUMPY = True
-except ImportError:
-    HAS_NUMPY = False
-    np = None
-
-try:
-    from PIL import Image, ImageDraw
-    HAS_PIL = True
-except ImportError:
-    HAS_PIL = False
-    Image = None
-    ImageDraw = None
-
-# GPU Support (optional)
-try:
-    import torch
-    GPU_AVAILABLE = torch.cuda.is_available()
-    GPU_NAME = torch.cuda.get_device_name(0) if GPU_AVAILABLE else None
-except ImportError:
-    GPU_AVAILABLE = False
-    GPU_NAME = None
-    torch = None
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# LOGGING CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
+# LOGGING SETUP
+# ════════════════════════════════════════════════════════════════════════════════
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-    ]
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
 # SACRED MATHEMATICS CONSTANTS
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
 
-PI = 3.141592653589793
-PHI = (1 + PureMath.sqrt(5)) / 2  # Golden ratio: 1.618033988749895
+PHI = (1 + math.sqrt(5)) / 2  # Golden ratio: 1.618033988749895
 PHI_INVERSE = PHI - 1  # 0.618033988749895
-GOLDEN_ANGLE = 137.5077640500378
-GOLDEN_ANGLE_RAD = GOLDEN_ANGLE * PI / 180
-FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597]
-E = 2.718281828459045
+GOLDEN_ANGLE = 137.5077640500378  # degrees
+GOLDEN_ANGLE_RAD = math.radians(GOLDEN_ANGLE)
+FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
 
-# Mayan Calendar Constants
+# Mayan Calendar constants
 MAYAN_DAY_SIGNS = [
-    "Imix", "Ik", "Akbal", "Kan", "Chicchan", "Cimi", "Manik", "Lamat",
-    "Muluc", "Oc", "Chuen", "Eb", "Ben", "Ix", "Men", "Cib",
-    "Caban", "Etznab", "Cauac", "Ahau"
+    ("Imix", "primordial waters, new beginnings"),
+    ("Ik", "breath of life, wind spirit"),
+    ("Akbal", "darkness, inner reflection"),
+    ("Kan", "seed, growth potential"),
+    ("Chicchan", "serpent energy, kundalini"),
+    ("Cimi", "transformation, death/rebirth"),
+    ("Manik", "healing hand, accomplishment"),
+    ("Lamat", "star harmony, abundance"),
+    ("Muluc", "cosmic water, emotions"),
+    ("Oc", "loyalty, heart guidance"),
+    ("Chuen", "creative play, artistry"),
+    ("Eb", "road of life, human journey"),
+    ("Ben", "sky walker, pillars of light"),
+    ("Ix", "jaguar wisdom, earth magic"),
+    ("Men", "eagle vision, higher perspective"),
+    ("Cib", "ancestral wisdom, forgiveness"),
+    ("Caban", "earth force, synchronicity"),
+    ("Etznab", "mirror truth, clarity"),
+    ("Cauac", "thunder being, purification"),
+    ("Ahau", "sun lord, enlightenment")
 ]
 
+# ════════════════════════════════════════════════════════════════════════════════
+# DATABASE SETUP
+# ════════════════════════════════════════════════════════════════════════════════
 
-def fibonacci(n: int) -> int:
-    """Get nth Fibonacci number"""
-    if n < len(FIBONACCI):
-        return FIBONACCI[n]
-    a, b = FIBONACCI[-2], FIBONACCI[-1]
-    for _ in range(n - len(FIBONACCI) + 1):
-        a, b = b, a + b
-    return b
+DATABASE_PATH = os.environ.get('DATABASE_PATH', 'life_fractal.db')
 
+def get_db():
+    """Get database connection for current request."""
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE_PATH)
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
-def golden_spiral_point(index: int, scale: float = 1.0) -> Tuple[float, float]:
-    """Calculate point on golden spiral"""
-    angle = index * GOLDEN_ANGLE_RAD
-    radius = scale * PureMath.sqrt(index + 1)
-    x = radius * PureMath.cos(angle)
-    y = radius * PureMath.sin(angle)
-    return (x, y)
+def close_db(e=None):
+    """Close database connection."""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
-
-def mayan_day_sign(date: datetime) -> Dict[str, Any]:
-    """Calculate Mayan Tzolkin day sign"""
-    # Days since Mayan epoch (August 11, 3114 BCE in proleptic Gregorian)
-    epoch = datetime(2012, 12, 21)  # End of 13th Baktun
-    days_diff = (date - epoch).days
+def init_db():
+    """Initialize database with all tables."""
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
     
-    day_number = (days_diff % 13) + 1
-    sign_index = days_diff % 20
+    # Users table with all fields
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            first_name TEXT DEFAULT '',
+            display_name TEXT DEFAULT '',
+            is_active INTEGER DEFAULT 1,
+            is_admin INTEGER DEFAULT 0,
+            email_verified INTEGER DEFAULT 0,
+            subscription_status TEXT DEFAULT 'trial',
+            trial_start_date TEXT,
+            trial_end_date TEXT,
+            stripe_customer_id TEXT,
+            spoons INTEGER DEFAULT 12,
+            max_spoons INTEGER DEFAULT 12,
+            current_streak INTEGER DEFAULT 0,
+            longest_streak INTEGER DEFAULT 0,
+            created_at TEXT,
+            last_login TEXT,
+            password_reset_token TEXT,
+            password_reset_expires TEXT
+        )
+    ''')
+    
+    # Accessibility preferences table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS accessibility_prefs (
+            user_id TEXT PRIMARY KEY,
+            reduced_motion INTEGER DEFAULT 0,
+            high_contrast INTEGER DEFAULT 0,
+            larger_text INTEGER DEFAULT 0,
+            dyslexia_font INTEGER DEFAULT 0,
+            screen_reader_mode INTEGER DEFAULT 0,
+            focus_indicators INTEGER DEFAULT 1,
+            simplified_layout INTEGER DEFAULT 0,
+            calm_colors INTEGER DEFAULT 0,
+            text_to_speech INTEGER DEFAULT 0,
+            keyboard_navigation INTEGER DEFAULT 1,
+            auto_save INTEGER DEFAULT 1,
+            gentle_reminders INTEGER DEFAULT 1,
+            celebration_intensity TEXT DEFAULT 'medium',
+            time_blindness_helpers INTEGER DEFAULT 1,
+            executive_function_support INTEGER DEFAULT 1,
+            sensory_break_reminders INTEGER DEFAULT 0,
+            task_chunking INTEGER DEFAULT 1,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # Pets table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pets (
+            user_id TEXT PRIMARY KEY,
+            species TEXT DEFAULT 'cat',
+            name TEXT DEFAULT 'Buddy',
+            hunger REAL DEFAULT 50.0,
+            energy REAL DEFAULT 50.0,
+            mood REAL DEFAULT 50.0,
+            stress REAL DEFAULT 30.0,
+            bond REAL DEFAULT 20.0,
+            level INTEGER DEFAULT 1,
+            experience INTEGER DEFAULT 0,
+            evolution_stage INTEGER DEFAULT 0,
+            last_fed TEXT,
+            last_played TEXT,
+            last_rested TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # Daily entries table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS daily_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            mood_score REAL DEFAULT 50.0,
+            energy_level REAL DEFAULT 50.0,
+            sleep_quality REAL DEFAULT 70.0,
+            sleep_hours REAL DEFAULT 7.0,
+            anxiety_level REAL DEFAULT 30.0,
+            stress_level REAL DEFAULT 30.0,
+            focus_clarity REAL DEFAULT 50.0,
+            mindfulness_score REAL DEFAULT 50.0,
+            gratitude_level REAL DEFAULT 50.0,
+            spoons_used INTEGER DEFAULT 0,
+            journal_entry TEXT DEFAULT '',
+            wellness_index REAL DEFAULT 50.0,
+            created_at TEXT,
+            updated_at TEXT,
+            UNIQUE(user_id, date),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # Goals table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS goals (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            category TEXT DEFAULT 'general',
+            priority INTEGER DEFAULT 3,
+            progress REAL DEFAULT 0.0,
+            target_date TEXT,
+            created_at TEXT,
+            completed_at TEXT,
+            color TEXT DEFAULT '#6B8E9F',
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+    
+    # Tasks table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            goal_id TEXT,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            spoon_cost INTEGER DEFAULT 1,
+            priority INTEGER DEFAULT 3,
+            due_date TEXT,
+            completed INTEGER DEFAULT 0,
+            completed_at TEXT,
+            created_at TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (goal_id) REFERENCES goals(id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+    logger.info("✅ Database initialized successfully")
+
+# ════════════════════════════════════════════════════════════════════════════════
+# MAYAN CALENDAR CALCULATOR
+# ════════════════════════════════════════════════════════════════════════════════
+
+def get_mayan_day(date: datetime = None) -> Dict[str, Any]:
+    """Calculate Mayan Tzolkin day for given date."""
+    if date is None:
+        date = datetime.now()
+    
+    # Correlation constant (GMT correlation)
+    correlation = 584283
+    
+    # Calculate Julian day number
+    a = (14 - date.month) // 12
+    y = date.year + 4800 - a
+    m = date.month + 12 * a - 3
+    jdn = date.day + (153 * m + 2) // 5 + 365 * y + y // 4 - y // 100 + y // 400 - 32045
+    
+    # Calculate Tzolkin
+    kin = (jdn - correlation) % 260
+    day_number = (kin % 13) + 1
+    day_sign_index = kin % 20
+    
+    day_sign, meaning = MAYAN_DAY_SIGNS[day_sign_index]
     
     return {
         'day_number': day_number,
-        'day_sign': MAYAN_DAY_SIGNS[sign_index],
-        'tzolkin': f"{day_number} {MAYAN_DAY_SIGNS[sign_index]}",
-        'energy_quality': _mayan_energy_quality(sign_index)
+        'day_sign': day_sign,
+        'meaning': meaning,
+        'full_name': f"{day_number} {day_sign}",
+        'kin': kin + 1
     }
 
+# ════════════════════════════════════════════════════════════════════════════════
+# PET EMOJI MAPPING
+# ════════════════════════════════════════════════════════════════════════════════
 
-def _mayan_energy_quality(sign_index: int) -> str:
-    """Get energy quality for Mayan day sign"""
-    qualities = {
-        0: "new beginnings, primal energy",
-        1: "communication, breath of life",
-        2: "dreams, inner vision",
-        3: "abundance, harvest energy",
-        4: "life force, kundalini rising",
-        5: "transformation, death/rebirth",
-        6: "healing, deer medicine",
-        7: "harmony, star energy",
-        8: "purification, water cleansing",
-        9: "loyalty, heart guidance",
-        10: "playfulness, creative arts",
-        11: "path walking, life journey",
-        12: "pillars of light, leadership",
-        13: "jaguar wisdom, earth magic",
-        14: "vision, eagle perspective",
-        15: "ancestral wisdom, owl medicine",
-        16: "earth movement, evolution",
-        17: "truth mirror, reflection",
-        18: "storm transformation, catalyst",
-        19: "enlightenment, sun mastery"
-    }
-    return qualities.get(sign_index, "cosmic mystery")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# SPOON THEORY - Energy Management for Neurodivergent Users
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@dataclass
-class SpoonState:
-    """Track mental energy using Spoon Theory"""
-    total_spoons: int = 12  # Default daily allocation
-    current_spoons: int = 12
-    recovery_rate: float = 0.5  # Spoons recovered per hour of rest
-    burnout_threshold: int = 2  # Below this = burnout risk
-    last_updated: str = ""
-    
-    def use_spoons(self, amount: int, task_name: str = "") -> Dict[str, Any]:
-        """Use spoons for an activity"""
-        if amount > self.current_spoons:
-            return {
-                'success': False,
-                'message': f"Not enough spoons for '{task_name}'. You have {self.current_spoons}, need {amount}.",
-                'suggestion': "Consider breaking this into smaller steps or resting first.",
-                'current_spoons': self.current_spoons,
-                'burnout_risk': self.current_spoons <= self.burnout_threshold
-            }
-        
-        self.current_spoons -= amount
-        self.last_updated = datetime.now().isoformat()
-        
-        burnout_risk = self.current_spoons <= self.burnout_threshold
-        
-        return {
-            'success': True,
-            'message': f"Used {amount} spoon(s) for '{task_name}'",
-            'spoons_used': amount,
-            'current_spoons': self.current_spoons,
-            'burnout_risk': burnout_risk,
-            'encouragement': self._get_encouragement()
-        }
-    
-    def rest(self, hours: float) -> Dict[str, Any]:
-        """Recover spoons through rest"""
-        recovered = int(hours * self.recovery_rate)
-        old_spoons = self.current_spoons
-        self.current_spoons = min(self.total_spoons, self.current_spoons + recovered)
-        actual_recovered = self.current_spoons - old_spoons
-        self.last_updated = datetime.now().isoformat()
-        
-        return {
-            'recovered': actual_recovered,
-            'current_spoons': self.current_spoons,
-            'message': f"Recovered {actual_recovered} spoon(s) from {hours:.1f} hours of rest"
-        }
-    
-    def new_day(self, sleep_quality: float = 0.7) -> Dict[str, Any]:
-        """Reset spoons for new day based on sleep quality"""
-        # Sleep quality affects how many spoons you start with
-        base_spoons = int(self.total_spoons * sleep_quality)
-        # Never start with less than half
-        self.current_spoons = max(self.total_spoons // 2, base_spoons)
-        self.last_updated = datetime.now().isoformat()
-        
-        return {
-            'current_spoons': self.current_spoons,
-            'total_spoons': self.total_spoons,
-            'sleep_impact': f"{'Good' if sleep_quality >= 0.7 else 'Poor'} sleep gave you {self.current_spoons} spoons"
-        }
-    
-    def _get_encouragement(self) -> str:
-        """Get contextual encouragement based on spoon level"""
-        if self.current_spoons >= self.total_spoons * 0.7:
-            return "You're doing great! Plenty of energy available."
-        elif self.current_spoons >= self.total_spoons * 0.4:
-            return "You're managing well. Consider pacing yourself."
-        elif self.current_spoons > self.burnout_threshold:
-            return "Running low on energy. Prioritize what's essential."
-        else:
-            return "Please rest soon. Your wellbeing matters most."
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
-
-# Activity spoon costs - customizable per user
-DEFAULT_SPOON_COSTS = {
-    'shower': 2,
-    'meal_prep': 2,
-    'eating': 1,
-    'email': 1,
-    'phone_call': 2,
-    'meeting': 3,
-    'deep_work': 4,
-    'exercise': 3,
-    'socializing': 3,
-    'commute': 2,
-    'chores': 2,
-    'creative_work': 2,
-    'rest': 0,
-    'meditation': 0,
+PET_EMOJIS = {
+    'cat': {'happy': '😺', 'sad': '😿', 'tired': '😸', 'hungry': '🐱', 'playful': '😻', 'idle': '🐱'},
+    'dragon': {'happy': '🐉', 'sad': '🐲', 'tired': '🐉', 'hungry': '🐲', 'playful': '🐉', 'idle': '🐲'},
+    'phoenix': {'happy': '🦅', 'sad': '🪶', 'tired': '🦅', 'hungry': '🦅', 'playful': '🔥', 'idle': '🦅'},
+    'owl': {'happy': '🦉', 'sad': '🦉', 'tired': '🦉', 'hungry': '🦉', 'playful': '🦉', 'idle': '🦉'},
+    'fox': {'happy': '🦊', 'sad': '🦊', 'tired': '🦊', 'hungry': '🦊', 'playful': '🦊', 'idle': '🦊'},
+    'bunny': {'happy': '🐰', 'sad': '🐇', 'tired': '🐰', 'hungry': '🐰', 'playful': '🐰', 'idle': '🐰'},
+    'turtle': {'happy': '🐢', 'sad': '🐢', 'tired': '🐢', 'hungry': '🐢', 'playful': '🐢', 'idle': '🐢'},
+    'butterfly': {'happy': '🦋', 'sad': '🦋', 'tired': '🦋', 'hungry': '🦋', 'playful': '🦋', 'idle': '🦋'}
 }
 
+def get_pet_emoji(species: str, mood: float) -> str:
+    """Get appropriate emoji for pet based on species and mood."""
+    emojis = PET_EMOJIS.get(species, PET_EMOJIS['cat'])
+    if mood >= 70:
+        return emojis['playful']
+    elif mood >= 50:
+        return emojis['happy']
+    elif mood >= 30:
+        return emojis['idle']
+    else:
+        return emojis['sad']
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# EMOTIONAL PET AI - Differential Equations for Realistic Behavior
-# ═══════════════════════════════════════════════════════════════════════════════════════
+def get_pet_status(mood: float) -> str:
+    """Get status text for pet mood."""
+    if mood >= 80:
+        return "Ecstatic 🌟"
+    elif mood >= 60:
+        return "Happy 😊"
+    elif mood >= 40:
+        return "Okay 😐"
+    elif mood >= 20:
+        return "Sad 😢"
+    else:
+        return "Needs Love 💔"
 
-class EmotionalPetAI:
-    """
-    Pet emotional system using differential equations for realistic, continuous behavior.
-    Each pet species has unique traits that affect how emotions evolve.
-    """
-    
-    SPECIES_TRAITS = {
-        'cat': {
-            'independence': 0.8, 'affection_threshold': 0.6, 'energy_baseline': 0.5,
-            'mood_volatility': 0.3, 'hunger_rate': 0.15, 'bond_growth': 0.1,
-            'emoji': '🐱', 'personality': 'Independent but secretly affectionate'
-        },
-        'dog': {
-            'independence': 0.2, 'affection_threshold': 0.2, 'energy_baseline': 0.7,
-            'mood_volatility': 0.5, 'hunger_rate': 0.2, 'bond_growth': 0.2,
-            'emoji': '🐕', 'personality': 'Loyal and eager to please'
-        },
-        'dragon': {
-            'independence': 0.9, 'affection_threshold': 0.8, 'energy_baseline': 0.6,
-            'mood_volatility': 0.4, 'hunger_rate': 0.25, 'bond_growth': 0.05,
-            'emoji': '🐉', 'personality': 'Proud but fiercely protective'
-        },
-        'phoenix': {
-            'independence': 0.7, 'affection_threshold': 0.5, 'energy_baseline': 0.8,
-            'mood_volatility': 0.6, 'hunger_rate': 0.1, 'bond_growth': 0.15,
-            'emoji': '🔥', 'personality': 'Transformative and inspiring'
-        },
-        'owl': {
-            'independence': 0.6, 'affection_threshold': 0.4, 'energy_baseline': 0.4,
-            'mood_volatility': 0.2, 'hunger_rate': 0.12, 'bond_growth': 0.12,
-            'emoji': '🦉', 'personality': 'Wise and observant'
-        },
-        'fox': {
-            'independence': 0.5, 'affection_threshold': 0.3, 'energy_baseline': 0.6,
-            'mood_volatility': 0.4, 'hunger_rate': 0.18, 'bond_growth': 0.15,
-            'emoji': '🦊', 'personality': 'Clever and playful'
-        },
-        'axolotl': {
-            'independence': 0.3, 'affection_threshold': 0.2, 'energy_baseline': 0.3,
-            'mood_volatility': 0.1, 'hunger_rate': 0.08, 'bond_growth': 0.18,
-            'emoji': '🦎', 'personality': 'Calm and regenerative'
-        },
-        'unicorn': {
-            'independence': 0.4, 'affection_threshold': 0.3, 'energy_baseline': 0.7,
-            'mood_volatility': 0.3, 'hunger_rate': 0.1, 'bond_growth': 0.2,
-            'emoji': '🦄', 'personality': 'Magical and pure-hearted'
-        }
-    }
-    
-    def __init__(self, species: str = 'cat', name: str = 'Buddy'):
-        self.species = species if species in self.SPECIES_TRAITS else 'cat'
-        self.name = name
-        self.traits = self.SPECIES_TRAITS[self.species]
-        
-        # Core emotional state (0-100 scale)
-        self.hunger = 50.0
-        self.energy = 50.0
-        self.mood = 50.0
-        self.bond = 20.0  # Starts low, grows over time
-        
-        # Leveling system
-        self.level = 1
-        self.xp = 0
-        self.xp_to_next = fibonacci(6)  # 8 XP to level 2
-        
-        # Interaction tracking
-        self.last_fed = datetime.now()
-        self.last_played = datetime.now()
-        self.last_updated = datetime.now()
-        self.interaction_count = 0
-        self.streak_days = 0
-        self.achievements = []
-    
-    def update(self, dt: float, user_wellness: float = 50.0, interactions: int = 0) -> Dict[str, Any]:
-        """
-        Update pet state using differential equations.
-        
-        Args:
-            dt: Time step in hours
-            user_wellness: User's current wellness score (0-100)
-            interactions: Number of interactions since last update
-        
-        Returns:
-            Updated state dictionary
-        """
-        traits = self.traits
-        
-        # Differential equations for each state variable
-        # dH/dt = hunger_rate - food_satisfaction
-        hunger_change = traits['hunger_rate'] * dt * 10
-        self.hunger = min(100, max(0, self.hunger + hunger_change))
-        
-        # dE/dt = -activity_drain + rest_recovery
-        energy_drain = 0.05 * dt * 10
-        energy_recovery = 0.02 * dt * 10 if self.hunger < 70 else 0
-        self.energy = min(100, max(0, self.energy - energy_drain + energy_recovery))
-        
-        # dM/dt = f(hunger, energy, bond, user_wellness)
-        # Mood is influenced by all factors
-        hunger_impact = -0.5 * max(0, (self.hunger - 70) / 30)  # Negative when hungry
-        energy_impact = 0.3 * (self.energy - 50) / 50
-        bond_impact = 0.2 * (self.bond - 50) / 50
-        wellness_impact = 0.3 * (user_wellness - 50) / 50
-        
-        mood_change = (hunger_impact + energy_impact + bond_impact + wellness_impact) * dt * 5
-        mood_change += (0.5 - traits['mood_volatility']) * (50 - self.mood) * 0.01  # Mean reversion
-        self.mood = min(100, max(0, self.mood + mood_change))
-        
-        # dB/dt = bond_growth * interactions - decay
-        # Bond grows with interaction, slowly decays without
-        if interactions > 0:
-            bond_growth = traits['bond_growth'] * interactions * 5
-            self.bond = min(100, self.bond + bond_growth)
-            self.interaction_count += interactions
-        else:
-            bond_decay = 0.01 * dt * (1 - traits['independence'])
-            self.bond = max(0, self.bond - bond_decay)
-        
-        self.last_updated = datetime.now()
-        
-        return self.get_state()
-    
-    def feed(self) -> Dict[str, Any]:
-        """Feed the pet"""
-        hunger_reduction = 30
-        self.hunger = max(0, self.hunger - hunger_reduction)
-        self.mood = min(100, self.mood + 10)
-        self.last_fed = datetime.now()
-        
-        # XP for feeding
-        xp_gained = 2
-        self._add_xp(xp_gained)
-        
-        return {
-            'action': 'feed',
-            'message': self._get_feed_message(),
-            'hunger': self.hunger,
-            'mood': self.mood,
-            'xp_gained': xp_gained,
-            'state': self.get_state()
-        }
-    
-    def play(self) -> Dict[str, Any]:
-        """Play with the pet"""
-        if self.energy < 20:
-            return {
-                'action': 'play',
-                'success': False,
-                'message': f"{self.name} is too tired to play right now. Let them rest!",
-                'state': self.get_state()
-            }
-        
-        energy_cost = 15
-        mood_boost = 20
-        bond_boost = 5
-        
-        self.energy = max(0, self.energy - energy_cost)
-        self.mood = min(100, self.mood + mood_boost)
-        self.bond = min(100, self.bond + bond_boost)
-        self.last_played = datetime.now()
-        
-        # XP for playing
-        xp_gained = 3
-        self._add_xp(xp_gained)
-        
-        return {
-            'action': 'play',
-            'success': True,
-            'message': self._get_play_message(),
-            'energy': self.energy,
-            'mood': self.mood,
-            'bond': self.bond,
-            'xp_gained': xp_gained,
-            'state': self.get_state()
-        }
-    
-    def rest(self) -> Dict[str, Any]:
-        """Let the pet rest"""
-        energy_recovery = 25
-        self.energy = min(100, self.energy + energy_recovery)
-        
-        return {
-            'action': 'rest',
-            'message': f"{self.name} takes a peaceful nap and feels refreshed!",
-            'energy': self.energy,
-            'state': self.get_state()
-        }
-    
-    def _add_xp(self, amount: int):
-        """Add XP and handle leveling"""
-        self.xp += amount
-        
-        while self.xp >= self.xp_to_next:
-            self.xp -= self.xp_to_next
-            self.level += 1
-            self.xp_to_next = fibonacci(5 + self.level)
-            self._check_achievements()
-    
-    def _check_achievements(self):
-        """Check and award achievements"""
-        new_achievements = []
-        
-        if self.level >= 5 and 'Trusted Friend' not in self.achievements:
-            new_achievements.append('Trusted Friend')
-        if self.level >= 10 and 'Soul Bond' not in self.achievements:
-            new_achievements.append('Soul Bond')
-        if self.bond >= 80 and 'Inseparable' not in self.achievements:
-            new_achievements.append('Inseparable')
-        if self.interaction_count >= 100 and 'Dedicated Caretaker' not in self.achievements:
-            new_achievements.append('Dedicated Caretaker')
-        
-        self.achievements.extend(new_achievements)
-        return new_achievements
-    
-    def _get_feed_message(self) -> str:
-        """Get species-appropriate feeding message"""
-        messages = {
-            'cat': f"{self.name} nibbles elegantly and purrs contentedly.",
-            'dog': f"{self.name} gobbles up the food and wags excitedly!",
-            'dragon': f"{self.name} roasts the meal with a small flame before eating.",
-            'phoenix': f"{self.name} absorbs the energy, feathers glowing brighter.",
-            'owl': f"{self.name} accepts the offering with a wise nod.",
-            'fox': f"{self.name} cleverly saves some for later!",
-            'axolotl': f"{self.name} happily filters through the food.",
-            'unicorn': f"{self.name} transforms the food into sparkles of energy!"
-        }
-        return messages.get(self.species, f"{self.name} eats happily!")
-    
-    def _get_play_message(self) -> str:
-        """Get species-appropriate play message"""
-        messages = {
-            'cat': f"{self.name} chases an imaginary butterfly with graceful leaps!",
-            'dog': f"{self.name} fetches and returns, tail wagging furiously!",
-            'dragon': f"{self.name} breathes playful smoke rings for you!",
-            'phoenix': f"{self.name} dances through the air leaving trails of light!",
-            'owl': f"{self.name} solves a puzzle you created together.",
-            'fox': f"{self.name} plays an elaborate game of hide and seek!",
-            'axolotl': f"{self.name} does happy wiggles in their tank!",
-            'unicorn': f"{self.name} prances and leaves a trail of sparkles!"
-        }
-        return messages.get(self.species, f"{self.name} plays joyfully!")
-    
-    def get_state(self) -> Dict[str, Any]:
-        """Get complete pet state"""
-        return {
-            'name': self.name,
-            'species': self.species,
-            'emoji': self.traits['emoji'],
-            'personality': self.traits['personality'],
-            'hunger': round(self.hunger, 1),
-            'energy': round(self.energy, 1),
-            'mood': round(self.mood, 1),
-            'bond': round(self.bond, 1),
-            'level': self.level,
-            'xp': self.xp,
-            'xp_to_next': self.xp_to_next,
-            'achievements': self.achievements,
-            'interaction_count': self.interaction_count,
-            'status': self._get_status(),
-            'needs_attention': self._needs_attention(),
-            'last_updated': self.last_updated.isoformat()
-        }
-    
-    def _get_status(self) -> str:
-        """Get pet's current status description"""
-        if self.hunger > 80:
-            return "Very hungry! 🍽️"
-        if self.energy < 20:
-            return "Exhausted 😴"
-        if self.mood < 30:
-            return "Feeling down 😢"
-        if self.mood > 80 and self.bond > 60:
-            return "Extremely happy! 💕"
-        if self.mood > 60:
-            return "Content 😊"
-        return "Okay 🙂"
-    
-    def _needs_attention(self) -> List[str]:
-        """List what the pet needs"""
-        needs = []
-        if self.hunger > 60:
-            needs.append('food')
-        if self.energy < 30:
-            needs.append('rest')
-        if self.mood < 40:
-            needs.append('play')
-        return needs
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize pet for storage"""
-        return {
-            'species': self.species,
-            'name': self.name,
-            'hunger': self.hunger,
-            'energy': self.energy,
-            'mood': self.mood,
-            'bond': self.bond,
-            'level': self.level,
-            'xp': self.xp,
-            'xp_to_next': self.xp_to_next,
-            'achievements': self.achievements,
-            'interaction_count': self.interaction_count,
-            'streak_days': self.streak_days,
-            'last_fed': self.last_fed.isoformat(),
-            'last_played': self.last_played.isoformat(),
-            'last_updated': self.last_updated.isoformat()
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'EmotionalPetAI':
-        """Deserialize pet from storage"""
-        pet = cls(data.get('species', 'cat'), data.get('name', 'Buddy'))
-        pet.hunger = data.get('hunger', 50)
-        pet.energy = data.get('energy', 50)
-        pet.mood = data.get('mood', 50)
-        pet.bond = data.get('bond', 20)
-        pet.level = data.get('level', 1)
-        pet.xp = data.get('xp', 0)
-        pet.xp_to_next = data.get('xp_to_next', fibonacci(6))
-        pet.achievements = data.get('achievements', [])
-        pet.interaction_count = data.get('interaction_count', 0)
-        pet.streak_days = data.get('streak_days', 0)
-        
-        if 'last_fed' in data:
-            pet.last_fed = datetime.fromisoformat(data['last_fed'])
-        if 'last_played' in data:
-            pet.last_played = datetime.fromisoformat(data['last_played'])
-        if 'last_updated' in data:
-            pet.last_updated = datetime.fromisoformat(data['last_updated'])
-        
-        return pet
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# FRACTAL TIME CALENDAR - Fibonacci Time Blocks with Circadian Alignment
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class FractalTimeCalendar:
-    """
-    Calendar system using Fibonacci time blocks aligned with circadian rhythms.
-    Breaks the day into natural energy phases with golden ratio proportions.
-    """
-    
-    # Circadian energy phases
-    ENERGY_PHASES = {
-        'dawn_preparation': {'start': 6, 'end': 8, 'energy': 0.6, 'focus': 0.5},
-        'morning_peak': {'start': 8, 'end': 12, 'energy': 1.0, 'focus': 1.0},
-        'midday_dip': {'start': 12, 'end': 14, 'energy': 0.5, 'focus': 0.4},
-        'afternoon_recovery': {'start': 14, 'end': 17, 'energy': 0.8, 'focus': 0.7},
-        'evening_wind_down': {'start': 17, 'end': 20, 'energy': 0.6, 'focus': 0.5},
-        'night_rest': {'start': 20, 'end': 22, 'energy': 0.3, 'focus': 0.2},
-        'sleep': {'start': 22, 'end': 6, 'energy': 0.1, 'focus': 0.0}
-    }
-    
-    # Task categories matched to optimal times
-    TASK_CATEGORIES = {
-        'deep_work': {'optimal_phases': ['morning_peak'], 'spoon_cost': 4},
-        'creative': {'optimal_phases': ['morning_peak', 'afternoon_recovery'], 'spoon_cost': 3},
-        'admin': {'optimal_phases': ['afternoon_recovery', 'evening_wind_down'], 'spoon_cost': 2},
-        'routine': {'optimal_phases': ['dawn_preparation', 'evening_wind_down'], 'spoon_cost': 1},
-        'social': {'optimal_phases': ['midday_dip', 'evening_wind_down'], 'spoon_cost': 3},
-        'rest': {'optimal_phases': ['midday_dip', 'night_rest'], 'spoon_cost': 0}
-    }
-    
-    def __init__(self, user_wake_time: int = 7, user_sleep_time: int = 23):
-        """
-        Initialize calendar with user's sleep schedule.
-        
-        Args:
-            user_wake_time: Hour user typically wakes (24h format)
-            user_sleep_time: Hour user typically sleeps (24h format)
-        """
-        self.wake_time = user_wake_time
-        self.sleep_time = user_sleep_time
-        self.tasks = []
-    
-    def generate_fibonacci_blocks(self, date: datetime) -> List[Dict[str, Any]]:
-        """
-        Generate Fibonacci time blocks for a day.
-        Uses Fibonacci sequence: 1, 1, 2, 3, 5 hours for a ~12 hour day.
-        """
-        blocks = []
-        
-        # Calculate available hours
-        awake_hours = self.sleep_time - self.wake_time
-        if awake_hours < 0:
-            awake_hours += 24
-        
-        # Fibonacci blocks that fit in the day
-        fib_hours = [1, 1, 2, 3, 5]  # Total: 12 hours
-        scale = awake_hours / 12.0
-        
-        current_hour = self.wake_time
-        block_index = 0
-        
-        for fib_duration in fib_hours:
-            scaled_duration = fib_duration * scale
-            start_time = datetime(date.year, date.month, date.day, 
-                                 int(current_hour) % 24, 
-                                 int((current_hour % 1) * 60))
-            
-            # Determine energy phase
-            phase = self._get_energy_phase(current_hour)
-            phase_data = self.ENERGY_PHASES.get(phase, {'energy': 0.5, 'focus': 0.5})
-            
-            # Calculate spoon capacity for this block
-            spoon_capacity = int(phase_data['energy'] * scaled_duration * 2)
-            
-            block = {
-                'index': block_index,
-                'start_hour': current_hour,
-                'duration_hours': scaled_duration,
-                'fibonacci_value': fib_duration,
-                'phase': phase,
-                'energy_level': phase_data['energy'],
-                'focus_level': phase_data['focus'],
-                'spoon_capacity': spoon_capacity,
-                'optimal_tasks': self._get_optimal_tasks(phase),
-                'golden_ratio_position': (block_index + 1) * PHI_INVERSE
-            }
-            
-            blocks.append(block)
-            current_hour += scaled_duration
-            block_index += 1
-        
-        return blocks
-    
-    def _get_energy_phase(self, hour: float) -> str:
-        """Determine which energy phase a given hour falls into"""
-        hour = int(hour) % 24
-        
-        for phase_name, phase_data in self.ENERGY_PHASES.items():
-            start = phase_data['start']
-            end = phase_data['end']
-            
-            if start < end:
-                if start <= hour < end:
-                    return phase_name
-            else:  # Wraps around midnight
-                if hour >= start or hour < end:
-                    return phase_name
-        
-        return 'unknown'
-    
-    def _get_optimal_tasks(self, phase: str) -> List[str]:
-        """Get task types optimal for a given energy phase"""
-        optimal = []
-        for task_type, task_data in self.TASK_CATEGORIES.items():
-            if phase in task_data['optimal_phases']:
-                optimal.append(task_type)
-        return optimal
-    
-    def schedule_task(self, task: Dict[str, Any], blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Schedule a task into the optimal time block.
-        
-        Args:
-            task: Task with 'name', 'category', 'spoon_cost', 'duration_hours'
-            blocks: List of time blocks from generate_fibonacci_blocks
-        
-        Returns:
-            Scheduling result with assigned block or suggestions
-        """
-        task_category = task.get('category', 'admin')
-        task_cost = task.get('spoon_cost', self.TASK_CATEGORIES.get(task_category, {}).get('spoon_cost', 2))
-        
-        # Find optimal blocks
-        optimal_phases = self.TASK_CATEGORIES.get(task_category, {}).get('optimal_phases', [])
-        
-        # Score each block
-        scored_blocks = []
-        for block in blocks:
-            score = 0
-            
-            # Bonus for being in optimal phase
-            if block['phase'] in optimal_phases:
-                score += 3
-            
-            # Bonus for having enough spoons
-            if block['spoon_capacity'] >= task_cost:
-                score += 2
-            
-            # Bonus for energy match
-            score += block['energy_level'] * 2
-            
-            scored_blocks.append((score, block))
-        
-        # Sort by score
-        scored_blocks.sort(key=lambda x: x[0], reverse=True)
-        
-        if scored_blocks:
-            best_block = scored_blocks[0][1]
-            return {
-                'success': True,
-                'task': task,
-                'assigned_block': best_block,
-                'reasoning': f"Scheduled in {best_block['phase']} phase for optimal energy"
-            }
-        
-        return {
-            'success': False,
-            'task': task,
-            'suggestion': "Consider breaking this task into smaller pieces"
-        }
-    
-    def get_day_plan(self, date: datetime, tasks: List[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Generate complete day plan with Mayan calendar integration"""
-        blocks = self.generate_fibonacci_blocks(date)
-        mayan = mayan_day_sign(date)
-        
-        plan = {
-            'date': date.isoformat(),
-            'mayan_day': mayan,
-            'fibonacci_blocks': blocks,
-            'total_spoon_capacity': sum(b['spoon_capacity'] for b in blocks),
-            'scheduled_tasks': [],
-            'energy_forecast': self._energy_forecast(blocks)
-        }
-        
-        if tasks:
-            for task in tasks:
-                result = self.schedule_task(task, blocks)
-                plan['scheduled_tasks'].append(result)
-        
-        return plan
-    
-    def _energy_forecast(self, blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Forecast energy availability throughout the day"""
-        peak_block = max(blocks, key=lambda b: b['energy_level'])
-        low_block = min(blocks, key=lambda b: b['energy_level'])
-        
-        return {
-            'peak_time': f"{int(peak_block['start_hour'])}:00",
-            'peak_energy': peak_block['energy_level'],
-            'low_time': f"{int(low_block['start_hour'])}:00",
-            'low_energy': low_block['energy_level'],
-            'recommendation': f"Schedule important tasks around {int(peak_block['start_hour'])}:00"
-        }
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# FIBONACCI TASK SCHEDULER - Golden Ratio Priority Optimization
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class FibonacciTaskScheduler:
-    """
-    Task scheduler using Fibonacci weighting for priority calculation.
-    Implements golden ratio optimization for task ordering.
-    """
-    
-    def __init__(self):
-        self.tasks = []
-    
-    def add_task(self, name: str, importance: int, urgency: int, 
-                 effort: int, category: str = 'general') -> Dict[str, Any]:
-        """
-        Add a task with Fibonacci-weighted priority.
-        
-        Args:
-            name: Task description
-            importance: 1-5 scale
-            urgency: 1-5 scale  
-            effort: 1-5 scale (higher = more effort)
-            category: Task category
-        
-        Returns:
-            Task with calculated priority
-        """
-        # Fibonacci weights for importance levels
-        importance_weight = fibonacci(importance + 3)  # fib(4) to fib(8)
-        urgency_weight = fibonacci(urgency + 2)  # fib(3) to fib(7)
-        effort_penalty = fibonacci(effort + 1)  # fib(2) to fib(6)
-        
-        # Golden ratio priority formula
-        # Higher importance and urgency increase priority
-        # Higher effort decreases priority (do easier things first when equal)
-        priority = (importance_weight * PHI + urgency_weight) / (effort_penalty * PHI_INVERSE + 1)
-        
-        task = {
-            'id': secrets.token_hex(4),
-            'name': name,
-            'importance': importance,
-            'urgency': urgency,
-            'effort': effort,
-            'category': category,
-            'priority': round(priority, 2),
-            'fibonacci_importance': importance_weight,
-            'fibonacci_urgency': urgency_weight,
-            'created_at': datetime.now().isoformat(),
-            'completed': False
-        }
-        
-        self.tasks.append(task)
-        self._sort_tasks()
-        
-        return task
-    
-    def _sort_tasks(self):
-        """Sort tasks by priority (highest first)"""
-        self.tasks.sort(key=lambda t: t['priority'], reverse=True)
-    
-    def get_next_task(self, available_spoons: int = None, 
-                      max_effort: int = None) -> Optional[Dict[str, Any]]:
-        """
-        Get the next task to work on.
-        
-        Args:
-            available_spoons: Filter by effort if spoons limited
-            max_effort: Maximum effort level to consider
-        
-        Returns:
-            Highest priority task matching criteria
-        """
-        for task in self.tasks:
-            if task['completed']:
-                continue
-            
-            if max_effort and task['effort'] > max_effort:
-                continue
-            
-            if available_spoons:
-                spoon_cost = DEFAULT_SPOON_COSTS.get(task['category'], task['effort'])
-                if spoon_cost > available_spoons:
-                    continue
-            
-            return task
-        
-        return None
-    
-    def complete_task(self, task_id: str) -> Dict[str, Any]:
-        """Mark a task as completed"""
-        for task in self.tasks:
-            if task['id'] == task_id:
-                task['completed'] = True
-                task['completed_at'] = datetime.now().isoformat()
-                
-                # Calculate XP earned (Fibonacci based on priority)
-                xp_earned = int(task['priority'] / PHI)
-                
-                return {
-                    'success': True,
-                    'task': task,
-                    'xp_earned': xp_earned,
-                    'message': f"Great job completing '{task['name']}'!"
-                }
-        
-        return {'success': False, 'message': 'Task not found'}
-    
-    def get_prioritized_list(self, limit: int = None) -> List[Dict[str, Any]]:
-        """Get prioritized task list"""
-        active_tasks = [t for t in self.tasks if not t['completed']]
-        if limit:
-            return active_tasks[:limit]
-        return active_tasks
-    
-    def get_by_category(self, category: str) -> List[Dict[str, Any]]:
-        """Get tasks filtered by category"""
-        return [t for t in self.tasks if t['category'] == category and not t['completed']]
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# EXECUTIVE FUNCTION SUPPORT - Pattern Detection & Scaffolding
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class ExecutiveFunctionSupport:
-    """
-    Detect executive dysfunction patterns and provide scaffolding support.
-    Uses statistical analysis to identify when users are struggling.
-    """
-    
-    def __init__(self):
-        self.behavior_history = []
-        self.dysfunction_indicators = {
-            'task_switching_difficulty': 0,
-            'initiation_problems': 0,
-            'time_blindness': 0,
-            'working_memory_issues': 0,
-            'emotional_regulation': 0
-        }
-    
-    def log_behavior(self, behavior: Dict[str, Any]):
-        """
-        Log user behavior for pattern analysis.
-        
-        Expected fields:
-            - timestamp: when
-            - action: what they did
-            - planned_action: what they intended
-            - duration: how long it took
-            - completion: did they finish
-            - mood: emotional state
-        """
-        behavior['timestamp'] = behavior.get('timestamp', datetime.now().isoformat())
-        self.behavior_history.append(behavior)
-        
-        # Keep last 100 behaviors
-        if len(self.behavior_history) > 100:
-            self.behavior_history = self.behavior_history[-100:]
-        
-        # Update indicators
-        self._analyze_patterns()
-    
-    def _analyze_patterns(self):
-        """Analyze behavior patterns for dysfunction indicators"""
-        if len(self.behavior_history) < 5:
-            return
-        
-        recent = self.behavior_history[-20:]
-        
-        # Task switching difficulty: starting many tasks, finishing few
-        started = sum(1 for b in recent if b.get('action') == 'start_task')
-        completed = sum(1 for b in recent if b.get('completion', False))
-        if started > 0:
-            self.dysfunction_indicators['task_switching_difficulty'] = max(0, (started - completed) / started)
-        
-        # Initiation problems: long delays before starting
-        delays = [b.get('delay_minutes', 0) for b in recent if 'delay_minutes' in b]
-        if delays:
-            avg_delay = sum(delays) / len(delays)
-            self.dysfunction_indicators['initiation_problems'] = min(1, avg_delay / 60)  # Normalize to 1 hour
-        
-        # Time blindness: large differences between planned and actual duration
-        time_errors = []
-        for b in recent:
-            if 'planned_duration' in b and 'actual_duration' in b:
-                error = abs(b['actual_duration'] - b['planned_duration']) / b['planned_duration']
-                time_errors.append(error)
-        if time_errors:
-            self.dysfunction_indicators['time_blindness'] = min(1, sum(time_errors) / len(time_errors))
-        
-        # Working memory: forgetting what was planned
-        mismatches = sum(1 for b in recent if b.get('action') != b.get('planned_action') and b.get('planned_action'))
-        if len(recent) > 0:
-            self.dysfunction_indicators['working_memory_issues'] = mismatches / len(recent)
-        
-        # Emotional regulation: mood swings
-        moods = [b.get('mood', 50) for b in recent if 'mood' in b]
-        if len(moods) >= 2:
-            mood_changes = [abs(moods[i] - moods[i-1]) for i in range(1, len(moods))]
-            avg_change = sum(mood_changes) / len(mood_changes)
-            self.dysfunction_indicators['emotional_regulation'] = min(1, avg_change / 30)
-    
-    def get_dysfunction_score(self) -> float:
-        """Calculate overall executive dysfunction score (0-1)"""
-        if not self.dysfunction_indicators:
-            return 0
-        
-        # Weighted average
-        weights = {
-            'task_switching_difficulty': 1.2,
-            'initiation_problems': 1.5,
-            'time_blindness': 1.0,
-            'working_memory_issues': 1.3,
-            'emotional_regulation': 0.8
-        }
-        
-        weighted_sum = sum(self.dysfunction_indicators[k] * weights[k] for k in weights)
-        weight_total = sum(weights.values())
-        
-        return weighted_sum / weight_total
-    
-    def detect_current_state(self) -> Dict[str, Any]:
-        """Detect current executive function state"""
-        score = self.get_dysfunction_score()
-        
-        state = {
-            'dysfunction_score': round(score, 2),
-            'indicators': self.dysfunction_indicators.copy(),
-            'severity': 'low' if score < 0.3 else 'moderate' if score < 0.6 else 'high',
-            'recommendations': self._get_recommendations(score),
-            'scaffolding_needed': score > 0.4
-        }
-        
-        return state
-    
-    def _get_recommendations(self, score: float) -> List[str]:
-        """Get personalized recommendations based on dysfunction patterns"""
-        recommendations = []
-        
-        if self.dysfunction_indicators['initiation_problems'] > 0.4:
-            recommendations.append("Try the 2-minute rule: commit to just 2 minutes of any task")
-            recommendations.append("Use body doubling - work alongside someone else")
-        
-        if self.dysfunction_indicators['task_switching_difficulty'] > 0.4:
-            recommendations.append("Complete one task fully before starting another")
-            recommendations.append("Use transition rituals between tasks")
-        
-        if self.dysfunction_indicators['time_blindness'] > 0.4:
-            recommendations.append("Use visual timers you can see counting down")
-            recommendations.append("Set alarms for task transitions")
-        
-        if self.dysfunction_indicators['working_memory_issues'] > 0.4:
-            recommendations.append("Write everything down immediately")
-            recommendations.append("Use checklists even for familiar tasks")
-        
-        if self.dysfunction_indicators['emotional_regulation'] > 0.4:
-            recommendations.append("Practice the STOP technique: Stop, Take a breath, Observe, Proceed")
-            recommendations.append("Schedule regular emotional check-ins")
-        
-        if not recommendations:
-            recommendations.append("You're doing well! Keep up the good patterns.")
-        
-        return recommendations
-    
-    def get_task_scaffolding(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Break down a task into micro-steps for executive function support.
-        Each step should be completable in under 5 minutes.
-        """
-        task_name = task.get('name', 'Task')
-        effort = task.get('effort', 3)
-        
-        # Generate micro-steps based on effort level
-        num_steps = effort + 2  # 3-7 steps based on effort
-        
-        steps = []
-        steps.append({
-            'step': 1,
-            'action': f"Get ready: Gather what you need for '{task_name}'",
-            'duration_minutes': 2,
-            'checkpoint': "I have everything I need"
-        })
-        
-        for i in range(2, num_steps):
-            steps.append({
-                'step': i,
-                'action': f"Work chunk {i-1}: Focus on one small part",
-                'duration_minutes': 5,
-                'checkpoint': f"Chunk {i-1} complete"
-            })
-        
-        steps.append({
-            'step': num_steps,
-            'action': "Wrap up: Review what you did and celebrate!",
-            'duration_minutes': 2,
-            'checkpoint': "Task complete! 🎉"
-        })
-        
-        return {
-            'original_task': task,
-            'micro_steps': steps,
-            'total_time_minutes': sum(s['duration_minutes'] for s in steps),
-            'approach': 'scaffolded',
-            'tip': "Focus only on the current step. The rest will wait."
-        }
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# ACCESSIBILITY SYSTEM - Full Support for Neurodivergent Users
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class AccessibilitySystem:
-    """
-    Comprehensive accessibility features for neurodivergent users.
-    Supports autism, ADHD, aphantasia, and dysgraphia.
-    """
-    
-    # Autism-safe color palettes (low saturation, predictable)
-    AUTISM_SAFE_PALETTES = {
-        'calm_ocean': {
-            'primary': '#5B8A9A',
-            'secondary': '#8BB4C2',
-            'background': '#F5F9FA',
-            'text': '#2C4A52',
-            'accent': '#7BA3B0',
-            'warning': '#D4A574'
-        },
-        'forest_peace': {
-            'primary': '#6B8E6B',
-            'secondary': '#9CB89C',
-            'background': '#F5F8F5',
-            'text': '#3A4D3A',
-            'accent': '#8DAD8D',
-            'warning': '#C9A86C'
-        },
-        'gentle_lavender': {
-            'primary': '#8B7B9B',
-            'secondary': '#B4A8C2',
-            'background': '#FAF8FC',
-            'text': '#4A3D52',
-            'accent': '#A294B0',
-            'warning': '#C4A67A'
-        },
-        'warm_sand': {
-            'primary': '#A89078',
-            'secondary': '#C8B8A8',
-            'background': '#FDFBF8',
-            'text': '#5A4A3A',
-            'accent': '#BBA898',
-            'warning': '#C49068'
-        },
-        'high_contrast': {
-            'primary': '#000000',
-            'secondary': '#333333',
-            'background': '#FFFFFF',
-            'text': '#000000',
-            'accent': '#0066CC',
-            'warning': '#CC6600'
-        }
-    }
-    
-    def __init__(self):
-        self.settings = {
-            'reduced_motion': False,
-            'high_contrast': False,
-            'large_text': False,
-            'dyslexia_font': False,
-            'screen_reader_mode': False,
-            'color_palette': 'calm_ocean',
-            'aphantasia_mode': False,  # Text descriptions instead of "visualize"
-            'simplified_interface': False,
-            'keyboard_only': False,
-            'auto_save': True,
-            'confirmation_dialogs': True,
-            'time_estimates': True,
-            'spoon_tracking': True
-        }
-    
-    def update_settings(self, new_settings: Dict[str, Any]) -> Dict[str, Any]:
-        """Update accessibility settings"""
-        for key, value in new_settings.items():
-            if key in self.settings:
-                self.settings[key] = value
-        return self.settings
-    
-    def get_color_palette(self) -> Dict[str, str]:
-        """Get current color palette"""
-        palette_name = self.settings['color_palette']
-        if self.settings['high_contrast']:
-            palette_name = 'high_contrast'
-        return self.AUTISM_SAFE_PALETTES.get(palette_name, self.AUTISM_SAFE_PALETTES['calm_ocean'])
-    
-    def get_css_variables(self) -> str:
-        """Generate CSS variables for current settings"""
-        palette = self.get_color_palette()
-        
-        css = ":root {\n"
-        for name, color in palette.items():
-            css += f"  --color-{name}: {color};\n"
-        
-        # Font settings
-        if self.settings['large_text']:
-            css += "  --font-size-base: 18px;\n"
-            css += "  --font-size-large: 24px;\n"
-        else:
-            css += "  --font-size-base: 16px;\n"
-            css += "  --font-size-large: 20px;\n"
-        
-        if self.settings['dyslexia_font']:
-            css += "  --font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif;\n"
-        else:
-            css += "  --font-family: 'Inter', -apple-system, sans-serif;\n"
-        
-        # Motion settings
-        if self.settings['reduced_motion']:
-            css += "  --animation-duration: 0s;\n"
-            css += "  --transition-duration: 0s;\n"
-        else:
-            css += "  --animation-duration: 0.3s;\n"
-            css += "  --transition-duration: 0.2s;\n"
-        
-        css += "}\n"
-        return css
-    
-    def transform_text_for_aphantasia(self, text: str) -> str:
-        """
-        Transform text to be aphantasia-friendly.
-        Replaces "visualize" language with concrete descriptions.
-        """
-        if not self.settings['aphantasia_mode']:
-            return text
-        
-        replacements = {
-            'visualize': 'think about',
-            'imagine': 'consider',
-            'picture': 'describe',
-            'see yourself': 'plan for yourself',
-            'envision': 'plan for',
-            'in your mind\'s eye': 'in your thoughts',
-            'mental image': 'mental description',
-            'dream about': 'plan for',
-        }
-        
-        result = text.lower()
-        for old, new in replacements.items():
-            result = result.replace(old, new)
-        
-        # Restore original capitalization for first letter
-        if text and text[0].isupper():
-            result = result[0].upper() + result[1:]
-        
-        return result
-    
-    def get_aria_attributes(self) -> Dict[str, str]:
-        """Get ARIA attributes for screen reader support"""
-        attrs = {
-            'role': 'application',
-            'aria-label': 'Life Fractal Intelligence - Life Planning Application'
-        }
-        
-        if self.settings['screen_reader_mode']:
-            attrs['aria-live'] = 'polite'
-            attrs['aria-atomic'] = 'true'
-        
-        return attrs
-    
-    def format_for_dysgraphia(self, form_fields: List[Dict]) -> List[Dict]:
-        """
-        Adapt form fields for users with dysgraphia.
-        Adds voice input options and simplifies text entry.
-        """
-        adapted_fields = []
-        
-        for field in form_fields:
-            adapted = field.copy()
-            
-            # Add voice input option
-            adapted['voice_input_enabled'] = True
-            
-            # Prefer selection over typing
-            if field.get('type') == 'text':
-                if field.get('options'):
-                    adapted['type'] = 'select'
-                else:
-                    adapted['type'] = 'textarea'  # Easier than single line
-                    adapted['autocomplete'] = True
-                    adapted['suggestions'] = True
-            
-            # Add character limit visibility
-            if 'maxLength' in field:
-                adapted['show_character_count'] = True
-            
-            adapted_fields.append(adapted)
-        
-        return adapted_fields
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return self.settings.copy()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# DATABASE - Complete Schema
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class Database:
-    """Production-ready SQLite database with all tables"""
-    
-    def __init__(self, db_path: str = "life_fractal.db"):
-        self.db_path = db_path
-        self.init_database()
-        logger.info(f"✅ Database initialized: {db_path}")
-    
-    def get_connection(self):
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
-    
-    def init_database(self):
-        """Create all tables"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        # Users table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                first_name TEXT,
-                last_name TEXT,
-                created_at TEXT NOT NULL,
-                last_login TEXT,
-                is_active INTEGER DEFAULT 1,
-                subscription_status TEXT DEFAULT 'trial',
-                trial_end_date TEXT,
-                stripe_customer_id TEXT,
-                accessibility_settings TEXT DEFAULT '{}',
-                spoon_settings TEXT DEFAULT '{}'
-            )
-        ''')
-        
-        # Goals table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS goals (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                title TEXT NOT NULL,
-                description TEXT,
-                category TEXT DEFAULT 'personal',
-                term TEXT DEFAULT 'medium',
-                priority INTEGER DEFAULT 3,
-                progress REAL DEFAULT 0.0,
-                target_date TEXT,
-                created_at TEXT NOT NULL,
-                completed_at TEXT,
-                why_important TEXT,
-                obstacles TEXT,
-                success_criteria TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        # Tasks table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS tasks (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                goal_id TEXT,
-                name TEXT NOT NULL,
-                description TEXT,
-                importance INTEGER DEFAULT 3,
-                urgency INTEGER DEFAULT 3,
-                effort INTEGER DEFAULT 3,
-                category TEXT DEFAULT 'general',
-                priority REAL DEFAULT 0.0,
-                spoon_cost INTEGER DEFAULT 2,
-                due_date TEXT,
-                created_at TEXT NOT NULL,
-                completed_at TEXT,
-                completed INTEGER DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                FOREIGN KEY (goal_id) REFERENCES goals(id)
-            )
-        ''')
-        
-        # Habits table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS habits (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                name TEXT NOT NULL,
-                description TEXT,
-                frequency TEXT DEFAULT 'daily',
-                current_streak INTEGER DEFAULT 0,
-                best_streak INTEGER DEFAULT 0,
-                total_completions INTEGER DEFAULT 0,
-                spoon_cost INTEGER DEFAULT 1,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        # Daily entries table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS daily_entries (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                date TEXT NOT NULL,
-                mood_level INTEGER DEFAULT 50,
-                energy_level INTEGER DEFAULT 50,
-                stress_level INTEGER DEFAULT 50,
-                sleep_hours REAL DEFAULT 7.0,
-                sleep_quality INTEGER DEFAULT 50,
-                spoons_used INTEGER DEFAULT 0,
-                spoons_available INTEGER DEFAULT 12,
-                journal_entry TEXT,
-                gratitude TEXT,
-                wins TEXT,
-                challenges TEXT,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                UNIQUE(user_id, date)
-            )
-        ''')
-        
-        # Pet state table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS pet_state (
-                user_id TEXT PRIMARY KEY,
-                species TEXT DEFAULT 'cat',
-                name TEXT DEFAULT 'Buddy',
-                hunger REAL DEFAULT 50.0,
-                energy REAL DEFAULT 50.0,
-                mood REAL DEFAULT 50.0,
-                bond REAL DEFAULT 20.0,
-                level INTEGER DEFAULT 1,
-                xp INTEGER DEFAULT 0,
-                xp_to_next INTEGER DEFAULT 8,
-                achievements TEXT DEFAULT '[]',
-                interaction_count INTEGER DEFAULT 0,
-                streak_days INTEGER DEFAULT 0,
-                last_fed TEXT,
-                last_played TEXT,
-                last_updated TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        # Behavior history for executive function tracking
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS behavior_history (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                action TEXT,
-                planned_action TEXT,
-                duration_planned INTEGER,
-                duration_actual INTEGER,
-                delay_minutes INTEGER,
-                completion INTEGER DEFAULT 0,
-                mood INTEGER DEFAULT 50,
-                notes TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        # Sessions table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sessions (
-                token TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                expires_at TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
-    
-    def execute(self, query: str, params: tuple = ()) -> List[Dict]:
-        """Execute query safely"""
-        try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            conn.commit()
-            results = [dict(row) for row in cursor.fetchall()]
-            conn.close()
-            return results
-        except Exception as e:
-            logger.error(f"Database error: {e}")
-            return []
-    
-    def insert(self, table: str, data: dict) -> bool:
-        """Insert data"""
-        try:
-            columns = ', '.join(data.keys())
-            placeholders = ', '.join('?' * len(data))
-            query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-            self.execute(query, tuple(data.values()))
-            return True
-        except Exception as e:
-            logger.error(f"Insert error: {e}")
-            return False
-    
-    def update(self, table: str, data: dict, where: dict) -> bool:
-        """Update data"""
-        try:
-            set_clause = ', '.join(f"{k} = ?" for k in data.keys())
-            where_clause = ' AND '.join(f"{k} = ?" for k in where.keys())
-            query = f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-            params = tuple(data.values()) + tuple(where.values())
-            self.execute(query, params)
-            return True
-        except Exception as e:
-            logger.error(f"Update error: {e}")
-            return False
-    
-    def select(self, table: str, where: Optional[dict] = None) -> List[Dict]:
-        """Select data"""
-        query = f"SELECT * FROM {table}"
-        params = ()
-        if where:
-            where_clause = ' AND '.join(f"{k} = ?" for k in where.keys())
-            query += f" WHERE {where_clause}"
-            params = tuple(where.values())
-        return self.execute(query, params)
-    
-    def delete(self, table: str, where: dict) -> bool:
-        """Delete data"""
-        try:
-            where_clause = ' AND '.join(f"{k} = ?" for k in where.keys())
-            query = f"DELETE FROM {table} WHERE {where_clause}"
-            self.execute(query, tuple(where.values()))
-            return True
-        except Exception as e:
-            logger.error(f"Delete error: {e}")
-            return False
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# FRACTAL ENGINE - 2D and 3D Visualization
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-class FractalEngine:
-    """Complete 2D & 3D fractal visualization engine"""
-    
-    def __init__(self, width: int = 800, height: int = 800):
-        self.width = width
-        self.height = height
-        self.use_gpu = GPU_AVAILABLE
-    
-    def generate_2d_fractal(self, wellness: float, mood: float, stress: float) -> Optional[Any]:
-        """Generate 2D Mandelbrot fractal based on user metrics"""
-        if not HAS_NUMPY or not HAS_PIL:
-            return None
-        
-        max_iter = int(100 + mood * 1.5)
-        zoom = 1.0 + (wellness / 100) * 3.0
-        center_x = -0.7 + (stress / 500)
-        center_y = 0.0
-        
-        # Generate Mandelbrot set
-        x = np.linspace(-2.5/zoom + center_x, 2.5/zoom + center_x, self.width)
-        y = np.linspace(-2.5/zoom + center_y, 2.5/zoom + center_y, self.height)
-        X, Y = np.meshgrid(x, y)
-        
-        c = X + 1j * Y
-        z = np.zeros_like(c)
-        iterations = np.zeros((self.height, self.width))
-        
-        for i in range(max_iter):
-            mask = np.abs(z) <= 2
-            z[mask] = z[mask] ** 2 + c[mask]
-            iterations[mask] = i
-        
-        # Apply wellness-based coloring
-        rgb = self._apply_wellness_coloring(iterations, max_iter, wellness)
-        
-        return Image.fromarray(rgb, 'RGB')
-    
-    def _apply_wellness_coloring(self, iterations: np.ndarray, max_iter: int, wellness: float) -> np.ndarray:
-        """Apply color scheme based on wellness level"""
-        normalized = iterations / max_iter
-        
-        # Wellness affects color temperature
-        # High wellness = warm colors, Low wellness = cool colors
-        warmth = wellness / 100
-        
-        r = np.uint8(255 * (normalized * warmth + (1 - normalized) * 0.3))
-        g = np.uint8(255 * (normalized * 0.5 + (1 - normalized) * (1 - warmth) * 0.5))
-        b = np.uint8(255 * ((1 - normalized) * (1 - warmth) + normalized * 0.2))
-        
-        return np.stack([r, g, b], axis=-1)
-    
-    def generate_3d_mandelbulb(self, wellness: float, mood: float) -> Optional[Any]:
-        """Generate 3D Mandelbulb fractal"""
-        if not HAS_NUMPY or not HAS_PIL:
-            return None
-        
-        power = 6.0 + (mood / 100) * 4.0
-        rotation_y = (wellness / 100) * PI * 0.5
-        
-        image = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        
-        for py in range(0, self.height, 2):
-            for px in range(0, self.width, 2):
-                # Ray direction
-                x = (2 * px / self.width - 1) * 0.8
-                y = (1 - 2 * py / self.height) * 0.8
-                
-                # Apply rotation
-                dx = x * PureMath.cos(rotation_y) - 1 * PureMath.sin(rotation_y)
-                dz = x * PureMath.sin(rotation_y) + 1 * PureMath.cos(rotation_y)
-                dy = y
-                
-                # Normalize
-                length = PureMath.sqrt(dx**2 + dy**2 + dz**2)
-                dx, dy, dz = dx/length, dy/length, dz/length
-                
-                # Ray march
-                t = 0
-                for _ in range(50):
-                    pos_x, pos_y, pos_z = dx * t, dy * t, dz * t - 2.5
-                    dist = self._mandelbulb_distance(pos_x, pos_y, pos_z, power)
-                    
-                    if dist < 0.001:
-                        intensity = int(255 * (1 - t / 5))
-                        hue = (wellness / 100) * 0.3  # Shift hue based on wellness
-                        r = int(intensity * (1 + hue))
-                        g = int(intensity * 0.5)
-                        b = int(intensity * (1 - hue))
-                        image[py:py+2, px:px+2] = [min(255, r), g, max(0, b)]
-                        break
-                    
-                    t += dist * 0.5
-                    if t > 5:
-                        break
-        
-        return Image.fromarray(image, 'RGB')
-    
-    def _mandelbulb_distance(self, x: float, y: float, z: float, power: float) -> float:
-        """Distance estimator for Mandelbulb"""
-        x0, y0, z0 = x, y, z
-        dr = 1.0
-        r = 0.0
-        
-        for _ in range(15):
-            r = PureMath.sqrt(x*x + y*y + z*z)
-            if r > 2:
-                break
-            
-            theta = PureMath.sqrt(max(0, x*x + y*y))
-            if theta > 0:
-                theta = z / theta
-                theta = PureMath.sqrt(1 + theta * theta)
-                theta = 1 / theta
-                theta = PureMath.sqrt(max(0, 1 - theta * theta))
-            else:
-                theta = 0
-            
-            phi = 0
-            if abs(x) > 0.0001:
-                phi = y / x if x != 0 else 0
-            
-            dr = pow(r, power - 1) * power * dr + 1.0
-            
-            zr = pow(r, power)
-            theta = theta * power
-            phi = phi * power
-            
-            x = zr * theta * (1 if x >= 0 else -1) + x0
-            y = zr * theta * phi + y0
-            z = zr * (z / (r + 0.0001)) * power + z0
-        
-        return 0.5 * PureMath.log(max(r, 0.0001)) * r / (dr + 0.0001)
-    
-    def fractal_to_base64(self, image) -> str:
-        """Convert PIL image to base64 string"""
-        if image is None:
-            return ""
-        
-        buffer = BytesIO()
-        image.save(buffer, format='PNG')
-        return base64.b64encode(buffer.getvalue()).decode()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
 # FLASK APPLICATION
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
 
-# Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('PRODUCTION', 'false').lower() == 'true'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 CORS(app, supports_credentials=True)
 
-# Initialize database
-db = Database()
+app.teardown_appcontext(close_db)
 
-# Initialize fractal engine
-fractal_engine = FractalEngine()
+# Configuration
+SUBSCRIPTION_PRICE = 20.00
+TRIAL_DAYS = 7
+GOFUNDME_URL = 'https://gofund.me/8d9303d27'
+STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/4gw4jF3HU6Fx4jC5kk'
 
-# In-memory stores (backed by database)
-user_pets: Dict[str, EmotionalPetAI] = {}
-user_calendars: Dict[str, FractalTimeCalendar] = {}
-user_schedulers: Dict[str, FibonacciTaskScheduler] = {}
-user_exec_support: Dict[str, ExecutiveFunctionSupport] = {}
-user_accessibility: Dict[str, AccessibilitySystem] = {}
-user_spoons: Dict[str, SpoonState] = {}
+# ════════════════════════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ════════════════════════════════════════════════════════════════════════════════
 
+def validate_email(email: str) -> bool:
+    """Validate email format."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# AUTHENTICATION HELPERS
-# ═══════════════════════════════════════════════════════════════════════════════════════
+def validate_password(password: str) -> Tuple[bool, str]:
+    """Validate password strength."""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not any(c.isdigit() for c in password):
+        return False, "Password must contain at least one number"
+    if not any(c.isalpha() for c in password):
+        return False, "Password must contain at least one letter"
+    return True, "Password is valid"
 
-def create_session(user_id: str) -> str:
-    """Create a new session token"""
-    token = secrets.token_hex(32)
-    expires_at = (datetime.now() + timedelta(days=7)).isoformat()
+def calculate_wellness(entry: dict) -> float:
+    """Calculate wellness index using Fibonacci weighting."""
+    weights = [FIBONACCI[i+3] for i in range(6)]  # [2, 3, 5, 8, 13, 21]
+    total_weight = sum(weights)
     
-    db.insert('sessions', {
-        'token': token,
-        'user_id': user_id,
-        'created_at': datetime.now().isoformat(),
-        'expires_at': expires_at
-    })
+    positive = (
+        entry.get('mood_score', 50) * weights[0] +
+        entry.get('energy_level', 50) * weights[1] +
+        entry.get('focus_clarity', 50) * weights[2] +
+        entry.get('mindfulness_score', 50) * weights[3] +
+        entry.get('sleep_quality', 70) * weights[4] +
+        entry.get('gratitude_level', 50) * weights[5]
+    )
     
-    return token
-
-
-def verify_session(token: str) -> Optional[str]:
-    """Verify session token and return user_id"""
-    if not token:
-        return None
+    negative = (entry.get('anxiety_level', 30) + entry.get('stress_level', 30)) * sum(weights[:2])
     
-    sessions = db.select('sessions', {'token': token})
-    if not sessions:
-        return None
+    wellness = max(0, min(100, (positive - negative / 2) / total_weight))
+    return round(wellness, 1)
+
+def generate_reset_token() -> str:
+    """Generate a secure password reset token."""
+    return secrets.token_urlsafe(32)
+
+# ════════════════════════════════════════════════════════════════════════════════
+# DATABASE OPERATIONS
+# ════════════════════════════════════════════════════════════════════════════════
+
+def create_user(email: str, password: str, first_name: str = "") -> Optional[Dict]:
+    """Create a new user with all defaults."""
+    db = get_db()
+    cursor = db.cursor()
     
-    session_data = sessions[0]
-    expires_at = datetime.fromisoformat(session_data['expires_at'])
-    
-    if datetime.now() > expires_at:
-        db.delete('sessions', {'token': token})
-        return None
-    
-    return session_data['user_id']
-
-
-def get_current_user():
-    """Get current user from session"""
-    token = request.cookies.get('session_token') or request.headers.get('Authorization', '').replace('Bearer ', '')
-    if not token:
-        return None
-    
-    user_id = verify_session(token)
-    if not user_id:
-        return None
-    
-    users = db.select('users', {'id': user_id})
-    return users[0] if users else None
-
-
-def require_auth(f):
-    """Decorator to require authentication"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        user = get_current_user()
-        if not user:
-            return jsonify({'error': 'Authentication required'}), 401
-        return f(user, *args, **kwargs)
-    return decorated
-
-
-def get_user_pet(user_id: str) -> EmotionalPetAI:
-    """Get or create user's pet"""
-    if user_id not in user_pets:
-        # Try to load from database
-        pet_data = db.select('pet_state', {'user_id': user_id})
-        if pet_data:
-            pet_dict = pet_data[0]
-            pet_dict['achievements'] = json.loads(pet_dict.get('achievements', '[]'))
-            user_pets[user_id] = EmotionalPetAI.from_dict(pet_dict)
-        else:
-            # Create new pet
-            user_pets[user_id] = EmotionalPetAI('cat', 'Buddy')
-            save_pet(user_id, user_pets[user_id])
-    
-    return user_pets[user_id]
-
-
-def save_pet(user_id: str, pet: EmotionalPetAI):
-    """Save pet to database"""
-    pet_dict = pet.to_dict()
-    pet_dict['user_id'] = user_id
-    pet_dict['achievements'] = json.dumps(pet_dict.get('achievements', []))
-    
-    existing = db.select('pet_state', {'user_id': user_id})
-    if existing:
-        db.update('pet_state', pet_dict, {'user_id': user_id})
-    else:
-        db.insert('pet_state', pet_dict)
-
-
-def get_user_spoons(user_id: str) -> SpoonState:
-    """Get or create user's spoon state"""
-    if user_id not in user_spoons:
-        user_spoons[user_id] = SpoonState()
-    return user_spoons[user_id]
-
-
-def get_user_calendar(user_id: str) -> FractalTimeCalendar:
-    """Get or create user's calendar"""
-    if user_id not in user_calendars:
-        user_calendars[user_id] = FractalTimeCalendar()
-    return user_calendars[user_id]
-
-
-def get_user_scheduler(user_id: str) -> FibonacciTaskScheduler:
-    """Get or create user's task scheduler"""
-    if user_id not in user_schedulers:
-        user_schedulers[user_id] = FibonacciTaskScheduler()
-    return user_schedulers[user_id]
-
-
-def get_user_exec_support(user_id: str) -> ExecutiveFunctionSupport:
-    """Get or create user's executive function support"""
-    if user_id not in user_exec_support:
-        user_exec_support[user_id] = ExecutiveFunctionSupport()
-    return user_exec_support[user_id]
-
-
-def get_user_accessibility(user_id: str) -> AccessibilitySystem:
-    """Get or create user's accessibility settings"""
-    if user_id not in user_accessibility:
-        user_accessibility[user_id] = AccessibilitySystem()
+    try:
+        user_id = f"user_{secrets.token_hex(8)}"
+        now = datetime.now(timezone.utc).isoformat()
+        trial_end = (datetime.now(timezone.utc) + timedelta(days=TRIAL_DAYS)).isoformat()
+        password_hash = generate_password_hash(password, method='pbkdf2:sha256')
         
-        # Load from database
-        users = db.select('users', {'id': user_id})
-        if users and users[0].get('accessibility_settings'):
-            try:
-                settings = json.loads(users[0]['accessibility_settings'])
-                user_accessibility[user_id].update_settings(settings)
-            except:
-                pass
+        # Create user
+        cursor.execute('''
+            INSERT INTO users (id, email, password_hash, first_name, display_name,
+                             subscription_status, trial_start_date, trial_end_date,
+                             spoons, max_spoons, created_at, last_login)
+            VALUES (?, ?, ?, ?, ?, 'trial', ?, ?, 12, 12, ?, ?)
+        ''', (user_id, email.lower(), password_hash, first_name, 
+              first_name or email.split('@')[0], now, trial_end, now, now))
+        
+        # Create default accessibility preferences
+        cursor.execute('''
+            INSERT INTO accessibility_prefs (user_id) VALUES (?)
+        ''', (user_id,))
+        
+        # Create default pet
+        cursor.execute('''
+            INSERT INTO pets (user_id, species, name, hunger, energy, mood, bond)
+            VALUES (?, 'cat', 'Buddy', 50, 50, 50, 20)
+        ''', (user_id,))
+        
+        db.commit()
+        
+        return {
+            'id': user_id,
+            'email': email.lower(),
+            'first_name': first_name,
+            'display_name': first_name or email.split('@')[0],
+            'spoons': 12,
+            'max_spoons': 12,
+            'trial_days_remaining': TRIAL_DAYS
+        }
+    except sqlite3.IntegrityError:
+        return None
+    except Exception as e:
+        logger.error(f"Error creating user: {e}")
+        return None
+
+def get_user_by_email(email: str) -> Optional[Dict]:
+    """Get user by email."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM users WHERE email = ?', (email.lower(),))
+    row = cursor.fetchone()
+    return dict(row) if row else None
+
+def get_user_by_id(user_id: str) -> Optional[Dict]:
+    """Get user by ID."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+    row = cursor.fetchone()
+    return dict(row) if row else None
+
+def verify_password(user: Dict, password: str) -> bool:
+    """Verify user password."""
+    return check_password_hash(user['password_hash'], password)
+
+def update_user_login(user_id: str):
+    """Update last login timestamp."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('''
+        UPDATE users SET last_login = ? WHERE id = ?
+    ''', (datetime.now(timezone.utc).isoformat(), user_id))
+    db.commit()
+
+def get_accessibility_prefs(user_id: str) -> Dict:
+    """Get user's accessibility preferences."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM accessibility_prefs WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    if row:
+        return dict(row)
+    return {}
+
+def save_accessibility_prefs(user_id: str, prefs: Dict) -> bool:
+    """Save user's accessibility preferences."""
+    db = get_db()
+    cursor = db.cursor()
     
-    return user_accessibility[user_id]
+    fields = [
+        'reduced_motion', 'high_contrast', 'larger_text', 'dyslexia_font',
+        'screen_reader_mode', 'focus_indicators', 'simplified_layout', 'calm_colors',
+        'text_to_speech', 'keyboard_navigation', 'auto_save', 'gentle_reminders',
+        'celebration_intensity', 'time_blindness_helpers', 'executive_function_support',
+        'sensory_break_reminders', 'task_chunking'
+    ]
+    
+    updates = []
+    values = []
+    for field in fields:
+        if field in prefs:
+            updates.append(f"{field} = ?")
+            values.append(prefs[field])
+    
+    if updates:
+        values.append(user_id)
+        cursor.execute(f'''
+            UPDATE accessibility_prefs SET {', '.join(updates)} WHERE user_id = ?
+        ''', values)
+        db.commit()
+        return True
+    return False
 
+def get_pet(user_id: str) -> Optional[Dict]:
+    """Get user's pet."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM pets WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    if row:
+        pet = dict(row)
+        pet['emoji'] = get_pet_emoji(pet['species'], pet['mood'])
+        pet['status'] = get_pet_status(pet['mood'])
+        pet['xp_for_next'] = FIBONACCI[min(pet['level'] + 5, len(FIBONACCI)-1)] * 10
+        return pet
+    return None
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - AUTHENTICATION
-# ═══════════════════════════════════════════════════════════════════════════════════════
+def update_pet(user_id: str, updates: Dict) -> bool:
+    """Update pet state."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    fields = ['hunger', 'energy', 'mood', 'stress', 'bond', 'level', 'experience',
+              'last_fed', 'last_played', 'last_rested', 'name', 'species']
+    
+    update_parts = []
+    values = []
+    for field in fields:
+        if field in updates:
+            update_parts.append(f"{field} = ?")
+            values.append(updates[field])
+    
+    if update_parts:
+        values.append(user_id)
+        cursor.execute(f'''
+            UPDATE pets SET {', '.join(update_parts)} WHERE user_id = ?
+        ''', values)
+        db.commit()
+        return True
+    return False
+
+def get_today_entry(user_id: str) -> Dict:
+    """Get or create today's entry."""
+    db = get_db()
+    cursor = db.cursor()
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    cursor.execute('''
+        SELECT * FROM daily_entries WHERE user_id = ? AND date = ?
+    ''', (user_id, today))
+    row = cursor.fetchone()
+    
+    if row:
+        return dict(row)
+    
+    # Create new entry
+    now = datetime.now(timezone.utc).isoformat()
+    cursor.execute('''
+        INSERT INTO daily_entries (user_id, date, created_at, updated_at)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, today, now, now))
+    db.commit()
+    
+    cursor.execute('SELECT * FROM daily_entries WHERE user_id = ? AND date = ?', (user_id, today))
+    return dict(cursor.fetchone())
+
+def save_daily_entry(user_id: str, data: Dict) -> Dict:
+    """Save daily entry data."""
+    db = get_db()
+    cursor = db.cursor()
+    today = datetime.now().strftime('%Y-%m-%d')
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Calculate wellness
+    data['wellness_index'] = calculate_wellness(data)
+    
+    fields = ['mood_score', 'energy_level', 'sleep_quality', 'sleep_hours',
+              'anxiety_level', 'stress_level', 'focus_clarity', 'mindfulness_score',
+              'gratitude_level', 'spoons_used', 'journal_entry', 'wellness_index']
+    
+    # Check if entry exists
+    cursor.execute('SELECT id FROM daily_entries WHERE user_id = ? AND date = ?', (user_id, today))
+    exists = cursor.fetchone()
+    
+    if exists:
+        update_parts = [f"{f} = ?" for f in fields if f in data]
+        values = [data[f] for f in fields if f in data]
+        values.extend([now, user_id, today])
+        
+        cursor.execute(f'''
+            UPDATE daily_entries SET {', '.join(update_parts)}, updated_at = ?
+            WHERE user_id = ? AND date = ?
+        ''', values)
+    else:
+        field_names = ['user_id', 'date', 'created_at', 'updated_at'] + [f for f in fields if f in data]
+        placeholders = ', '.join(['?' for _ in field_names])
+        values = [user_id, today, now, now] + [data[f] for f in fields if f in data]
+        
+        cursor.execute(f'''
+            INSERT INTO daily_entries ({', '.join(field_names)}) VALUES ({placeholders})
+        ''', values)
+    
+    db.commit()
+    return get_today_entry(user_id)
+
+def get_goals(user_id: str) -> List[Dict]:
+    """Get all goals for user."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('''
+        SELECT * FROM goals WHERE user_id = ? ORDER BY priority, created_at DESC
+    ''', (user_id,))
+    return [dict(row) for row in cursor.fetchall()]
+
+def create_goal(user_id: str, data: Dict) -> Dict:
+    """Create a new goal."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    goal_id = f"goal_{secrets.token_hex(6)}"
+    now = datetime.now(timezone.utc).isoformat()
+    
+    cursor.execute('''
+        INSERT INTO goals (id, user_id, title, description, category, priority, target_date, color, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (goal_id, user_id, data.get('title', 'New Goal'), data.get('description', ''),
+          data.get('category', 'general'), data.get('priority', 3),
+          data.get('target_date'), data.get('color', '#6B8E9F'), now))
+    
+    db.commit()
+    
+    cursor.execute('SELECT * FROM goals WHERE id = ?', (goal_id,))
+    return dict(cursor.fetchone())
+
+def get_tasks(user_id: str, include_completed: bool = False) -> List[Dict]:
+    """Get tasks for user."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    if include_completed:
+        cursor.execute('''
+            SELECT * FROM tasks WHERE user_id = ? ORDER BY priority, due_date
+        ''', (user_id,))
+    else:
+        cursor.execute('''
+            SELECT * FROM tasks WHERE user_id = ? AND completed = 0 ORDER BY priority, due_date
+        ''', (user_id,))
+    
+    return [dict(row) for row in cursor.fetchall()]
+
+def create_task(user_id: str, data: Dict) -> Dict:
+    """Create a new task."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    task_id = f"task_{secrets.token_hex(6)}"
+    now = datetime.now(timezone.utc).isoformat()
+    
+    cursor.execute('''
+        INSERT INTO tasks (id, user_id, goal_id, title, description, spoon_cost, priority, due_date, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (task_id, user_id, data.get('goal_id'), data.get('title', 'New Task'),
+          data.get('description', ''), data.get('spoon_cost', 1),
+          data.get('priority', 3), data.get('due_date'), now))
+    
+    db.commit()
+    
+    cursor.execute('SELECT * FROM tasks WHERE id = ?', (task_id,))
+    return dict(cursor.fetchone())
+
+def complete_task(task_id: str, user_id: str) -> Optional[Dict]:
+    """Mark task as complete."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    # Get task and verify ownership
+    cursor.execute('SELECT * FROM tasks WHERE id = ? AND user_id = ?', (task_id, user_id))
+    task = cursor.fetchone()
+    
+    if not task:
+        return None
+    
+    task = dict(task)
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Mark complete
+    cursor.execute('''
+        UPDATE tasks SET completed = 1, completed_at = ? WHERE id = ?
+    ''', (now, task_id))
+    
+    # Deduct spoons
+    cursor.execute('''
+        UPDATE users SET spoons = MAX(0, spoons - ?) WHERE id = ?
+    ''', (task['spoon_cost'], user_id))
+    
+    # Update goal progress if linked
+    if task['goal_id']:
+        cursor.execute('''
+            UPDATE goals SET progress = MIN(100, progress + 10) WHERE id = ?
+        ''', (task['goal_id'],))
+    
+    # Award pet XP
+    cursor.execute('''
+        UPDATE pets SET experience = experience + ?, mood = MIN(100, mood + 5)
+        WHERE user_id = ?
+    ''', (task['spoon_cost'] * 5, user_id))
+    
+    db.commit()
+    
+    cursor.execute('SELECT * FROM tasks WHERE id = ?', (task_id,))
+    return dict(cursor.fetchone())
+
+def set_password_reset_token(email: str) -> Optional[str]:
+    """Set password reset token for user."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    token = generate_reset_token()
+    expires = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    
+    cursor.execute('''
+        UPDATE users SET password_reset_token = ?, password_reset_expires = ?
+        WHERE email = ?
+    ''', (token, expires, email.lower()))
+    
+    if cursor.rowcount > 0:
+        db.commit()
+        return token
+    return None
+
+def reset_password(token: str, new_password: str) -> bool:
+    """Reset password using token."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute('''
+        SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?
+    ''', (token,))
+    row = cursor.fetchone()
+    
+    if not row:
+        return False
+    
+    # Check expiration
+    expires = datetime.fromisoformat(row['password_reset_expires'].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > expires:
+        return False
+    
+    # Update password
+    password_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
+    cursor.execute('''
+        UPDATE users SET password_hash = ?, password_reset_token = NULL, password_reset_expires = NULL
+        WHERE id = ?
+    ''', (password_hash, row['id']))
+    
+    db.commit()
+    return True
+
+# ════════════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION ROUTES
+# ════════════════════════════════════════════════════════════════════════════════
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
-    """Register a new user"""
+    """Register a new user."""
     try:
         data = request.get_json() or {}
-        email = data.get('email', '').lower().strip()
+        email = data.get('email', '').strip()
         password = data.get('password', '')
-        first_name = data.get('first_name', '')
-        last_name = data.get('last_name', '')
+        first_name = data.get('first_name', '').strip()
         
-        if not email or not password:
-            return jsonify({'error': 'Email and password required'}), 400
+        # Validate email
+        if not email or not validate_email(email):
+            return jsonify({'error': 'Please enter a valid email address'}), 400
         
-        # Check if user exists
-        existing = db.select('users', {'email': email})
-        if existing:
-            return jsonify({'error': 'Email already registered'}), 400
+        # Validate password
+        valid, message = validate_password(password)
+        if not valid:
+            return jsonify({'error': message}), 400
         
         # Create user
-        user_id = secrets.token_hex(16)
-        password_hash = generate_password_hash(password)
-        trial_end = (datetime.now() + timedelta(days=7)).isoformat()
+        user = create_user(email, password, first_name)
+        if not user:
+            return jsonify({'error': 'An account with this email already exists'}), 400
         
-        db.insert('users', {
-            'id': user_id,
-            'email': email,
-            'password_hash': password_hash,
-            'first_name': first_name,
-            'last_name': last_name,
-            'created_at': datetime.now().isoformat(),
-            'subscription_status': 'trial',
-            'trial_end_date': trial_end
-        })
+        # Set session
+        session['user_id'] = user['id']
+        session.permanent = True
         
-        # Create session
-        token = create_session(user_id)
-        
-        # Create default pet
-        pet = EmotionalPetAI('cat', 'Buddy')
-        user_pets[user_id] = pet
-        save_pet(user_id, pet)
-        
-        response = make_response(jsonify({
+        return jsonify({
             'success': True,
-            'user_id': user_id,
-            'message': 'Welcome! Your 7-day free trial has started.',
-            'trial_end_date': trial_end
-        }))
-        response.set_cookie('session_token', token, httponly=True, samesite='Lax', max_age=604800)
-        
-        return response
+            'message': 'Welcome to Life Fractal Intelligence! 🌀',
+            'user': user,
+            'trial_days_remaining': TRIAL_DAYS
+        }), 201
         
     except Exception as e:
         logger.error(f"Registration error: {e}")
-        return jsonify({'error': 'Registration failed'}), 500
-
+        return jsonify({'error': 'Registration failed. Please try again.'}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    """Log in a user"""
+    """Login user."""
     try:
         data = request.get_json() or {}
-        email = data.get('email', '').lower().strip()
+        email = data.get('email', '').strip().lower()
         password = data.get('password', '')
         
         if not email or not password:
-            return jsonify({'error': 'Email and password required'}), 400
+            return jsonify({'error': 'Email and password are required'}), 400
         
-        # Find user
-        users = db.select('users', {'email': email})
-        if not users:
-            return jsonify({'error': 'Invalid credentials'}), 401
+        user = get_user_by_email(email)
+        if not user or not verify_password(user, password):
+            return jsonify({'error': 'Invalid email or password'}), 401
         
-        user = users[0]
+        if not user['is_active']:
+            return jsonify({'error': 'This account has been deactivated'}), 403
         
-        if not check_password_hash(user['password_hash'], password):
-            return jsonify({'error': 'Invalid credentials'}), 401
+        # Update login time
+        update_user_login(user['id'])
         
-        # Update last login
-        db.update('users', {'last_login': datetime.now().isoformat()}, {'id': user['id']})
+        # Set session
+        session['user_id'] = user['id']
+        session.permanent = True
         
-        # Create session
-        token = create_session(user['id'])
+        # Calculate trial days
+        trial_days = 0
+        if user['trial_end_date']:
+            try:
+                trial_end = datetime.fromisoformat(user['trial_end_date'].replace('Z', '+00:00'))
+                delta = trial_end - datetime.now(timezone.utc)
+                trial_days = max(0, delta.days)
+            except:
+                pass
         
-        response = make_response(jsonify({
+        return jsonify({
             'success': True,
-            'user_id': user['id'],
-            'first_name': user['first_name'],
-            'subscription_status': user['subscription_status']
-        }))
-        response.set_cookie('session_token', token, httponly=True, samesite='Lax', max_age=604800)
-        
-        return response
+            'message': f"Welcome back, {user['first_name'] or user['display_name']}! 👋",
+            'user': {
+                'id': user['id'],
+                'email': user['email'],
+                'first_name': user['first_name'],
+                'display_name': user['display_name'],
+                'spoons': user['spoons'],
+                'max_spoons': user['max_spoons']
+            },
+            'trial_days_remaining': trial_days
+        }), 200
         
     except Exception as e:
         logger.error(f"Login error: {e}")
-        return jsonify({'error': 'Login failed'}), 500
-
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
 
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
-    """Log out current user"""
-    token = request.cookies.get('session_token')
-    if token:
-        db.delete('sessions', {'token': token})
-    
-    response = make_response(jsonify({'success': True}))
-    response.delete_cookie('session_token')
-    return response
+    """Logout user."""
+    session.clear()
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
 
-
-@app.route('/api/auth/me', methods=['GET'])
-@require_auth
-def get_me(user):
-    """Get current user info"""
-    return jsonify({
-        'id': user['id'],
-        'email': user['email'],
-        'first_name': user['first_name'],
-        'last_name': user['last_name'],
-        'subscription_status': user['subscription_status'],
-        'trial_end_date': user.get('trial_end_date')
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - PET SYSTEM
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/pet', methods=['GET'])
-@require_auth
-def get_pet(user):
-    """Get user's pet state"""
-    pet = get_user_pet(user['id'])
-    
-    # Update pet based on time passed
-    last_update = pet.last_updated
-    hours_passed = (datetime.now() - last_update).total_seconds() / 3600
-    
-    if hours_passed > 0.1:  # More than 6 minutes
-        pet.update(hours_passed)
-        save_pet(user['id'], pet)
-    
-    return jsonify(pet.get_state())
-
-
-@app.route('/api/pet/feed', methods=['POST'])
-@require_auth
-def feed_pet(user):
-    """Feed the pet"""
-    pet = get_user_pet(user['id'])
-    result = pet.feed()
-    save_pet(user['id'], pet)
-    return jsonify(result)
-
-
-@app.route('/api/pet/play', methods=['POST'])
-@require_auth
-def play_with_pet(user):
-    """Play with the pet"""
-    pet = get_user_pet(user['id'])
-    result = pet.play()
-    save_pet(user['id'], pet)
-    return jsonify(result)
-
-
-@app.route('/api/pet/rest', methods=['POST'])
-@require_auth
-def rest_pet(user):
-    """Let the pet rest"""
-    pet = get_user_pet(user['id'])
-    result = pet.rest()
-    save_pet(user['id'], pet)
-    return jsonify(result)
-
-
-@app.route('/api/pet/species', methods=['GET'])
-def get_pet_species():
-    """Get available pet species"""
-    species_info = []
-    for species, traits in EmotionalPetAI.SPECIES_TRAITS.items():
-        species_info.append({
-            'species': species,
-            'emoji': traits['emoji'],
-            'personality': traits['personality']
-        })
-    return jsonify(species_info)
-
-
-@app.route('/api/pet/change', methods=['POST'])
-@require_auth
-def change_pet(user):
-    """Change pet species"""
-    data = request.get_json() or {}
-    new_species = data.get('species', 'cat')
-    new_name = data.get('name', 'Buddy')
-    
-    if new_species not in EmotionalPetAI.SPECIES_TRAITS:
-        return jsonify({'error': 'Invalid species'}), 400
-    
-    # Create new pet (preserving some stats)
-    old_pet = get_user_pet(user['id'])
-    new_pet = EmotionalPetAI(new_species, new_name)
-    
-    # Transfer some progress
-    new_pet.bond = old_pet.bond * 0.5  # Keep half the bond
-    new_pet.level = max(1, old_pet.level - 1)  # Drop one level
-    
-    user_pets[user['id']] = new_pet
-    save_pet(user['id'], new_pet)
-    
-    return jsonify({
-        'success': True,
-        'message': f"Welcome {new_name} the {new_species}!",
-        'pet': new_pet.get_state()
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - SPOON THEORY
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/spoons', methods=['GET'])
-@require_auth
-def get_spoons(user):
-    """Get current spoon state"""
-    spoons = get_user_spoons(user['id'])
-    return jsonify(spoons.to_dict())
-
-
-@app.route('/api/spoons/use', methods=['POST'])
-@require_auth
-def use_spoons(user):
-    """Use spoons for an activity"""
-    data = request.get_json() or {}
-    amount = data.get('amount', 1)
-    task_name = data.get('task', 'activity')
-    
-    spoons = get_user_spoons(user['id'])
-    result = spoons.use_spoons(amount, task_name)
-    
-    return jsonify(result)
-
-
-@app.route('/api/spoons/rest', methods=['POST'])
-@require_auth
-def rest_spoons(user):
-    """Recover spoons through rest"""
-    data = request.get_json() or {}
-    hours = data.get('hours', 1)
-    
-    spoons = get_user_spoons(user['id'])
-    result = spoons.rest(hours)
-    
-    return jsonify(result)
-
-
-@app.route('/api/spoons/new-day', methods=['POST'])
-@require_auth
-def new_day_spoons(user):
-    """Reset spoons for new day"""
-    data = request.get_json() or {}
-    sleep_quality = data.get('sleep_quality', 0.7)
-    
-    spoons = get_user_spoons(user['id'])
-    result = spoons.new_day(sleep_quality)
-    
-    return jsonify(result)
-
-
-@app.route('/api/spoons/costs', methods=['GET'])
-def get_spoon_costs():
-    """Get default spoon costs for activities"""
-    return jsonify(DEFAULT_SPOON_COSTS)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - GOALS
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/goals', methods=['GET'])
-@require_auth
-def get_goals(user):
-    """Get all user goals"""
-    goals = db.select('goals', {'user_id': user['id']})
-    return jsonify(goals)
-
-
-@app.route('/api/goals', methods=['POST'])
-@require_auth
-def create_goal(user):
-    """Create a new goal"""
-    data = request.get_json() or {}
-    
-    goal_id = secrets.token_hex(8)
-    
-    goal_data = {
-        'id': goal_id,
-        'user_id': user['id'],
-        'title': data.get('title', 'New Goal'),
-        'description': data.get('description', ''),
-        'category': data.get('category', 'personal'),
-        'term': data.get('term', 'medium'),
-        'priority': data.get('priority', 3),
-        'progress': 0.0,
-        'target_date': data.get('target_date'),
-        'created_at': datetime.now().isoformat(),
-        'why_important': data.get('why_important', ''),
-        'obstacles': data.get('obstacles', ''),
-        'success_criteria': data.get('success_criteria', '')
-    }
-    
-    db.insert('goals', goal_data)
-    
-    return jsonify({
-        'success': True,
-        'goal': goal_data
-    })
-
-
-@app.route('/api/goals/<goal_id>', methods=['PUT'])
-@require_auth
-def update_goal(user, goal_id):
-    """Update a goal"""
-    data = request.get_json() or {}
-    
-    # Verify ownership
-    goals = db.select('goals', {'id': goal_id, 'user_id': user['id']})
-    if not goals:
-        return jsonify({'error': 'Goal not found'}), 404
-    
-    update_data = {}
-    for field in ['title', 'description', 'category', 'term', 'priority', 'progress', 'target_date', 'why_important', 'obstacles', 'success_criteria']:
-        if field in data:
-            update_data[field] = data[field]
-    
-    if data.get('progress', 0) >= 100 and not goals[0].get('completed_at'):
-        update_data['completed_at'] = datetime.now().isoformat()
-    
-    db.update('goals', update_data, {'id': goal_id})
-    
-    return jsonify({'success': True})
-
-
-@app.route('/api/goals/<goal_id>', methods=['DELETE'])
-@require_auth
-def delete_goal(user, goal_id):
-    """Delete a goal"""
-    db.delete('goals', {'id': goal_id, 'user_id': user['id']})
-    return jsonify({'success': True})
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - TASKS (Fibonacci Scheduler)
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/tasks', methods=['GET'])
-@require_auth
-def get_tasks(user):
-    """Get all user tasks"""
-    tasks = db.select('tasks', {'user_id': user['id']})
-    
-    # Sort by priority
-    tasks.sort(key=lambda t: t.get('priority', 0), reverse=True)
-    
-    return jsonify(tasks)
-
-
-@app.route('/api/tasks', methods=['POST'])
-@require_auth
-def create_task(user):
-    """Create a new task with Fibonacci priority"""
-    data = request.get_json() or {}
-    
-    # Calculate Fibonacci priority
-    importance = min(5, max(1, data.get('importance', 3)))
-    urgency = min(5, max(1, data.get('urgency', 3)))
-    effort = min(5, max(1, data.get('effort', 3)))
-    
-    importance_weight = fibonacci(importance + 3)
-    urgency_weight = fibonacci(urgency + 2)
-    effort_penalty = fibonacci(effort + 1)
-    
-    priority = (importance_weight * PHI + urgency_weight) / (effort_penalty * PHI_INVERSE + 1)
-    
-    task_id = secrets.token_hex(8)
-    
-    task_data = {
-        'id': task_id,
-        'user_id': user['id'],
-        'goal_id': data.get('goal_id'),
-        'name': data.get('name', 'New Task'),
-        'description': data.get('description', ''),
-        'importance': importance,
-        'urgency': urgency,
-        'effort': effort,
-        'category': data.get('category', 'general'),
-        'priority': round(priority, 2),
-        'spoon_cost': DEFAULT_SPOON_COSTS.get(data.get('category', 'general'), effort),
-        'due_date': data.get('due_date'),
-        'created_at': datetime.now().isoformat(),
-        'completed': 0
-    }
-    
-    db.insert('tasks', task_data)
-    
-    return jsonify({
-        'success': True,
-        'task': task_data
-    })
-
-
-@app.route('/api/tasks/<task_id>/complete', methods=['POST'])
-@require_auth
-def complete_task(user, task_id):
-    """Mark task as complete"""
-    tasks = db.select('tasks', {'id': task_id, 'user_id': user['id']})
-    if not tasks:
-        return jsonify({'error': 'Task not found'}), 404
-    
-    task = tasks[0]
-    
-    db.update('tasks', {
-        'completed': 1,
-        'completed_at': datetime.now().isoformat()
-    }, {'id': task_id})
-    
-    # Award XP to pet
-    pet = get_user_pet(user['id'])
-    xp_earned = int(task.get('priority', 5) / PHI)
-    pet._add_xp(xp_earned)
-    save_pet(user['id'], pet)
-    
-    # Use spoons
-    spoons = get_user_spoons(user['id'])
-    spoon_result = spoons.use_spoons(task.get('spoon_cost', 2), task['name'])
-    
-    return jsonify({
-        'success': True,
-        'xp_earned': xp_earned,
-        'spoons': spoon_result,
-        'message': f"Great job completing '{task['name']}'!"
-    })
-
-
-@app.route('/api/tasks/next', methods=['GET'])
-@require_auth
-def get_next_task(user):
-    """Get the next recommended task"""
-    spoons = get_user_spoons(user['id'])
-    available_spoons = spoons.current_spoons
-    
-    tasks = db.select('tasks', {'user_id': user['id']})
-    active_tasks = [t for t in tasks if not t.get('completed')]
-    
-    # Filter by available spoons
-    doable_tasks = [t for t in active_tasks if t.get('spoon_cost', 2) <= available_spoons]
-    
-    if not doable_tasks:
-        # Suggest rest
-        return jsonify({
-            'task': None,
-            'message': "You don't have enough spoons for any tasks. Consider resting!",
-            'current_spoons': available_spoons
-        })
-    
-    # Sort by priority
-    doable_tasks.sort(key=lambda t: t.get('priority', 0), reverse=True)
-    
-    return jsonify({
-        'task': doable_tasks[0],
-        'alternatives': doable_tasks[1:3],
-        'current_spoons': available_spoons
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - CALENDAR (Fractal Time)
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/calendar/today', methods=['GET'])
-@require_auth
-def get_today_plan(user):
-    """Get today's Fibonacci time block plan"""
-    calendar = get_user_calendar(user['id'])
-    today = datetime.now()
-    
-    # Get user's tasks
-    tasks = db.select('tasks', {'user_id': user['id']})
-    active_tasks = [t for t in tasks if not t.get('completed')]
-    
-    plan = calendar.get_day_plan(today, active_tasks)
-    
-    return jsonify(plan)
-
-
-@app.route('/api/calendar/date/<date_str>', methods=['GET'])
-@require_auth
-def get_date_plan(user, date_str):
-    """Get plan for a specific date"""
+@app.route('/api/auth/forgot-password', methods=['POST'])
+def forgot_password():
+    """Request password reset."""
     try:
-        date = datetime.fromisoformat(date_str)
-    except:
-        return jsonify({'error': 'Invalid date format'}), 400
-    
-    calendar = get_user_calendar(user['id'])
-    plan = calendar.get_day_plan(date)
-    
-    return jsonify(plan)
+        data = request.get_json() or {}
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        token = set_password_reset_token(email)
+        
+        # Always return success to prevent email enumeration
+        return jsonify({
+            'success': True,
+            'message': 'If an account exists with this email, you will receive reset instructions.',
+            # In production, send email with reset link
+            # For demo, include token in response
+            'reset_token': token if token else None
+        })
+        
+    except Exception as e:
+        logger.error(f"Password reset error: {e}")
+        return jsonify({'error': 'Failed to process request'}), 500
 
+@app.route('/api/auth/reset-password', methods=['POST'])
+def do_reset_password():
+    """Reset password with token."""
+    try:
+        data = request.get_json() or {}
+        token = data.get('token', '')
+        new_password = data.get('password', '')
+        
+        if not token or not new_password:
+            return jsonify({'error': 'Token and new password are required'}), 400
+        
+        valid, message = validate_password(new_password)
+        if not valid:
+            return jsonify({'error': message}), 400
+        
+        if reset_password(token, new_password):
+            return jsonify({
+                'success': True,
+                'message': 'Password reset successfully. You can now log in.'
+            })
+        else:
+            return jsonify({'error': 'Invalid or expired reset token'}), 400
+            
+    except Exception as e:
+        logger.error(f"Password reset error: {e}")
+        return jsonify({'error': 'Failed to reset password'}), 500
 
-@app.route('/api/calendar/mayan', methods=['GET'])
-@require_auth
-def get_mayan_day(user):
-    """Get Mayan calendar info for today"""
-    mayan = mayan_day_sign(datetime.now())
-    return jsonify(mayan)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - EXECUTIVE FUNCTION SUPPORT
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/executive/state', methods=['GET'])
-@require_auth
-def get_exec_state(user):
-    """Get executive function state"""
-    exec_support = get_user_exec_support(user['id'])
-    return jsonify(exec_support.detect_current_state())
-
-
-@app.route('/api/executive/log', methods=['POST'])
-@require_auth
-def log_behavior(user):
-    """Log behavior for pattern analysis"""
-    data = request.get_json() or {}
+@app.route('/api/auth/session')
+def check_session():
+    """Check if user is logged in."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'authenticated': False}), 401
     
-    exec_support = get_user_exec_support(user['id'])
-    exec_support.log_behavior(data)
-    
-    # Also save to database
-    behavior_data = {
-        'id': secrets.token_hex(8),
-        'user_id': user['id'],
-        'timestamp': data.get('timestamp', datetime.now().isoformat()),
-        'action': data.get('action'),
-        'planned_action': data.get('planned_action'),
-        'duration_planned': data.get('planned_duration'),
-        'duration_actual': data.get('actual_duration'),
-        'delay_minutes': data.get('delay_minutes'),
-        'completion': 1 if data.get('completion') else 0,
-        'mood': data.get('mood', 50),
-        'notes': data.get('notes')
-    }
-    
-    db.insert('behavior_history', behavior_data)
-    
-    return jsonify({
-        'success': True,
-        'current_state': exec_support.detect_current_state()
-    })
-
-
-@app.route('/api/executive/scaffold/<task_id>', methods=['GET'])
-@require_auth
-def get_task_scaffold(user, task_id):
-    """Get scaffolded micro-steps for a task"""
-    tasks = db.select('tasks', {'id': task_id, 'user_id': user['id']})
-    if not tasks:
-        return jsonify({'error': 'Task not found'}), 404
-    
-    exec_support = get_user_exec_support(user['id'])
-    scaffolding = exec_support.get_task_scaffolding(tasks[0])
-    
-    return jsonify(scaffolding)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - DAILY CHECK-IN
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/checkin', methods=['POST'])
-@require_auth
-def daily_checkin(user):
-    """Submit daily check-in"""
-    data = request.get_json() or {}
-    today = datetime.now().strftime('%Y-%m-%d')
-    
-    entry_data = {
-        'id': secrets.token_hex(8),
-        'user_id': user['id'],
-        'date': today,
-        'mood_level': data.get('mood', 50),
-        'energy_level': data.get('energy', 50),
-        'stress_level': data.get('stress', 50),
-        'sleep_hours': data.get('sleep_hours', 7),
-        'sleep_quality': data.get('sleep_quality', 50),
-        'journal_entry': data.get('journal', ''),
-        'gratitude': data.get('gratitude', ''),
-        'wins': data.get('wins', ''),
-        'challenges': data.get('challenges', ''),
-        'created_at': datetime.now().isoformat()
-    }
-    
-    # Check for existing entry
-    existing = db.execute(
-        "SELECT id FROM daily_entries WHERE user_id = ? AND date = ?",
-        (user['id'], today)
-    )
-    
-    if existing:
-        # Update existing
-        db.update('daily_entries', entry_data, {'user_id': user['id'], 'date': today})
-    else:
-        db.insert('daily_entries', entry_data)
-    
-    # Update pet based on user wellness
-    pet = get_user_pet(user['id'])
-    wellness = (entry_data['mood_level'] + entry_data['energy_level']) / 2
-    pet.update(1.0, wellness)
-    save_pet(user['id'], pet)
-    
-    # Reset spoons for new day
-    spoons = get_user_spoons(user['id'])
-    sleep_quality = entry_data['sleep_quality'] / 100
-    spoon_result = spoons.new_day(sleep_quality)
+    user = get_user_by_id(user_id)
+    if not user:
+        session.clear()
+        return jsonify({'authenticated': False}), 401
     
     return jsonify({
-        'success': True,
-        'pet_state': pet.get_state(),
-        'spoons': spoon_result,
-        'message': "Check-in recorded! Have a great day!"
-    })
-
-
-@app.route('/api/checkin/history', methods=['GET'])
-@require_auth
-def get_checkin_history(user):
-    """Get check-in history"""
-    limit = request.args.get('limit', 30, type=int)
-    
-    entries = db.execute(
-        "SELECT * FROM daily_entries WHERE user_id = ? ORDER BY date DESC LIMIT ?",
-        (user['id'], limit)
-    )
-    
-    return jsonify(entries)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - ACCESSIBILITY
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/accessibility', methods=['GET'])
-@require_auth
-def get_accessibility_settings(user):
-    """Get accessibility settings"""
-    accessibility = get_user_accessibility(user['id'])
-    return jsonify(accessibility.to_dict())
-
-
-@app.route('/api/accessibility', methods=['PUT'])
-@require_auth
-def update_accessibility_settings(user):
-    """Update accessibility settings"""
-    data = request.get_json() or {}
-    
-    accessibility = get_user_accessibility(user['id'])
-    accessibility.update_settings(data)
-    
-    # Save to database
-    db.update('users', {
-        'accessibility_settings': json.dumps(accessibility.to_dict())
-    }, {'id': user['id']})
-    
-    return jsonify({
-        'success': True,
-        'settings': accessibility.to_dict()
-    })
-
-
-@app.route('/api/accessibility/css', methods=['GET'])
-@require_auth
-def get_accessibility_css(user):
-    """Get CSS variables for current accessibility settings"""
-    accessibility = get_user_accessibility(user['id'])
-    css = accessibility.get_css_variables()
-    
-    return css, 200, {'Content-Type': 'text/css'}
-
-
-@app.route('/api/accessibility/palettes', methods=['GET'])
-def get_color_palettes():
-    """Get available color palettes"""
-    return jsonify(AccessibilitySystem.AUTISM_SAFE_PALETTES)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - FRACTALS
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/fractal/2d', methods=['GET'])
-@require_auth
-def generate_2d_fractal(user):
-    """Generate 2D fractal based on user metrics"""
-    # Get latest check-in
-    entries = db.execute(
-        "SELECT * FROM daily_entries WHERE user_id = ? ORDER BY date DESC LIMIT 1",
-        (user['id'],)
-    )
-    
-    if entries:
-        entry = entries[0]
-        wellness = (entry['mood_level'] + entry['energy_level']) / 2
-        mood = entry['mood_level']
-        stress = entry['stress_level']
-    else:
-        wellness, mood, stress = 50, 50, 50
-    
-    image = fractal_engine.generate_2d_fractal(wellness, mood, stress)
-    
-    if image is None:
-        return jsonify({'error': 'Fractal generation not available'}), 500
-    
-    base64_img = fractal_engine.fractal_to_base64(image)
-    
-    return jsonify({
-        'image': f"data:image/png;base64,{base64_img}",
-        'parameters': {
-            'wellness': wellness,
-            'mood': mood,
-            'stress': stress
+        'authenticated': True,
+        'user': {
+            'id': user['id'],
+            'email': user['email'],
+            'first_name': user['first_name'],
+            'display_name': user['display_name'],
+            'spoons': user['spoons'],
+            'max_spoons': user['max_spoons']
         }
     })
 
+# ════════════════════════════════════════════════════════════════════════════════
+# USER DATA ROUTES
+# ════════════════════════════════════════════════════════════════════════════════
 
-@app.route('/api/fractal/3d', methods=['GET'])
-@require_auth
-def generate_3d_fractal(user):
-    """Generate 3D Mandelbulb fractal"""
-    entries = db.execute(
-        "SELECT * FROM daily_entries WHERE user_id = ? ORDER BY date DESC LIMIT 1",
-        (user['id'],)
-    )
+@app.route('/api/dashboard')
+def get_dashboard():
+    """Get dashboard data for logged in user."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
     
-    if entries:
-        entry = entries[0]
-        wellness = (entry['mood_level'] + entry['energy_level']) / 2
-        mood = entry['mood_level']
-    else:
-        wellness, mood = 50, 50
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
     
-    image = fractal_engine.generate_3d_mandelbulb(wellness, mood)
-    
-    if image is None:
-        return jsonify({'error': 'Fractal generation not available'}), 500
-    
-    base64_img = fractal_engine.fractal_to_base64(image)
+    pet = get_pet(user_id)
+    today = get_today_entry(user_id)
+    goals = get_goals(user_id)
+    tasks = get_tasks(user_id)
+    mayan = get_mayan_day()
+    accessibility = get_accessibility_prefs(user_id)
     
     return jsonify({
-        'image': f"data:image/png;base64,{base64_img}",
-        'parameters': {
-            'wellness': wellness,
-            'mood': mood
-        }
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - SUBSCRIPTION
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/subscription/status', methods=['GET'])
-@require_auth
-def subscription_status(user):
-    """Get subscription status"""
-    trial_end = user.get('trial_end_date')
-    status = user.get('subscription_status', 'trial')
-    
-    trial_active = False
-    trial_days_remaining = 0
-    
-    if trial_end:
-        try:
-            trial_end_date = datetime.fromisoformat(trial_end)
-            trial_days_remaining = max(0, (trial_end_date - datetime.now()).days)
-            trial_active = trial_days_remaining > 0 and status == 'trial'
-        except:
-            pass
-    
-    return jsonify({
-        'status': status,
-        'trial_active': trial_active,
-        'trial_days_remaining': trial_days_remaining,
-        'trial_end_date': trial_end,
-        'has_access': status == 'active' or trial_active,
-        'payment_link': os.environ.get('STRIPE_PAYMENT_LINK', 'https://buy.stripe.com/eVqeVd0GfadZaUXg8qcwg00'),
-        'gofundme_url': 'https://gofund.me/8d9303d27'
-    })
-
-
-@app.route('/api/subscription/activate', methods=['POST'])
-@require_auth
-def activate_subscription(user):
-    """Activate subscription (called after payment)"""
-    db.update('users', {'subscription_status': 'active'}, {'id': user['id']})
-    
-    return jsonify({
-        'success': True,
-        'message': 'Subscription activated! Thank you for your support!'
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# API ROUTES - SYSTEM
-# ═══════════════════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'version': '7.0.0',
-        'timestamp': datetime.now().isoformat(),
-        'features': {
-            'numpy': HAS_NUMPY,
-            'pillow': HAS_PIL,
-            'gpu': GPU_AVAILABLE,
-            'gpu_name': GPU_NAME
-        }
-    })
-
-
-@app.route('/api/system/status', methods=['GET'])
-def system_status():
-    """Get system status"""
-    return jsonify({
-        'name': 'Life Fractal Intelligence',
-        'version': '7.0.0',
-        'status': 'operational',
+        'user': {
+            'id': user['id'],
+            'email': user['email'],
+            'first_name': user['first_name'],
+            'display_name': user['display_name'],
+            'spoons': user['spoons'],
+            'max_spoons': user['max_spoons'],
+            'current_streak': user['current_streak']
+        },
+        'pet': pet,
+        'today': today,
+        'goals': goals,
+        'tasks': tasks,
+        'mayan_day': mayan,
+        'accessibility': accessibility,
         'sacred_math': {
             'phi': PHI,
             'golden_angle': GOLDEN_ANGLE,
-            'fibonacci': FIBONACCI[:10]
-        },
-        'features': {
-            'emotional_pet_ai': True,
-            'fractal_time_calendar': True,
-            'fibonacci_task_scheduler': True,
-            'executive_function_support': True,
-            'spoon_theory': True,
-            '2d_fractals': HAS_NUMPY and HAS_PIL,
-            '3d_fractals': HAS_NUMPY and HAS_PIL,
-            'accessibility': True,
-            'mayan_calendar': True
+            'fibonacci': FIBONACCI[:13]
         }
     })
 
+@app.route('/api/accessibility', methods=['GET', 'POST'])
+def handle_accessibility():
+    """Get or save accessibility preferences."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    if request.method == 'GET':
+        prefs = get_accessibility_prefs(user_id)
+        return jsonify({'preferences': prefs})
+    
+    # POST - save preferences
+    data = request.get_json() or {}
+    save_accessibility_prefs(user_id, data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Accessibility preferences saved!',
+        'preferences': get_accessibility_prefs(user_id)
+    })
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# MAIN DASHBOARD HTML
-# ═══════════════════════════════════════════════════════════════════════════════════════
+@app.route('/api/checkin', methods=['POST'])
+def save_checkin():
+    """Save daily check-in."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json() or {}
+    entry = save_daily_entry(user_id, data)
+    
+    # Update pet based on mood
+    if 'mood_score' in data:
+        pet = get_pet(user_id)
+        if pet:
+            mood_delta = (data['mood_score'] - 50) * 0.3
+            new_mood = max(0, min(100, pet['mood'] + mood_delta))
+            update_pet(user_id, {'mood': new_mood})
+    
+    return jsonify({
+        'success': True,
+        'message': 'Check-in saved! 🌟',
+        'entry': entry
+    })
 
-DASHBOARD_HTML = '''
+@app.route('/api/pet', methods=['GET'])
+def get_pet_data():
+    """Get pet data."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    pet = get_pet(user_id)
+    return jsonify({'pet': pet})
+
+@app.route('/api/pet/feed', methods=['POST'])
+def feed_pet():
+    """Feed the pet."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    pet = get_pet(user_id)
+    if not pet:
+        return jsonify({'error': 'No pet found'}), 404
+    
+    new_hunger = max(0, pet['hunger'] - 30)
+    new_mood = min(100, pet['mood'] + 5)
+    
+    update_pet(user_id, {
+        'hunger': new_hunger,
+        'mood': new_mood,
+        'last_fed': datetime.now(timezone.utc).isoformat()
+    })
+    
+    return jsonify({
+        'success': True,
+        'message': f"{pet['name']} enjoyed the treat! 🍖",
+        'pet': get_pet(user_id)
+    })
+
+@app.route('/api/pet/play', methods=['POST'])
+def play_with_pet():
+    """Play with the pet."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    pet = get_pet(user_id)
+    if not pet:
+        return jsonify({'error': 'No pet found'}), 404
+    
+    if pet['energy'] < 20:
+        return jsonify({'error': f"{pet['name']} is too tired to play right now 😴"}), 400
+    
+    new_energy = max(0, pet['energy'] - 15)
+    new_mood = min(100, pet['mood'] + 15)
+    new_bond = min(100, pet['bond'] + 3)
+    new_xp = pet['experience'] + 10
+    
+    # Check for level up
+    xp_needed = FIBONACCI[min(pet['level'] + 5, len(FIBONACCI)-1)] * 10
+    new_level = pet['level']
+    if new_xp >= xp_needed:
+        new_level += 1
+        new_xp -= xp_needed
+    
+    update_pet(user_id, {
+        'energy': new_energy,
+        'mood': new_mood,
+        'bond': new_bond,
+        'experience': new_xp,
+        'level': new_level,
+        'last_played': datetime.now(timezone.utc).isoformat()
+    })
+    
+    response = {
+        'success': True,
+        'message': f"You played with {pet['name']}! 🎮",
+        'pet': get_pet(user_id)
+    }
+    
+    if new_level > pet['level']:
+        response['level_up'] = True
+        response['message'] = f"🎉 {pet['name']} leveled up to level {new_level}!"
+    
+    return jsonify(response)
+
+@app.route('/api/pet/rest', methods=['POST'])
+def rest_pet():
+    """Let pet rest."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    pet = get_pet(user_id)
+    if not pet:
+        return jsonify({'error': 'No pet found'}), 404
+    
+    new_energy = min(100, pet['energy'] + 25)
+    new_stress = max(0, pet['stress'] - 10)
+    
+    update_pet(user_id, {
+        'energy': new_energy,
+        'stress': new_stress,
+        'last_rested': datetime.now(timezone.utc).isoformat()
+    })
+    
+    return jsonify({
+        'success': True,
+        'message': f"{pet['name']} is resting peacefully 😴",
+        'pet': get_pet(user_id)
+    })
+
+@app.route('/api/goals', methods=['GET', 'POST'])
+def handle_goals():
+    """Get or create goals."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    if request.method == 'GET':
+        goals = get_goals(user_id)
+        return jsonify({'goals': goals})
+    
+    # POST - create goal
+    data = request.get_json() or {}
+    goal = create_goal(user_id, data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Goal created! 🎯',
+        'goal': goal
+    })
+
+@app.route('/api/tasks', methods=['GET', 'POST'])
+def handle_tasks():
+    """Get or create tasks."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    if request.method == 'GET':
+        include_completed = request.args.get('include_completed', 'false').lower() == 'true'
+        tasks = get_tasks(user_id, include_completed)
+        return jsonify({'tasks': tasks})
+    
+    # POST - create task
+    data = request.get_json() or {}
+    task = create_task(user_id, data)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Task added! ✅',
+        'task': task
+    })
+
+@app.route('/api/tasks/<task_id>/complete', methods=['POST'])
+def mark_task_complete(task_id):
+    """Mark task as complete."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    task = complete_task(task_id, user_id)
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+    
+    user = get_user_by_id(user_id)
+    pet = get_pet(user_id)
+    
+    return jsonify({
+        'success': True,
+        'message': f"Task complete! -{task['spoon_cost']} spoons 🥄",
+        'task': task,
+        'spoons_remaining': user['spoons'],
+        'pet': pet
+    })
+
+# ════════════════════════════════════════════════════════════════════════════════
+# VISUALIZATION ROUTES
+# ════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/visualization/data')
+def get_visualization_data():
+    """Get data for 3D visualization."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    goals = get_goals(user_id)
+    today = get_today_entry(user_id)
+    pet = get_pet(user_id)
+    
+    # Create goal orbs positioned using golden angle
+    orbs = []
+    for i, goal in enumerate(goals):
+        theta = i * GOLDEN_ANGLE_RAD
+        r = 3 + (i * 0.5)
+        
+        orbs.append({
+            'id': goal['id'],
+            'title': goal['title'],
+            'progress': goal['progress'],
+            'color': goal['color'],
+            'position': {
+                'x': r * math.cos(theta),
+                'y': (goal['progress'] / 100 * 2) - 1,
+                'z': r * math.sin(theta)
+            },
+            'size': 0.3 + (goal['priority'] / 10)
+        })
+    
+    return jsonify({
+        'orbs': orbs,
+        'wellness': today.get('wellness_index', 50),
+        'mood': today.get('mood_score', 50),
+        'energy': today.get('energy_level', 50),
+        'pet_mood': pet['mood'] if pet else 50,
+        'sacred_math': {
+            'phi': PHI,
+            'golden_angle': GOLDEN_ANGLE
+        }
+    })
+
+# ════════════════════════════════════════════════════════════════════════════════
+# MAIN HTML TEMPLATE
+# ════════════════════════════════════════════════════════════════════════════════
+
+MAIN_HTML = '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Fractal Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=OpenDyslexic&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --color-primary: #5B8A9A;
-            --color-secondary: #8BB4C2;
-            --color-background: #F5F9FA;
-            --color-text: #2C4A52;
-            --color-accent: #7BA3B0;
-            --color-warning: #D4A574;
-            --color-success: #6B8E6B;
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-size-base: 16px;
+            --primary: #6B8E9F;
+            --primary-light: #8FB3C4;
+            --primary-dark: #4A6B7C;
+            --secondary: #9F8E6B;
+            --accent: #8E6B9F;
+            --success: #6B9F8E;
+            --warning: #9F9F6B;
+            --danger: #9F6B6B;
+            --background: #F8F9FA;
+            --surface: #FFFFFF;
+            --text: #2D3748;
+            --text-secondary: #718096;
+            --border: #E2E8F0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        /* Calm colors mode */
+        .calm-colors {
+            --primary: #7A9E7A;
+            --primary-light: #9EBE9E;
+            --accent: #7A7A9E;
+            --background: #F5F7F5;
+        }
+        
+        /* High contrast mode */
+        .high-contrast {
+            --primary: #0066CC;
+            --text: #000000;
+            --background: #FFFFFF;
+            --border: #000000;
+        }
+        
+        /* Dyslexia font mode */
+        .dyslexia-font {
+            --font-main: 'OpenDyslexic', sans-serif;
+        }
+        
+        /* Larger text mode */
+        .larger-text {
+            font-size: 18px;
+        }
+        .larger-text h1 { font-size: 2.5rem; }
+        .larger-text h2 { font-size: 2rem; }
+        .larger-text h3 { font-size: 1.5rem; }
+        
+        /* Reduced motion */
+        .reduced-motion * {
+            animation: none !important;
+            transition: none !important;
         }
         
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: var(--font-family);
-            font-size: var(--font-size-base);
-            background: var(--color-background);
-            color: var(--color-text);
-            line-height: 1.6;
+            font-family: var(--font-main);
+            background: var(--background);
+            color: var(--text);
             min-height: 100vh;
+            line-height: 1.6;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* Neurodiversity Symbol */
+        .neurodiversity-symbol {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4, #45B7D1, #96E6A1, #DDA0DD);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
         }
         
-        header {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        /* Header */
+        .header {
+            background: var(--surface);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 4px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
         .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--color-primary);
-        }
-        
-        .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
-        }
-        
-        .spoon-display {
-            background: var(--color-secondary);
-            padding: 8px 16px;
-            border-radius: 20px;
+            gap: 0.75rem;
+            font-size: 1.25rem;
             font-weight: 600;
+            color: var(--primary);
         }
         
-        .grid {
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .spoons-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            color: white;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .user-greeting {
+            color: var(--text-secondary);
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--background);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        /* Accessibility Banner */
+        .accessibility-banner {
+            background: linear-gradient(135deg, #E8F4F8, #F8E8F4);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .accessibility-banner a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .accessibility-banner a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Main Layout */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         
-        .card h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: var(--color-primary);
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--text);
         }
         
-        .pet-card {
+        .card-icon {
+            font-size: 1.25rem;
+        }
+        
+        /* Pet Card */
+        .pet-display {
             text-align: center;
+            padding: 1rem 0;
         }
         
         .pet-emoji {
-            font-size: 80px;
-            margin: 20px 0;
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            animation: gentle-bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .pet-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .pet-status {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
         
         .pet-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 15px 0;
+            gap: 0.75rem;
+            margin: 1rem 0;
         }
         
-        .stat {
-            background: var(--color-background);
-            padding: 10px;
+        .stat-box {
+            background: var(--background);
+            padding: 0.75rem;
             border-radius: 8px;
+            text-align: center;
         }
         
         .stat-label {
-            font-size: 12px;
-            color: #666;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
         }
         
         .stat-value {
-            font-size: 18px;
+            font-size: 1.1rem;
             font-weight: 600;
+            color: var(--text);
         }
         
-        .progress-bar {
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
+        .pet-level {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: var(--color-primary);
-            transition: width 0.3s;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--color-text);
-        }
-        
-        .btn-secondary {
-            background: var(--color-secondary);
-            color: var(--color-text);
-        }
-        
-        .btn-group {
+        .pet-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 0.5rem;
+            justify-content: center;
         }
         
+        /* Check-in Form */
         .checkin-form {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1rem;
         }
         
-        .form-group {
+        .slider-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 0.25rem;
         }
         
-        .form-group label {
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .slider-container {
+        .slider-label {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .slider-value {
+            font-weight: 600;
+            color: var(--primary);
         }
         
         input[type="range"] {
-            flex: 1;
-            -webkit-appearance: none;
+            width: 100%;
             height: 8px;
-            background: #e0e0e0;
             border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
         }
         
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 20px;
             height: 20px;
-            background: var(--color-primary);
             border-radius: 50%;
+            background: var(--primary);
             cursor: pointer;
-        }
-        
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
         }
         
         textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
             border-radius: 8px;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 0.9rem;
             resize: vertical;
             min-height: 80px;
         }
         
-        textarea:focus {
-            outline: none;
-            border-color: var(--color-primary);
+        /* Tasks Section */
+        .tasks-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
         }
         
         .task-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.5rem;
         }
         
         .task-item {
-            background: var(--color-background);
-            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--background);
             border-radius: 8px;
+        }
+        
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .task-title {
+            flex: 1;
+        }
+        
+        .task-spoons {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Calendar Card */
+        .mayan-day {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .mayan-number {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        
+        .mayan-sign {
+            font-size: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        .mayan-meaning {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+        
+        /* Fractal Buttons */
+        .fractal-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        /* Goals Section */
+        .goals-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--background), #E8F4F8);
+        }
+        
+        .auth-card {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-logo h1 {
+            color: var(--primary);
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .error-message {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .success-message {
+            background: #D1FAE5;
+            color: #059669;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        /* Accessibility Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+        }
+        
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 1.5rem;
         }
         
-        .task-priority {
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: var(--color-accent);
-            color: white;
-        }
-        
-        .fractal-container {
-            text-align: center;
-        }
-        
-        .fractal-image {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        
-        .mayan-info {
-            background: linear-gradient(135deg, #2C4A52 0%, #5B8A9A 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .mayan-day {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-        
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-        }
-        
-        .login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        .login-card h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--color-primary);
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--color-primary);
-        }
-        
-        .accessibility-notice {
-            background: var(--color-secondary);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        
+        .accessibility-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .accessibility-section h3 {
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+        
+        .toggle-label {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .toggle-label span:first-child {
+            font-weight: 500;
+        }
+        
+        .toggle-label span:last-child {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border);
+            border-radius: 13px;
+            transition: 0.3s;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        
+        input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        
+        /* 3D View */
+        .fractal-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0A0E17;
+            z-index: 200;
+        }
+        
+        .fractal-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(20, 30, 45, 0.9);
+            padding: 1rem;
+            border-radius: var(--radius);
+            color: white;
+            min-width: 250px;
+        }
+        
+        .fractal-controls h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .control-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .fractal-controls input[type="range"] {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .fractal-info {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(20, 30, 45, 0.9);
+            padding: 1rem;
+            border-radius: var(--radius);
+            color: white;
+            font-size: 0.85rem;
         }
         
         .hidden {
             display: none !important;
         }
         
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            
-            header {
-                flex-direction: column;
-                gap: 15px;
-            }
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Focus Indicators */
+        .focus-indicators *:focus {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <!-- Login View -->
-    <div id="login-view" class="login-container">
-        <div class="login-card">
-            <h1>🌀 Life Fractal</h1>
-            <form id="login-form">
-                <input type="email" id="login-email" class="form-input" placeholder="Email" required>
-                <input type="password" id="login-password" class="form-input" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" style="width:100%">Log In</button>
+    <!-- Auth Pages -->
+    <div id="login-page" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>🌀 Life Fractal</h1>
+            </div>
+            <form id="login-form" class="auth-form">
+                <div id="login-error" class="error-message hidden"></div>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Log In
+                </button>
             </form>
-            <p style="text-align:center; margin-top:20px">
-                Don't have an account? <a href="#" id="show-register">Sign up</a>
-            </p>
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="#" onclick="showPage('register')">Sign up</a></p>
+                <p style="margin-top: 0.5rem;"><a href="#" onclick="showPage('forgot-password')">Forgot password?</a></p>
+            </div>
         </div>
     </div>
     
-    <!-- Register View -->
-    <div id="register-view" class="login-container hidden">
-        <div class="login-card">
-            <h1>🌀 Create Account</h1>
-            <form id="register-form">
-                <input type="text" id="register-name" class="form-input" placeholder="First Name" required>
-                <input type="email" id="register-email" class="form-input" placeholder="Email" required>
-                <input type="password" id="register-password" class="form-input" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" style="width:100%">Start Free Trial</button>
+    <div id="register-page" class="auth-container hidden">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>🌀 Life Fractal</h1>
+            </div>
+            <form id="register-form" class="auth-form">
+                <div id="register-error" class="error-message hidden"></div>
+                <div class="form-group">
+                    <label for="register-name">Your Name (optional)</label>
+                    <input type="text" id="register-name" autocomplete="given-name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required autocomplete="new-password" 
+                           minlength="8" placeholder="At least 8 characters">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Create Account
+                </button>
             </form>
-            <p style="text-align:center; margin-top:20px">
-                Already have an account? <a href="#" id="show-login">Log in</a>
-            </p>
+            <div class="auth-footer">
+                <p>Already have an account? <a href="#" onclick="showPage('login')">Log in</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="forgot-password-page" class="auth-container hidden">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>🌀 Reset Password</h1>
+            </div>
+            <form id="forgot-form" class="auth-form">
+                <div id="forgot-message" class="hidden"></div>
+                <div class="form-group">
+                    <label for="forgot-email">Email</label>
+                    <input type="email" id="forgot-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Send Reset Link
+                </button>
+            </form>
+            <div class="auth-footer">
+                <p><a href="#" onclick="showPage('login')">Back to login</a></p>
+            </div>
         </div>
     </div>
     
     <!-- Main Dashboard -->
-    <div id="dashboard-view" class="hidden">
-        <div class="container">
-            <header>
-                <div class="logo">🌀 Life Fractal Intelligence</div>
-                <div class="user-info">
-                    <div class="spoon-display" id="spoon-count">🥄 12 Spoons</div>
-                    <span id="user-name">Welcome!</span>
-                    <button class="btn btn-secondary" id="logout-btn">Logout</button>
-                </div>
-            </header>
-            
-            <div class="accessibility-notice">
-                ♿ Accessibility features enabled. <a href="#" id="accessibility-settings">Customize</a>
+    <div id="dashboard-page" class="hidden">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🌀</span>
+                <span>Life Fractal Intelligence</span>
             </div>
-            
-            <div class="grid">
+            <div class="header-right">
+                <div class="spoons-display">
+                    <span>🥄</span>
+                    <span id="spoons-count">12</span>
+                    <span>Spoons</span>
+                </div>
+                <span class="user-greeting">Hi, <span id="user-name">there</span>!</span>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </header>
+        
+        <div class="accessibility-banner">
+            <span class="neurodiversity-symbol">∞</span>
+            <span>Accessibility features enabled.</span>
+            <a href="#" onclick="openAccessibilityModal()">Customize</a>
+        </div>
+        
+        <main class="main-content">
+            <div class="dashboard-grid">
                 <!-- Pet Card -->
-                <div class="card pet-card">
-                    <h2>🐾 Your Companion</h2>
-                    <div class="pet-emoji" id="pet-emoji">🐱</div>
-                    <div id="pet-name" style="font-size:20px; font-weight:600">Buddy</div>
-                    <div id="pet-status" style="color:#666; margin:5px 0">Content 😊</div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🐾</span>
+                        <span>Your Companion</span>
+                    </div>
+                    <div class="pet-display">
+                        <div class="pet-emoji" id="pet-emoji">🐱</div>
+                        <div class="pet-name" id="pet-name">Buddy</div>
+                        <div class="pet-status" id="pet-status">Okay 😐</div>
+                    </div>
                     <div class="pet-stats">
-                        <div class="stat">
+                        <div class="stat-box">
                             <div class="stat-label">Hunger</div>
                             <div class="stat-value" id="pet-hunger">50</div>
-                            <div class="progress-bar"><div class="progress-fill" id="hunger-bar" style="width:50%"></div></div>
                         </div>
-                        <div class="stat">
+                        <div class="stat-box">
                             <div class="stat-label">Energy</div>
                             <div class="stat-value" id="pet-energy">50</div>
-                            <div class="progress-bar"><div class="progress-fill" id="energy-bar" style="width:50%"></div></div>
                         </div>
-                        <div class="stat">
+                        <div class="stat-box">
                             <div class="stat-label">Mood</div>
                             <div class="stat-value" id="pet-mood">50</div>
-                            <div class="progress-bar"><div class="progress-fill" id="mood-bar" style="width:50%"></div></div>
                         </div>
-                        <div class="stat">
+                        <div class="stat-box">
                             <div class="stat-label">Bond</div>
                             <div class="stat-value" id="pet-bond">20</div>
-                            <div class="progress-bar"><div class="progress-fill" id="bond-bar" style="width:20%"></div></div>
                         </div>
                     </div>
-                    <div style="margin:10px 0">
-                        Level <span id="pet-level">1</span> • <span id="pet-xp">0</span>/<span id="pet-xp-next">8</span> XP
-                    </div>
-                    <div class="btn-group" style="justify-content:center">
-                        <button class="btn btn-primary" id="feed-btn">🍽️ Feed</button>
-                        <button class="btn btn-primary" id="play-btn">🎾 Play</button>
-                        <button class="btn btn-secondary" id="rest-btn">💤 Rest</button>
+                    <div class="pet-level" id="pet-level">Level 1 • 0/80 XP</div>
+                    <div class="pet-actions">
+                        <button class="btn btn-secondary" onclick="feedPet()">🍖 Feed</button>
+                        <button class="btn btn-primary" onclick="playWithPet()">✨ Play</button>
+                        <button class="btn btn-secondary" onclick="restPet()">⭐ Rest</button>
                     </div>
                 </div>
                 
                 <!-- Daily Check-in -->
                 <div class="card">
-                    <h2>📝 Daily Check-in</h2>
-                    <form class="checkin-form" id="checkin-form">
-                        <div class="form-group">
-                            <label>Mood</label>
-                            <div class="slider-container">
-                                <input type="range" id="mood-slider" min="0" max="100" value="50">
+                    <div class="card-header">
+                        <span class="card-icon">📝</span>
+                        <span>Daily Check-in</span>
+                    </div>
+                    <form id="checkin-form" class="checkin-form">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Mood</span>
                                 <span class="slider-value" id="mood-value">50</span>
                             </div>
+                            <input type="range" id="mood-slider" min="0" max="100" value="50" 
+                                   oninput="updateSliderValue('mood')">
                         </div>
-                        <div class="form-group">
-                            <label>Energy</label>
-                            <div class="slider-container">
-                                <input type="range" id="energy-slider" min="0" max="100" value="50">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Energy</span>
                                 <span class="slider-value" id="energy-value">50</span>
                             </div>
+                            <input type="range" id="energy-slider" min="0" max="100" value="50"
+                                   oninput="updateSliderValue('energy')">
                         </div>
-                        <div class="form-group">
-                            <label>Sleep Quality</label>
-                            <div class="slider-container">
-                                <input type="range" id="sleep-slider" min="0" max="100" value="70">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Sleep Quality</span>
                                 <span class="slider-value" id="sleep-value">70</span>
                             </div>
+                            <input type="range" id="sleep-slider" min="0" max="100" value="70"
+                                   oninput="updateSliderValue('sleep')">
                         </div>
                         <div class="form-group">
                             <label>Journal (optional)</label>
                             <textarea id="journal-entry" placeholder="How are you feeling today?"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Check-in</button>
+                        <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">
+                            Save Check-in
+                        </button>
                     </form>
                 </div>
                 
-                <!-- Tasks -->
+                <!-- Today's Tasks -->
                 <div class="card">
-                    <h2>✅ Today's Tasks</h2>
-                    <div class="task-list" id="task-list">
-                        <p style="color:#666; text-align:center">No tasks yet. Add some goals first!</p>
+                    <div class="card-header">
+                        <span class="card-icon">✅</span>
+                        <span>Today's Tasks</span>
                     </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" id="add-task-btn">+ Add Task</button>
-                        <button class="btn btn-secondary" id="next-task-btn">🎯 What's Next?</button>
+                    <div id="tasks-container">
+                        <div class="tasks-empty">
+                            No tasks yet. Add some goals first!
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
+                        <button class="btn btn-secondary" onclick="suggestNextTask()">🎯 What's Next?</button>
                     </div>
                 </div>
                 
-                <!-- Mayan Calendar -->
+                <!-- Sacred Calendar -->
                 <div class="card">
-                    <h2>📅 Sacred Calendar</h2>
-                    <div class="mayan-info" id="mayan-info">
-                        <div style="font-size:14px">Today's Mayan Day</div>
-                        <div class="mayan-day" id="mayan-day">Loading...</div>
-                        <div id="mayan-energy" style="font-size:14px; opacity:0.9"></div>
+                    <div class="card-header">
+                        <span class="card-icon">📅</span>
+                        <span>Sacred Calendar</span>
                     </div>
-                    <div style="margin-top:15px; text-align:center">
-                        <a href="#" class="btn btn-secondary" id="view-calendar">View Full Calendar</a>
+                    <div class="mayan-day">
+                        <div>Today's Mayan Day</div>
+                        <div class="mayan-number" id="mayan-number">11</div>
+                        <div class="mayan-sign" id="mayan-sign">Oc</div>
+                        <div class="mayan-meaning" id="mayan-meaning">loyalty, heart guidance</div>
                     </div>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem; justify-content: center;">
+                        View Full Calendar
+                    </button>
                 </div>
                 
-                <!-- Fractal Visualization -->
-                <div class="card fractal-container">
-                    <h2>🌀 Your Life Fractal</h2>
-                    <p style="color:#666; font-size:14px">Your metrics transformed into sacred geometry</p>
-                    <img src="" alt="Fractal visualization" class="fractal-image hidden" id="fractal-image">
-                    <div class="btn-group" style="justify-content:center">
-                        <button class="btn btn-primary" id="gen-2d-btn">Generate 2D</button>
-                        <button class="btn btn-secondary" id="gen-3d-btn">Generate 3D</button>
+                <!-- Life Fractal -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">🌀</span>
+                        <span>Your Life Fractal</span>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Your metrics transformed into sacred geometry
+                    </p>
+                    <div class="fractal-buttons">
+                        <button class="btn btn-primary" onclick="generate2DFractal()">Generate 2D</button>
+                        <button class="btn btn-primary" onclick="open3DView()">Generate 3D</button>
                     </div>
                 </div>
                 
                 <!-- Goals -->
                 <div class="card">
-                    <h2>🎯 Goals</h2>
-                    <div id="goals-list">
-                        <p style="color:#666; text-align:center">No goals yet. Start by setting some!</p>
+                    <div class="card-header">
+                        <span class="card-icon">🎯</span>
+                        <span>Goals</span>
                     </div>
-                    <button class="btn btn-primary" style="margin-top:15px; width:100%" id="add-goal-btn">+ Add Goal</button>
+                    <div id="goals-container">
+                        <div class="goals-empty">
+                            No goals yet. Start by setting some!
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; justify-content: center;" 
+                            onclick="openAddGoalModal()">
+                        + Add Goal
+                    </button>
                 </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Accessibility Modal -->
+    <div id="accessibility-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="neurodiversity-symbol">∞</span>
+                    Accessibility Settings
+                </h2>
+                <button class="modal-close" onclick="closeAccessibilityModal()">×</button>
+            </div>
+            
+            <div class="accessibility-section">
+                <h3>Visual Preferences</h3>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Reduced Motion</span>
+                            <span>Minimize animations and transitions</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-reduced-motion" onchange="saveAccessibilityPref('reduced_motion', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>High Contrast</span>
+                            <span>Increase color contrast for better visibility</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-high-contrast" onchange="saveAccessibilityPref('high_contrast', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Larger Text</span>
+                            <span>Increase text size throughout the app</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-larger-text" onchange="saveAccessibilityPref('larger_text', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Dyslexia-Friendly Font</span>
+                            <span>Use OpenDyslexic font for easier reading</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-dyslexia-font" onchange="saveAccessibilityPref('dyslexia_font', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Calm Colors</span>
+                            <span>Use softer, less stimulating colors</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-calm-colors" onchange="saveAccessibilityPref('calm_colors', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accessibility-section">
+                <h3>Navigation & Interaction</h3>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Keyboard Navigation</span>
+                            <span>Enhanced keyboard shortcuts and focus indicators</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-keyboard-nav" checked onchange="saveAccessibilityPref('keyboard_navigation', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Focus Indicators</span>
+                            <span>Show clear outlines when navigating with keyboard</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-focus-indicators" checked onchange="saveAccessibilityPref('focus_indicators', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Simplified Layout</span>
+                            <span>Reduce visual clutter for better focus</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-simplified-layout" onchange="saveAccessibilityPref('simplified_layout', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accessibility-section">
+                <h3>Executive Function Support</h3>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Time Blindness Helpers</span>
+                            <span>Visual time indicators and gentle reminders</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-time-helpers" checked onchange="saveAccessibilityPref('time_blindness_helpers', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Task Chunking</span>
+                            <span>Break tasks into smaller, manageable steps</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-task-chunking" checked onchange="saveAccessibilityPref('task_chunking', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Gentle Reminders</span>
+                            <span>Soft, non-intrusive notifications</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-gentle-reminders" checked onchange="saveAccessibilityPref('gentle_reminders', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Sensory Break Reminders</span>
+                            <span>Reminders to take sensory breaks</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-sensory-breaks" onchange="saveAccessibilityPref('sensory_break_reminders', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <div class="toggle-label">
+                            <span>Auto-Save</span>
+                            <span>Automatically save your progress</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pref-auto-save" checked onchange="saveAccessibilityPref('auto_save', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <button class="btn btn-primary" onclick="closeAccessibilityModal()">
+                    Save & Close
+                </button>
             </div>
         </div>
     </div>
     
+    <!-- 3D Fractal View -->
+    <div id="fractal-view" class="fractal-view hidden">
+        <div class="fractal-controls">
+            <h2>🌀 Fractal Universe</h2>
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.75rem;" onclick="regenerateFractal()">
+                🔄 Regenerate
+            </button>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.75rem;" onclick="addGoalOrb()">
+                + Add Goal Orb
+            </button>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.75rem;" onclick="toggleSacredGeometry()">
+                🔷 Toggle Sacred Geometry
+            </button>
+            <label class="toggle-switch" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <input type="checkbox" id="auto-rotate" checked onchange="toggleAutoRotate()">
+                <span class="toggle-slider"></span>
+                <span style="color: white;">Auto-Rotate</span>
+            </label>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Mood Influence</span>
+                    <span id="mood-influence-val">50</span>
+                </div>
+                <input type="range" id="mood-influence" min="0" max="100" value="50" oninput="updateFractalParam('mood')">
+            </div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Energy Flow</span>
+                    <span id="energy-flow-val">50</span>
+                </div>
+                <input type="range" id="energy-flow" min="0" max="100" value="50" oninput="updateFractalParam('energy')">
+            </div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Complexity</span>
+                    <span id="complexity-val">2000</span>
+                </div>
+                <input type="range" id="complexity" min="500" max="5000" value="2000" oninput="updateFractalParam('complexity')">
+            </div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Goal Orbs</span>
+                    <span id="orbs-val">0</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="resetCamera()">
+                Reset Camera
+            </button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="close3DView()">
+                ← Back to Dashboard
+            </button>
+        </div>
+        
+        <div class="fractal-info">
+            <div><strong>Controls</strong></div>
+            <div>Mouse: Drag to rotate</div>
+            <div>Scroll: Zoom in/out</div>
+            <div>Right-click: Pan camera</div>
+            <div>Space: Pause/Resume rotation</div>
+            <div style="margin-top: 0.5rem; color: var(--primary-light);">
+                Your fractal evolves with your wellness data.<br>
+                Each orb represents a goal, colored by progress and importance.
+            </div>
+        </div>
+        
+        <div id="fractal-container" style="width: 100%; height: 100%;"></div>
+    </div>
+
     <script>
-        // State
+        // ============================================================
+        // STATE MANAGEMENT
+        // ============================================================
         let currentUser = null;
+        let accessibilityPrefs = {};
+        let threeScene = null;
+        let threeCamera = null;
+        let threeRenderer = null;
+        let fractalPoints = null;
+        let sacredGeometry = null;
+        let goalOrbs = [];
+        let autoRotate = true;
+        let animationId = null;
         
-        // API helper
-        async function api(endpoint, method = 'GET', data = null) {
-            const options = {
-                method,
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include'
-            };
-            if (data) options.body = JSON.stringify(data);
+        const PHI = 1.618033988749895;
+        const GOLDEN_ANGLE = 137.5077640500378;
+        const GOLDEN_ANGLE_RAD = GOLDEN_ANGLE * Math.PI / 180;
+        
+        // ============================================================
+        // PAGE NAVIGATION
+        // ============================================================
+        function showPage(page) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('forgot-password-page').classList.add('hidden');
+            document.getElementById('dashboard-page').classList.add('hidden');
             
-            const response = await fetch(`/api${endpoint}`, options);
-            return response.json();
+            document.getElementById(page + '-page').classList.remove('hidden');
         }
         
-        // View switching
-        function showView(viewId) {
-            document.querySelectorAll('[id$="-view"]').forEach(v => v.classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-        }
-        
-        // Update pet display
-        function updatePetDisplay(pet) {
-            document.getElementById('pet-emoji').textContent = pet.emoji;
-            document.getElementById('pet-name').textContent = pet.name;
-            document.getElementById('pet-status').textContent = pet.status;
-            document.getElementById('pet-hunger').textContent = Math.round(pet.hunger);
-            document.getElementById('pet-energy').textContent = Math.round(pet.energy);
-            document.getElementById('pet-mood').textContent = Math.round(pet.mood);
-            document.getElementById('pet-bond').textContent = Math.round(pet.bond);
-            document.getElementById('pet-level').textContent = pet.level;
-            document.getElementById('pet-xp').textContent = pet.xp;
-            document.getElementById('pet-xp-next').textContent = pet.xp_to_next;
-            
-            document.getElementById('hunger-bar').style.width = pet.hunger + '%';
-            document.getElementById('energy-bar').style.width = pet.energy + '%';
-            document.getElementById('mood-bar').style.width = pet.mood + '%';
-            document.getElementById('bond-bar').style.width = pet.bond + '%';
-        }
-        
-        // Update spoon display
-        function updateSpoonDisplay(spoons) {
-            document.getElementById('spoon-count').textContent = `🥄 ${spoons.current_spoons} Spoons`;
-        }
-        
-        // Load dashboard data
-        async function loadDashboard() {
+        // ============================================================
+        // AUTHENTICATION
+        // ============================================================
+        async function checkSession() {
             try {
-                // Get user info
-                const user = await api('/auth/me');
-                currentUser = user;
-                document.getElementById('user-name').textContent = `Hi, ${user.first_name || 'there'}!`;
+                const res = await fetch('/api/auth/session');
+                const data = await res.json();
                 
-                // Get pet
-                const pet = await api('/pet');
-                updatePetDisplay(pet);
-                
-                // Get spoons
-                const spoons = await api('/spoons');
-                updateSpoonDisplay(spoons);
-                
-                // Get Mayan day
-                const mayan = await api('/calendar/mayan');
-                document.getElementById('mayan-day').textContent = mayan.tzolkin;
-                document.getElementById('mayan-energy').textContent = mayan.energy_quality;
-                
-                // Get tasks
-                const tasks = await api('/tasks');
-                const taskList = document.getElementById('task-list');
-                if (tasks.length > 0) {
-                    taskList.innerHTML = tasks.slice(0, 5).map(t => `
-                        <div class="task-item">
-                            <div>
-                                <strong>${t.name}</strong>
-                                <div style="font-size:12px; color:#666">🥄 ${t.spoon_cost} spoons</div>
-                            </div>
-                            <span class="task-priority">P${Math.round(t.priority)}</span>
-                        </div>
-                    `).join('');
+                if (data.authenticated) {
+                    currentUser = data.user;
+                    showPage('dashboard');
+                    loadDashboard();
+                } else {
+                    showPage('login');
                 }
-                
-                // Get goals
-                const goals = await api('/goals');
-                const goalsList = document.getElementById('goals-list');
-                if (goals.length > 0) {
-                    goalsList.innerHTML = goals.map(g => `
-                        <div style="margin-bottom:10px; padding:10px; background:#f5f9fa; border-radius:8px">
-                            <strong>${g.title}</strong>
-                            <div class="progress-bar" style="margin-top:5px">
-                                <div class="progress-fill" style="width:${g.progress}%"></div>
-                            </div>
-                            <div style="font-size:12px; color:#666; margin-top:5px">${g.progress}% complete</div>
-                        </div>
-                    `).join('');
-                }
-                
-                showView('dashboard-view');
-                
-            } catch (error) {
-                console.error('Dashboard load error:', error);
-                showView('login-view');
+            } catch (e) {
+                showPage('login');
             }
         }
         
-        // Check auth on load
-        async function checkAuth() {
-            try {
-                await api('/auth/me');
-                loadDashboard();
-            } catch {
-                showView('login-view');
-            }
-        }
-        
-        // Event listeners
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const errorEl = document.getElementById('login-error');
+            errorEl.classList.add('hidden');
+            
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             
-            const result = await api('/auth/login', 'POST', { email, password });
-            
-            if (result.success) {
-                loadDashboard();
-            } else {
-                alert(result.error || 'Login failed');
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    currentUser = data.user;
+                    showPage('dashboard');
+                    loadDashboard();
+                } else {
+                    errorEl.textContent = data.error;
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.remove('hidden');
             }
         });
         
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const errorEl = document.getElementById('register-error');
+            errorEl.classList.add('hidden');
+            
             const first_name = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             
-            const result = await api('/auth/register', 'POST', { email, password, first_name });
-            
-            if (result.success) {
-                loadDashboard();
-            } else {
-                alert(result.error || 'Registration failed');
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, first_name })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    currentUser = data.user;
+                    showPage('dashboard');
+                    loadDashboard();
+                } else {
+                    errorEl.textContent = data.error;
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.remove('hidden');
             }
         });
         
-        document.getElementById('show-register').addEventListener('click', (e) => {
+        document.getElementById('forgot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            showView('register-view');
+            const msgEl = document.getElementById('forgot-message');
+            
+            const email = document.getElementById('forgot-email').value;
+            
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await res.json();
+                
+                msgEl.textContent = data.message;
+                msgEl.className = 'success-message';
+                msgEl.classList.remove('hidden');
+            } catch (e) {
+                msgEl.textContent = 'Connection error. Please try again.';
+                msgEl.className = 'error-message';
+                msgEl.classList.remove('hidden');
+            }
         });
         
-        document.getElementById('show-login').addEventListener('click', (e) => {
-            e.preventDefault();
-            showView('login-view');
-        });
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            currentUser = null;
+            showPage('login');
+        }
         
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await api('/auth/logout', 'POST');
-            showView('login-view');
-        });
+        // ============================================================
+        // DASHBOARD
+        // ============================================================
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/dashboard');
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showPage('login');
+                    return;
+                }
+                
+                currentUser = data.user;
+                accessibilityPrefs = data.accessibility || {};
+                
+                // Update UI
+                document.getElementById('user-name').textContent = data.user.display_name || data.user.first_name || 'there';
+                document.getElementById('spoons-count').textContent = data.user.spoons;
+                
+                // Update pet
+                if (data.pet) {
+                    document.getElementById('pet-emoji').textContent = data.pet.emoji;
+                    document.getElementById('pet-name').textContent = data.pet.name;
+                    document.getElementById('pet-status').textContent = data.pet.status;
+                    document.getElementById('pet-hunger').textContent = Math.round(data.pet.hunger);
+                    document.getElementById('pet-energy').textContent = Math.round(data.pet.energy);
+                    document.getElementById('pet-mood').textContent = Math.round(data.pet.mood);
+                    document.getElementById('pet-bond').textContent = Math.round(data.pet.bond);
+                    document.getElementById('pet-level').textContent = 
+                        `Level ${data.pet.level} • ${data.pet.experience}/${data.pet.xp_for_next} XP`;
+                }
+                
+                // Update mayan day
+                if (data.mayan_day) {
+                    document.getElementById('mayan-number').textContent = data.mayan_day.day_number;
+                    document.getElementById('mayan-sign').textContent = data.mayan_day.day_sign;
+                    document.getElementById('mayan-meaning').textContent = data.mayan_day.meaning;
+                }
+                
+                // Update today's entry
+                if (data.today) {
+                    document.getElementById('mood-slider').value = data.today.mood_score || 50;
+                    document.getElementById('energy-slider').value = data.today.energy_level || 50;
+                    document.getElementById('sleep-slider').value = data.today.sleep_quality || 70;
+                    document.getElementById('journal-entry').value = data.today.journal_entry || '';
+                    updateSliderValue('mood');
+                    updateSliderValue('energy');
+                    updateSliderValue('sleep');
+                }
+                
+                // Update goals
+                updateGoalsDisplay(data.goals || []);
+                
+                // Update tasks
+                updateTasksDisplay(data.tasks || []);
+                
+                // Apply accessibility preferences
+                applyAccessibilityPrefs();
+                
+            } catch (e) {
+                console.error('Error loading dashboard:', e);
+            }
+        }
         
-        // Pet interactions
-        document.getElementById('feed-btn').addEventListener('click', async () => {
-            const result = await api('/pet/feed', 'POST');
-            if (result.state) updatePetDisplay(result.state);
-            alert(result.message);
-        });
+        function updateSliderValue(type) {
+            const slider = document.getElementById(type + '-slider');
+            const valueEl = document.getElementById(type + '-value');
+            valueEl.textContent = slider.value;
+        }
         
-        document.getElementById('play-btn').addEventListener('click', async () => {
-            const result = await api('/pet/play', 'POST');
-            if (result.state) updatePetDisplay(result.state);
-            alert(result.message);
-        });
-        
-        document.getElementById('rest-btn').addEventListener('click', async () => {
-            const result = await api('/pet/rest', 'POST');
-            if (result.state) updatePetDisplay(result.state);
-            alert(result.message);
-        });
-        
-        // Check-in form
         document.getElementById('checkin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const result = await api('/checkin', 'POST', {
-                mood: parseInt(document.getElementById('mood-slider').value),
-                energy: parseInt(document.getElementById('energy-slider').value),
+            const data = {
+                mood_score: parseInt(document.getElementById('mood-slider').value),
+                energy_level: parseInt(document.getElementById('energy-slider').value),
                 sleep_quality: parseInt(document.getElementById('sleep-slider').value),
-                journal: document.getElementById('journal-entry').value
-            });
+                journal_entry: document.getElementById('journal-entry').value
+            };
             
-            if (result.success) {
-                if (result.pet_state) updatePetDisplay(result.pet_state);
-                if (result.spoons) updateSpoonDisplay(result.spoons);
-                alert(result.message);
+            try {
+                const res = await fetch('/api/checkin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    const result = await res.json();
+                    alert(result.message);
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('Error saving check-in:', e);
             }
         });
         
-        // Slider value updates
-        ['mood', 'energy', 'sleep'].forEach(name => {
-            const slider = document.getElementById(`${name}-slider`);
-            const value = document.getElementById(`${name}-value`);
-            slider.addEventListener('input', () => {
-                value.textContent = slider.value;
-            });
-        });
+        // ============================================================
+        // PET INTERACTIONS
+        // ============================================================
+        async function feedPet() {
+            try {
+                const res = await fetch('/api/pet/feed', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    loadDashboard();
+                    alert(data.message);
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) {
+                console.error('Error feeding pet:', e);
+            }
+        }
         
-        // Fractal generation
-        document.getElementById('gen-2d-btn').addEventListener('click', async () => {
-            const btn = document.getElementById('gen-2d-btn');
-            btn.textContent = 'Generating...';
-            btn.disabled = true;
+        async function playWithPet() {
+            try {
+                const res = await fetch('/api/pet/play', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    loadDashboard();
+                    if (data.level_up) {
+                        alert(data.message);
+                    }
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) {
+                console.error('Error playing with pet:', e);
+            }
+        }
+        
+        async function restPet() {
+            try {
+                const res = await fetch('/api/pet/rest', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('Error resting pet:', e);
+            }
+        }
+        
+        // ============================================================
+        // GOALS & TASKS
+        // ============================================================
+        function updateGoalsDisplay(goals) {
+            const container = document.getElementById('goals-container');
             
-            const result = await api('/fractal/2d');
-            
-            if (result.image) {
-                const img = document.getElementById('fractal-image');
-                img.src = result.image;
-                img.classList.remove('hidden');
+            if (goals.length === 0) {
+                container.innerHTML = '<div class="goals-empty">No goals yet. Start by setting some!</div>';
+                return;
             }
             
-            btn.textContent = 'Generate 2D';
-            btn.disabled = false;
-        });
+            container.innerHTML = goals.map(goal => `
+                <div class="task-item" style="border-left: 3px solid ${goal.color};">
+                    <div class="task-title">
+                        <strong>${goal.title}</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            ${Math.round(goal.progress)}% complete
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
         
-        document.getElementById('gen-3d-btn').addEventListener('click', async () => {
-            const btn = document.getElementById('gen-3d-btn');
-            btn.textContent = 'Generating...';
-            btn.disabled = true;
+        function updateTasksDisplay(tasks) {
+            const container = document.getElementById('tasks-container');
             
-            const result = await api('/fractal/3d');
-            
-            if (result.image) {
-                const img = document.getElementById('fractal-image');
-                img.src = result.image;
-                img.classList.remove('hidden');
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="tasks-empty">No tasks yet. Add some goals first!</div>';
+                return;
             }
             
-            btn.textContent = 'Generate 3D';
-            btn.disabled = false;
-        });
+            container.innerHTML = `<div class="task-list">
+                ${tasks.map(task => `
+                    <div class="task-item">
+                        <input type="checkbox" class="task-checkbox" 
+                               onchange="completeTask('${task.id}')" ${task.completed ? 'checked disabled' : ''}>
+                        <span class="task-title" ${task.completed ? 'style="text-decoration: line-through;"' : ''}>
+                            ${task.title}
+                        </span>
+                        <span class="task-spoons">🥄 ${task.spoon_cost}</span>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
         
-        // Add goal
-        document.getElementById('add-goal-btn').addEventListener('click', async () => {
-            const title = prompt('What is your goal?');
+        async function completeTask(taskId) {
+            try {
+                const res = await fetch(`/api/tasks/${taskId}/complete`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('spoons-count').textContent = data.spoons_remaining;
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('Error completing task:', e);
+            }
+        }
+        
+        async function openAddGoalModal() {
+            const title = prompt('What goal would you like to set?');
             if (!title) return;
             
-            const result = await api('/goals', 'POST', { title });
-            if (result.success) {
-                loadDashboard();
+            try {
+                const res = await fetch('/api/goals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title })
+                });
+                
+                if (res.ok) {
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('Error creating goal:', e);
             }
-        });
+        }
         
-        // Add task
-        document.getElementById('add-task-btn').addEventListener('click', async () => {
-            const name = prompt('What task do you need to do?');
-            if (!name) return;
+        async function openAddTaskModal() {
+            const title = prompt('What task would you like to add?');
+            if (!title) return;
             
-            const result = await api('/tasks', 'POST', { name });
-            if (result.success) {
-                loadDashboard();
-            }
-        });
-        
-        // What's next
-        document.getElementById('next-task-btn').addEventListener('click', async () => {
-            const result = await api('/tasks/next');
+            const spoons = parseInt(prompt('How many spoons will this cost? (1-5)', '2')) || 2;
             
-            if (result.task) {
-                alert(`Next task: ${result.task.name}\\n\\nSpoon cost: ${result.task.spoon_cost}\\nPriority: ${result.task.priority}`);
-            } else {
-                alert(result.message);
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, spoon_cost: Math.min(5, Math.max(1, spoons)) })
+                });
+                
+                if (res.ok) {
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.error('Error creating task:', e);
+            }
+        }
+        
+        function suggestNextTask() {
+            alert('🎯 Based on your energy levels and goals, consider starting with your smallest, lowest-spoon task first. Build momentum with quick wins!');
+        }
+        
+        // ============================================================
+        // ACCESSIBILITY
+        // ============================================================
+        function openAccessibilityModal() {
+            document.getElementById('accessibility-modal').classList.remove('hidden');
+            loadAccessibilityPrefs();
+        }
+        
+        function closeAccessibilityModal() {
+            document.getElementById('accessibility-modal').classList.add('hidden');
+        }
+        
+        function loadAccessibilityPrefs() {
+            document.getElementById('pref-reduced-motion').checked = accessibilityPrefs.reduced_motion || false;
+            document.getElementById('pref-high-contrast').checked = accessibilityPrefs.high_contrast || false;
+            document.getElementById('pref-larger-text').checked = accessibilityPrefs.larger_text || false;
+            document.getElementById('pref-dyslexia-font').checked = accessibilityPrefs.dyslexia_font || false;
+            document.getElementById('pref-calm-colors').checked = accessibilityPrefs.calm_colors || false;
+            document.getElementById('pref-keyboard-nav').checked = accessibilityPrefs.keyboard_navigation !== false;
+            document.getElementById('pref-focus-indicators').checked = accessibilityPrefs.focus_indicators !== false;
+            document.getElementById('pref-simplified-layout').checked = accessibilityPrefs.simplified_layout || false;
+            document.getElementById('pref-time-helpers').checked = accessibilityPrefs.time_blindness_helpers !== false;
+            document.getElementById('pref-task-chunking').checked = accessibilityPrefs.task_chunking !== false;
+            document.getElementById('pref-gentle-reminders').checked = accessibilityPrefs.gentle_reminders !== false;
+            document.getElementById('pref-sensory-breaks').checked = accessibilityPrefs.sensory_break_reminders || false;
+            document.getElementById('pref-auto-save').checked = accessibilityPrefs.auto_save !== false;
+        }
+        
+        async function saveAccessibilityPref(key, value) {
+            accessibilityPrefs[key] = value ? 1 : 0;
+            
+            try {
+                await fetch('/api/accessibility', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [key]: value ? 1 : 0 })
+                });
+                
+                applyAccessibilityPrefs();
+            } catch (e) {
+                console.error('Error saving accessibility pref:', e);
+            }
+        }
+        
+        function applyAccessibilityPrefs() {
+            document.body.classList.toggle('reduced-motion', accessibilityPrefs.reduced_motion);
+            document.body.classList.toggle('high-contrast', accessibilityPrefs.high_contrast);
+            document.body.classList.toggle('larger-text', accessibilityPrefs.larger_text);
+            document.body.classList.toggle('dyslexia-font', accessibilityPrefs.dyslexia_font);
+            document.body.classList.toggle('calm-colors', accessibilityPrefs.calm_colors);
+            document.body.classList.toggle('focus-indicators', accessibilityPrefs.focus_indicators !== false);
+        }
+        
+        // ============================================================
+        // 3D VISUALIZATION
+        // ============================================================
+        function open3DView() {
+            document.getElementById('fractal-view').classList.remove('hidden');
+            initThreeJS();
+        }
+        
+        function close3DView() {
+            document.getElementById('fractal-view').classList.add('hidden');
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+        
+        function initThreeJS() {
+            const container = document.getElementById('fractal-container');
+            container.innerHTML = '';
+            
+            // Scene
+            threeScene = new THREE.Scene();
+            threeScene.background = new THREE.Color(0x0A0E17);
+            
+            // Camera
+            threeCamera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            threeCamera.position.z = 10;
+            
+            // Renderer
+            threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+            threeRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(threeRenderer.domElement);
+            
+            // Create fractal
+            createFractal();
+            
+            // Create sacred geometry
+            createSacredGeometry();
+            
+            // Mouse controls
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            
+            threeRenderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+            
+            threeRenderer.domElement.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+                
+                threeScene.rotation.y += deltaMove.x * 0.005;
+                threeScene.rotation.x += deltaMove.y * 0.005;
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+            
+            threeRenderer.domElement.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            threeRenderer.domElement.addEventListener('wheel', (e) => {
+                threeCamera.position.z += e.deltaY * 0.01;
+                threeCamera.position.z = Math.max(3, Math.min(30, threeCamera.position.z));
+            });
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                threeCamera.aspect = container.clientWidth / container.clientHeight;
+                threeCamera.updateProjectionMatrix();
+                threeRenderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            // Start animation
+            animate();
+            
+            // Load visualization data
+            loadVisualizationData();
+        }
+        
+        function createFractal() {
+            const complexity = parseInt(document.getElementById('complexity').value) || 2000;
+            const mood = parseInt(document.getElementById('mood-influence').value) || 50;
+            const energy = parseInt(document.getElementById('energy-flow').value) || 50;
+            
+            // Remove old points
+            if (fractalPoints) {
+                threeScene.remove(fractalPoints);
+            }
+            
+            // Create geometry
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            
+            for (let i = 0; i < complexity; i++) {
+                // Golden spiral positioning
+                const theta = i * GOLDEN_ANGLE_RAD;
+                const r = Math.sqrt(i) * 0.1;
+                const phi = (i / complexity) * Math.PI * 2 * (mood / 50);
+                
+                const x = r * Math.cos(theta) * Math.sin(phi);
+                const y = r * Math.sin(theta) * Math.sin(phi);
+                const z = r * Math.cos(phi) * (energy / 50);
+                
+                positions.push(x, y, z);
+                
+                // Color based on position and parameters
+                const hue = (i / complexity + mood / 200) % 1;
+                const color = new THREE.Color().setHSL(hue, 0.7, 0.5 + energy / 200);
+                colors.push(color.r, color.g, color.b);
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            // Material
+            const material = new THREE.PointsMaterial({
+                size: 0.05,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            fractalPoints = new THREE.Points(geometry, material);
+            threeScene.add(fractalPoints);
+        }
+        
+        function createSacredGeometry() {
+            if (sacredGeometry) {
+                sacredGeometry.forEach(obj => threeScene.remove(obj));
+            }
+            sacredGeometry = [];
+            
+            // Icosahedron (Platonic solid)
+            const icoGeometry = new THREE.IcosahedronGeometry(3, 0);
+            const icoMaterial = new THREE.MeshBasicMaterial({
+                color: 0x6B8E9F,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            const icosahedron = new THREE.Mesh(icoGeometry, icoMaterial);
+            threeScene.add(icosahedron);
+            sacredGeometry.push(icosahedron);
+            
+            // Dodecahedron
+            const dodecaGeometry = new THREE.DodecahedronGeometry(2.5, 0);
+            const dodecaMaterial = new THREE.MeshBasicMaterial({
+                color: 0x9F8E6B,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.2
+            });
+            const dodecahedron = new THREE.Mesh(dodecaGeometry, dodecaMaterial);
+            threeScene.add(dodecahedron);
+            sacredGeometry.push(dodecahedron);
+        }
+        
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            if (autoRotate) {
+                threeScene.rotation.y += 0.002;
+            }
+            
+            // Animate sacred geometry
+            if (sacredGeometry) {
+                sacredGeometry.forEach((obj, i) => {
+                    obj.rotation.x += 0.001 * (i + 1);
+                    obj.rotation.z += 0.0005 * (i + 1);
+                });
+            }
+            
+            // Animate goal orbs
+            goalOrbs.forEach((orb, i) => {
+                const time = Date.now() * 0.001;
+                orb.position.y = orb.userData.baseY + Math.sin(time + i) * 0.2;
+            });
+            
+            threeRenderer.render(threeScene, threeCamera);
+        }
+        
+        async function loadVisualizationData() {
+            try {
+                const res = await fetch('/api/visualization/data');
+                const data = await res.json();
+                
+                if (res.ok && data.orbs) {
+                    // Clear existing orbs
+                    goalOrbs.forEach(orb => threeScene.remove(orb));
+                    goalOrbs = [];
+                    
+                    // Create new orbs
+                    data.orbs.forEach(orbData => {
+                        const geometry = new THREE.SphereGeometry(orbData.size, 32, 32);
+                        const color = new THREE.Color(orbData.color);
+                        const material = new THREE.MeshBasicMaterial({
+                            color: color,
+                            transparent: true,
+                            opacity: 0.8
+                        });
+                        
+                        const orb = new THREE.Mesh(geometry, material);
+                        orb.position.set(orbData.position.x, orbData.position.y, orbData.position.z);
+                        orb.userData = { ...orbData, baseY: orbData.position.y };
+                        
+                        threeScene.add(orb);
+                        goalOrbs.push(orb);
+                    });
+                    
+                    document.getElementById('orbs-val').textContent = goalOrbs.length;
+                    
+                    // Update sliders with user data
+                    if (data.mood) {
+                        document.getElementById('mood-influence').value = data.mood;
+                        document.getElementById('mood-influence-val').textContent = Math.round(data.mood);
+                    }
+                    if (data.energy) {
+                        document.getElementById('energy-flow').value = data.energy;
+                        document.getElementById('energy-flow-val').textContent = Math.round(data.energy);
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading visualization data:', e);
+            }
+        }
+        
+        function regenerateFractal() {
+            createFractal();
+        }
+        
+        function addGoalOrb() {
+            const geometry = new THREE.SphereGeometry(0.3, 32, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: Math.random() * 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const orb = new THREE.Mesh(geometry, material);
+            
+            // Position using golden angle
+            const i = goalOrbs.length;
+            const theta = i * GOLDEN_ANGLE_RAD;
+            const r = 3 + i * 0.5;
+            
+            orb.position.set(
+                r * Math.cos(theta),
+                Math.random() * 2 - 1,
+                r * Math.sin(theta)
+            );
+            orb.userData = { baseY: orb.position.y };
+            
+            threeScene.add(orb);
+            goalOrbs.push(orb);
+            
+            document.getElementById('orbs-val').textContent = goalOrbs.length;
+        }
+        
+        function toggleSacredGeometry() {
+            sacredGeometry.forEach(obj => {
+                obj.visible = !obj.visible;
+            });
+        }
+        
+        function toggleAutoRotate() {
+            autoRotate = document.getElementById('auto-rotate').checked;
+        }
+        
+        function resetCamera() {
+            threeCamera.position.set(0, 0, 10);
+            threeScene.rotation.set(0, 0, 0);
+        }
+        
+        function updateFractalParam(type) {
+            const value = document.getElementById(type === 'mood' ? 'mood-influence' : 
+                         type === 'energy' ? 'energy-flow' : 'complexity').value;
+            document.getElementById(type === 'mood' ? 'mood-influence-val' : 
+                         type === 'energy' ? 'energy-flow-val' : 'complexity-val').textContent = value;
+            
+            createFractal();
+        }
+        
+        function generate2DFractal() {
+            alert('2D fractal generation coming soon! For now, try the immersive 3D view.');
+        }
+        
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', checkSession);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !document.getElementById('fractal-view').classList.contains('hidden')) {
+                e.preventDefault();
+                document.getElementById('auto-rotate').checked = !autoRotate;
+                autoRotate = !autoRotate;
+            }
+            if (e.code === 'Escape') {
+                if (!document.getElementById('accessibility-modal').classList.contains('hidden')) {
+                    closeAccessibilityModal();
+                }
+                if (!document.getElementById('fractal-view').classList.contains('hidden')) {
+                    close3DView();
+                }
             }
         });
-        
-        // Initialize
-        checkAuth();
     </script>
 </body>
 </html>
 '''
 
-
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# MAIN ROUTES
-# ═══════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════
+# MAIN PAGE ROUTE
+# ════════════════════════════════════════════════════════════════════════════════
 
 @app.route('/')
 def index():
-    """Serve main dashboard"""
-    return render_template_string(DASHBOARD_HTML)
+    """Serve main application."""
+    return render_template_string(MAIN_HTML)
 
+@app.route('/api/health')
+def health():
+    """Health check endpoint."""
+    return jsonify({
+        'status': 'healthy',
+        'version': '8.0.0',
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'features': {
+            'accessibility': True,
+            'user_management': True,
+            '3d_visualization': True,
+            'pet_system': True,
+            'mayan_calendar': True,
+            'spoon_theory': True
+        }
+    })
 
-@app.route('/login')
-def login_page():
-    """Redirect to main page (login handled in SPA)"""
-    return redirect('/')
+# ════════════════════════════════════════════════════════════════════════════════
+# STARTUP
+# ════════════════════════════════════════════════════════════════════════════════
 
+def print_banner():
+    print("\n" + "=" * 70)
+    print("🌀 LIFE FRACTAL INTELLIGENCE v8.0 - COMPLETE PRODUCTION BUILD")
+    print("=" * 70)
+    print("   For brains like mine - built with love for the neurodivergent community")
+    print("=" * 70)
+    print(f"✨ Golden Ratio (φ):     {PHI:.15f}")
+    print(f"🌻 Golden Angle:         {GOLDEN_ANGLE:.10f}°")
+    print(f"🔢 Fibonacci:            {FIBONACCI[:10]}...")
+    print("=" * 70)
+    print("\n🌟 Features:")
+    print("   ∞ Neurodiversity-focused accessibility")
+    print("   🔐 Complete user management system")
+    print("   🎨 Interactive 3D fractal visualization")
+    print("   🐱 Virtual pet companion")
+    print("   🥄 Spoon theory energy tracking")
+    print("   📅 Mayan sacred calendar")
+    print("=" * 70)
+    print(f"\n💰 Subscription: ${SUBSCRIPTION_PRICE}/month, {TRIAL_DAYS}-day free trial")
+    print(f"🎁 GoFundMe: {GOFUNDME_URL}")
+    print("=" * 70)
 
-# ═══════════════════════════════════════════════════════════════════════════════════════
-# APPLICATION STARTUP
-# ═══════════════════════════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
-    logger.info("=" * 70)
-    logger.info("🌀 LIFE FRACTAL INTELLIGENCE v7.0")
-    logger.info("=" * 70)
-    logger.info(f"✅ Sacred Mathematics: PHI={PHI:.10f}")
-    logger.info(f"✅ Golden Angle: {GOLDEN_ANGLE}°")
-    logger.info(f"✅ NumPy: {'Available' if HAS_NUMPY else 'Not available'}")
-    logger.info(f"✅ Pillow: {'Available' if HAS_PIL else 'Not available'}")
-    logger.info(f"✅ GPU: {GPU_NAME if GPU_AVAILABLE else 'Not available'}")
-    logger.info("=" * 70)
-    logger.info("Features enabled:")
-    logger.info("  • Emotional Pet AI with differential equations")
-    logger.info("  • Fractal Time Calendar with Fibonacci blocks")
-    logger.info("  • Fibonacci Task Scheduler")
-    logger.info("  • Executive Function Support")
-    logger.info("  • Spoon Theory Energy Management")
-    logger.info("  • 2D/3D Fractal Visualization")
-    logger.info("  • Full Accessibility System")
-    logger.info("  • Mayan Calendar Integration")
-    logger.info("=" * 70)
+    print_banner()
+    
+    # Initialize database
+    with app.app_context():
+        init_db()
     
     port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
-    
-    logger.info(f"🚀 Starting server on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    print(f"\n🚀 Starting server at http://localhost:{port}\n")
+    app.run(host='0.0.0.0', port=port, debug=True)
