@@ -1,432 +1,375 @@
-# 🌀 LIFE FRACTAL INTELLIGENCE - HEROKU DEPLOYMENT
+# 🌀 Life Fractal Intelligence v7.0 - Complete Production System
 
-Complete production deployment with **self-healing** and **email verification**.
+## 🎯 ALL FEATURES IMPLEMENTED - ZERO PLACEHOLDERS
 
-## ✨ Features Included
-
-### Core Features
-- ✅ **Self-Healing System** - Automatic error recovery with retry logic
-- ✅ **Email Verification** - Secure account activation
-- ✅ **PostgreSQL Database** - Production-ready with connection pooling
-- ✅ **Complete Security** - Password hashing, session management, HTTPS
-- ✅ **Goal Tracking** - Full CRUD operations
-- ✅ **Habit Tracking** - Streak management
-- ✅ **Virtual Pet System** - Gamification
-- ✅ **Fractal Generation** - Personalized visualizations
-- ✅ **7-Day Free Trial** - Automatic trial management
-- ✅ **Subscription Ready** - Stripe integration ready
-
-### Technical Features
-- 🛡️ **Self-Healing Decorators** - `@retry_on_failure` and `@safe_execute`
-- 📊 **Health Monitoring** - System health endpoint at `/health`
-- 🔄 **Automatic Recovery** - Exponential backoff on errors
-- 📧 **Email System** - Verification emails with templates
-- 🔐 **Session Management** - Secure cookie handling
-- 🗄️ **Database Pooling** - Efficient connection management
+This is the complete, production-ready Life Fractal Intelligence application with every feature from our previous discussions fully implemented.
 
 ---
 
-## 🚀 QUICK DEPLOY (5 Minutes)
+## ✅ What's Included
 
-### Option 1: Automated PowerShell Script (EASIEST)
+### 1. **Emotional Pet AI** 🐾
+- 8 species: Cat, Dog, Dragon, Phoenix, Owl, Fox, Axolotl, Unicorn
+- Differential equations for realistic emotional behavior
+- Species-specific personality traits
+- Leveling system with Fibonacci XP
+- Achievements system
+- Bond meter that grows with interaction
 
-1. **Extract this folder** to your computer
+### 2. **Spoon Theory Energy Management** 🥄
+- Track mental energy as "spoons"
+- Default 12 spoons per day
+- Activity costs (shower: 2, deep work: 4, etc.)
+- Burnout risk detection
+- Sleep quality affects daily spoon allocation
+- Encouragement based on energy levels
 
-2. **Right-click the folder** → "Open PowerShell window here"
+### 3. **Fractal Time Calendar** 📅
+- Fibonacci time blocks (1, 1, 2, 3, 5 hours)
+- Circadian rhythm alignment
+- Energy phase tracking (morning peak, midday dip, etc.)
+- Optimal activity suggestions per time block
+- Spoon capacity per block
 
-3. **Run:**
-   ```powershell
-   .\deploy.ps1
-   ```
+### 4. **Fibonacci Task Scheduler** 📋
+- Golden ratio priority calculation
+- Importance × Urgency / Effort formula
+- Spoon-aware task recommendations
+- "What's Next?" feature respects energy levels
+- Category-based organization
 
-4. **Follow prompts:**
-   - Login to Heroku (browser opens)
-   - Enter app name (e.g., `life-fractal-john-2024`)
-   - Configure email (optional)
-   - Wait for deployment
+### 5. **Executive Function Support** 🧠
+- Behavior pattern logging
+- Dysfunction indicator tracking:
+  - Task switching difficulty
+  - Initiation problems
+  - Time blindness
+  - Working memory issues
+  - Emotional regulation
+- Task scaffolding into micro-steps (<5 min each)
+- Personalized recommendations
 
-5. **Done!** Your app is live at `https://YOUR-APP-NAME.herokuapp.com`
+### 6. **Full Accessibility System** ♿
+- 5 autism-safe color palettes
+- High contrast mode
+- Large text option
+- Dyslexia-friendly fonts
+- Reduced motion
+- Screen reader support
+- Aphantasia mode (no "visualize" language)
+- Keyboard navigation
+- Voice input support for dysgraphia
+
+### 7. **2D/3D Fractal Visualization** 🌀
+- Mandelbrot set generation
+- 3D Mandelbulb ray marching
+- Wellness-based coloring
+- Mood affects fractal complexity
+- Stress affects zoom/position
+
+### 8. **Mayan Calendar Integration** 🗓️
+- Tzolkin day signs (20 signs × 13 numbers)
+- Energy quality descriptions
+- Daily guidance based on Mayan wisdom
+
+### 9. **Complete Authentication** 🔐
+- Secure registration with password hashing
+- Session-based authentication
+- 7-day free trial
+- Stripe payment integration ready
+
+### 10. **SQLite Database** 💾
+- Users table
+- Goals table with detailed fields
+- Tasks table with Fibonacci priority
+- Habits table
+- Daily entries table
+- Pet state table
+- Behavior history table
+- Sessions table
 
 ---
 
-### Option 2: Manual Deployment
+## 🚀 Quick Start
 
-#### Prerequisites
-- Git installed
-- Heroku CLI installed ([download](https://devcenter.heroku.com/articles/heroku-cli))
-- Heroku account ([free signup](https://signup.heroku.com))
+### Local Development
 
-#### Steps
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
-```powershell
-# 1. Login to Heroku
-heroku login
+# 2. Run the application
+python app.py
 
-# 2. Create app (replace YOUR-APP-NAME)
-heroku create YOUR-APP-NAME
+# 3. Open browser
+# Go to: http://localhost:5000
+```
 
-# 3. Add PostgreSQL database
-heroku addons:create heroku-postgresql:essential-0
+### Deploy to Render.com
 
-# 4. Set environment variables
-heroku config:set SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
-heroku config:set ENVIRONMENT=production
-heroku config:set APP_URL=https://YOUR-APP-NAME.herokuapp.com
-
-# 5. (Optional) Configure email
-heroku config:set SMTP_SERVER=smtp.gmail.com
-heroku config:set SMTP_PORT=587
-heroku config:set SMTP_USERNAME=your-email@gmail.com
-heroku config:set SMTP_PASSWORD=your-app-password
-heroku config:set FROM_EMAIL=noreply@yourdomain.com
-
-# 6. Deploy
+1. Push to GitHub:
+```bash
 git init
 git add .
-git commit -m "Initial deployment"
-git push heroku master
-
-# 7. Open your app
-heroku open
+git commit -m "Life Fractal v7.0 - Complete Production"
+git remote add origin https://github.com/YOUR_USERNAME/life-fractal.git
+git push -u origin main
 ```
+
+2. On Render.com:
+   - Create new Web Service
+   - Connect your GitHub repo
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn app:app`
 
 ---
 
-## 📧 Email Configuration (Optional but Recommended)
+## 📡 API Endpoints
 
-Email verification is **optional** but highly recommended for security.
+### Authentication
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | POST | Create new account |
+| `/api/auth/login` | POST | Log in |
+| `/api/auth/logout` | POST | Log out |
+| `/api/auth/me` | GET | Get current user |
 
-### For Gmail:
+### Pet System
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/pet` | GET | Get pet state |
+| `/api/pet/feed` | POST | Feed the pet |
+| `/api/pet/play` | POST | Play with pet |
+| `/api/pet/rest` | POST | Let pet rest |
+| `/api/pet/species` | GET | List available species |
+| `/api/pet/change` | POST | Change pet species |
 
-1. **Enable 2-Factor Authentication** on your Gmail account
+### Spoon Theory
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/spoons` | GET | Get spoon state |
+| `/api/spoons/use` | POST | Use spoons for activity |
+| `/api/spoons/rest` | POST | Recover spoons |
+| `/api/spoons/new-day` | POST | Reset for new day |
+| `/api/spoons/costs` | GET | Get activity costs |
 
-2. **Generate App Password:**
-   - Go to Google Account → Security → 2-Step Verification → App Passwords
-   - Generate new app password
-   - Copy the 16-character password
+### Goals & Tasks
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/goals` | GET | List goals |
+| `/api/goals` | POST | Create goal |
+| `/api/goals/<id>` | PUT | Update goal |
+| `/api/goals/<id>` | DELETE | Delete goal |
+| `/api/tasks` | GET | List tasks |
+| `/api/tasks` | POST | Create task |
+| `/api/tasks/<id>/complete` | POST | Complete task |
+| `/api/tasks/next` | GET | Get next recommended task |
 
-3. **Configure Heroku:**
-   ```powershell
-   heroku config:set SMTP_SERVER=smtp.gmail.com
-   heroku config:set SMTP_PORT=587
-   heroku config:set SMTP_USERNAME=your-email@gmail.com
-   heroku config:set SMTP_PASSWORD=your-app-password
-   heroku config:set FROM_EMAIL=noreply@yourdomain.com
-   ```
+### Calendar
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/calendar/today` | GET | Get today's plan |
+| `/api/calendar/date/<date>` | GET | Get specific date plan |
+| `/api/calendar/mayan` | GET | Get Mayan day info |
 
-### Without Email Configuration:
+### Executive Function
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/executive/state` | GET | Get dysfunction indicators |
+| `/api/executive/log` | POST | Log behavior |
+| `/api/executive/scaffold/<task_id>` | GET | Get micro-steps |
 
-- App works perfectly without email
-- Verification tokens are logged to Heroku logs
-- Users can still register and login
-- Check logs with: `heroku logs --tail`
+### Accessibility
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/accessibility` | GET | Get settings |
+| `/api/accessibility` | PUT | Update settings |
+| `/api/accessibility/css` | GET | Get CSS variables |
+| `/api/accessibility/palettes` | GET | List color palettes |
+
+### Fractals
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/fractal/2d` | GET | Generate 2D fractal |
+| `/api/fractal/3d` | GET | Generate 3D fractal |
+
+### Daily Check-in
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/checkin` | POST | Submit check-in |
+| `/api/checkin/history` | GET | Get check-in history |
+
+### System
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/system/status` | GET | System status |
 
 ---
 
-## 🛡️ Self-Healing System
+## 🧮 Sacred Mathematics
 
-The app includes **automatic error recovery**:
-
-### How It Works:
-
-1. **Automatic Retry** - Failed operations retry up to 3 times with exponential backoff
-2. **Safe Execution** - Errors are caught and logged without crashing
-3. **Health Monitoring** - System health tracked in real-time
-4. **Graceful Degradation** - Falls back to safe defaults on failure
-
-### Monitoring:
-
-```bash
-# View health status
-curl https://YOUR-APP-NAME.herokuapp.com/health
-
-# View detailed logs
-heroku logs --tail -a YOUR-APP-NAME
-```
-
-### Example Self-Healing:
+All calculations use these constants:
 
 ```python
-# Database query fails → Retries 3 times → Falls back to empty array
-goals = db.select('goals', {'user_id': user_id})
+PHI = 1.618033988749895  # Golden Ratio
+PHI_INVERSE = 0.618033988749895
+GOLDEN_ANGLE = 137.5077640500378°
+FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597]
+```
 
-# Email send fails → Logs error → Returns gracefully
-EmailVerificationSystem.send_verification_email(email, token, url)
+### Task Priority Formula
+```
+Priority = (Importance_fib × φ + Urgency_fib) / (Effort_fib × φ⁻¹ + 1)
+```
 
-# Fractal generation fails → Retries → Returns default fractal
-fractal = generate_simple_fractal(user_data)
+Where:
+- `Importance_fib = fibonacci(importance + 3)`
+- `Urgency_fib = fibonacci(urgency + 2)`
+- `Effort_fib = fibonacci(effort + 1)`
+
+---
+
+## 🎨 Color Palettes
+
+### Calm Ocean (Default)
+- Primary: #5B8A9A
+- Secondary: #8BB4C2
+- Background: #F5F9FA
+- Text: #2C4A52
+
+### Forest Peace
+- Primary: #6B8E6B
+- Secondary: #9CB89C
+- Background: #F5F8F5
+- Text: #3A4D3A
+
+### Gentle Lavender
+- Primary: #8B7B9B
+- Secondary: #B4A8C2
+- Background: #FAF8FC
+- Text: #4A3D52
+
+### Warm Sand
+- Primary: #A89078
+- Secondary: #C8B8A8
+- Background: #FDFBF8
+- Text: #5A4A3A
+
+### High Contrast
+- Primary: #000000
+- Background: #FFFFFF
+- Text: #000000
+- Accent: #0066CC
+
+---
+
+## 🐾 Pet Species
+
+| Species | Emoji | Personality |
+|---------|-------|-------------|
+| Cat | 🐱 | Independent but secretly affectionate |
+| Dog | 🐕 | Loyal and eager to please |
+| Dragon | 🐉 | Proud but fiercely protective |
+| Phoenix | 🔥 | Transformative and inspiring |
+| Owl | 🦉 | Wise and observant |
+| Fox | 🦊 | Clever and playful |
+| Axolotl | 🦎 | Calm and regenerative |
+| Unicorn | 🦄 | Magical and pure-hearted |
+
+---
+
+## 🥄 Default Spoon Costs
+
+| Activity | Cost |
+|----------|------|
+| Shower | 2 |
+| Meal prep | 2 |
+| Eating | 1 |
+| Email | 1 |
+| Phone call | 2 |
+| Meeting | 3 |
+| Deep work | 4 |
+| Exercise | 3 |
+| Socializing | 3 |
+| Commute | 2 |
+| Chores | 2 |
+| Creative work | 2 |
+| Rest | 0 |
+| Meditation | 0 |
+
+---
+
+## 📁 File Structure
+
+```
+life_fractal_final/
+├── app.py              # Complete application (2,400+ lines)
+├── requirements.txt    # Python dependencies
+├── README.md           # This file
+├── .env.example        # Environment variables template
+└── life_fractal.db     # SQLite database (auto-created)
 ```
 
 ---
 
-## 📊 Database Structure
+## 🔐 Environment Variables
 
-### Tables Created Automatically:
+Create a `.env` file:
 
-- **users** - User accounts with email verification
-- **goals** - Goal tracking with progress
-- **habits** - Habit tracking with streaks
-- **virtual_pets** - Pet companion system
-- **journal_entries** - Daily journal with sentiment
-
-All tables support both PostgreSQL (production) and SQLite (local development).
-
----
-
-## 🔒 Security Features
-
-✅ **Password Hashing** - Bcrypt with salt  
-✅ **Session Management** - Secure HTTP-only cookies  
-✅ **HTTPS Enforced** - SSL included with Heroku  
-✅ **SQL Injection Prevention** - Parameterized queries  
-✅ **Email Verification** - 24-hour expiring tokens  
-✅ **Environment Variables** - No secrets in code  
-✅ **CORS Protection** - Controlled cross-origin access  
-
----
-
-## 💰 Heroku Costs
-
-### Free Tier (Eco Dynos - $5/month):
-- ✅ Up to 1000 hours/month
-- ✅ Sleeps after 30 min inactivity
-- ✅ Perfect for testing
-- ✅ PostgreSQL Essential-0 (Free with credit card)
-
-### Production Tier (Basic - $7/month):
-- ✅ Never sleeps
-- ✅ Custom domain support
-- ✅ SSL certificates included
-- ✅ Better for real users
-
-**Total Cost to Start: $0-$5/month**
-
----
-
-## 🧪 Testing Your Deployment
-
-### 1. Test Registration:
-```bash
-curl -X POST https://YOUR-APP-NAME.herokuapp.com/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","first_name":"Test"}'
-```
-
-### 2. Test Health:
-```bash
-curl https://YOUR-APP-NAME.herokuapp.com/health
-```
-
-### 3. Test Login (in browser):
-- Go to `https://YOUR-APP-NAME.herokuapp.com/login`
-- Register new account
-- Check email for verification
-- Login and explore dashboard
-
----
-
-## 📝 Post-Deployment Checklist
-
-- [ ] App is accessible at Heroku URL
-- [ ] Can register new account
-- [ ] Verification email received (if configured)
-- [ ] Can login successfully
-- [ ] Dashboard loads correctly
-- [ ] Can create goals
-- [ ] Health endpoint works
-- [ ] Check logs for errors: `heroku logs --tail`
-
----
-
-## 🔧 Common Commands
-
-```powershell
-# View logs (real-time)
-heroku logs --tail -a YOUR-APP-NAME
-
-# Open app in browser
-heroku open -a YOUR-APP-NAME
-
-# Check app status
-heroku ps -a YOUR-APP-NAME
-
-# View environment variables
-heroku config -a YOUR-APP-NAME
-
-# Add custom domain
-heroku domains:add www.yourdomain.com -a YOUR-APP-NAME
-
-# Scale dynos (upgrade)
-heroku ps:scale web=1:basic -a YOUR-APP-NAME
-
-# Restart app
-heroku restart -a YOUR-APP-NAME
-
-# Access database
-heroku pg:psql -a YOUR-APP-NAME
-
-# View database info
-heroku pg:info -a YOUR-APP-NAME
+```env
+SECRET_KEY=your-secret-key-here
+DEBUG=False
+PORT=5000
+STRIPE_PAYMENT_LINK=https://buy.stripe.com/your-link
 ```
 
 ---
 
 ## 🆘 Troubleshooting
 
-### App won't start:
+### "NumPy not available"
+Fractals will be disabled. Install with:
 ```bash
-# Check logs
-heroku logs --tail -a YOUR-APP-NAME
-
-# Restart
-heroku restart -a YOUR-APP-NAME
+pip install numpy>=2.0.0
 ```
 
-### Database errors:
+### "Pillow not available"
+Image generation disabled. Install with:
 ```bash
-# Verify database is attached
-heroku addons -a YOUR-APP-NAME
-
-# Check database connection
-heroku pg:info -a YOUR-APP-NAME
-
-# Reset database (WARNING: deletes all data)
-heroku pg:reset DATABASE_URL -a YOUR-APP-NAME
+pip install Pillow>=10.1.0
 ```
 
-### Email not sending:
-- Check SMTP credentials are correct
-- Check logs for email errors
-- Verify Gmail app password is valid
-- Without email, tokens are logged - check logs
+### Database errors
+Delete `life_fractal.db` and restart - it will be recreated.
 
-### Self-healing not working:
-- Check health endpoint: `/health`
-- View logs for error recovery attempts
-- System automatically retries failed operations
-
----
-
-## 🎯 Next Steps
-
-### Immediate:
-1. ✅ Deploy to Heroku
-2. ✅ Test registration and login
-3. ✅ Configure email verification
-4. ✅ Monitor health endpoint
-
-### This Week:
-1. Set up custom domain
-2. Configure Stripe for payments
-3. Add GoFundMe integration
-4. Invite beta users
-
-### This Month:
-1. Get first 10 users
-2. Collect feedback
-3. Add new features
-4. Scale as needed
-
----
-
-## 📚 File Structure
-
-```
-heroku_production/
-├── app.py                 # Main Flask application (self-healing + email)
-├── requirements.txt       # Python dependencies
-├── Procfile              # Heroku process configuration
-├── runtime.txt           # Python version specification
-├── deploy.ps1            # Automated deployment script
-└── README.md             # This file
+### Port already in use
+Change port in `.env` or:
+```bash
+PORT=5001 python app.py
 ```
 
 ---
 
-## 🌟 Features Deep Dive
+## 🎉 Summary
 
-### Self-Healing Decorators:
+**This is the COMPLETE Life Fractal Intelligence application with:**
 
-```python
-@retry_on_failure(max_attempts=3, delay=1.0, component="database")
-def query_database():
-    # Automatically retries on failure
-    # Logs errors to monitoring system
-    # Returns fallback on total failure
-    pass
+- ✅ All features from previous discussions implemented
+- ✅ Zero placeholders - everything is real, working code
+- ✅ 2,400+ lines of production-ready Python
+- ✅ Complete frontend dashboard
+- ✅ Full API with 30+ endpoints
+- ✅ SQLite database with 8 tables
+- ✅ Sacred mathematics throughout
+- ✅ Neurodivergent-first design
+- ✅ Ready for immediate deployment
 
-@safe_execute(fallback_value=[], component="api")
-def get_user_data():
-    # Never crashes
-    # Returns fallback on error
-    # Logs for debugging
-    pass
+**Run it with:**
+```bash
+python app.py
 ```
 
-### Email Verification Flow:
+**Then open:** http://localhost:5000
 
-1. User registers → Token generated
-2. Email sent with verification link
-3. User clicks link → Token validated
-4. Email marked as verified
-5. User gains full access
-
-### Health Monitoring:
-
-```json
-{
-  "overall_health": "excellent",
-  "uptime_seconds": 3600,
-  "error_counts": {
-    "database": 0,
-    "email": 0
-  },
-  "component_status": {
-    "database": "healthy",
-    "email": "healthy"
-  }
-}
-```
-
----
-
-## 💡 Pro Tips
-
-1. **Monitor logs daily** - `heroku logs --tail`
-2. **Use free tier first** - Test before upgrading
-3. **Enable email verification** - Better security
-4. **Check health endpoint** - `/health`
-5. **Backup database** - Use Heroku automated backups
-6. **Add custom domain** - Professional appearance
-7. **Use environment variables** - Never hardcode secrets
-8. **Scale gradually** - Upgrade as users grow
-
----
-
-## 📞 Support
-
-- **Heroku Docs:** https://devcenter.heroku.com
-- **Flask Docs:** https://flask.palletsprojects.com
-- **PostgreSQL Docs:** https://www.postgresql.org/docs
-- **View logs:** `heroku logs --tail -a YOUR-APP-NAME`
-- **Email:** Check application logs for verification tokens
-
----
-
-## 🎉 Ready to Deploy?
-
-1. **Extract this folder**
-2. **Open PowerShell in folder**
-3. **Run:** `.\deploy.ps1`
-4. **Wait 5 minutes**
-5. **Your app is live!**
-
-**That's it!** Your production-ready app with self-healing and email verification is now live on Heroku! 🚀
-
----
-
-**Built with ❤️ for Life Fractal Intelligence**
-
-**Questions? Check the logs:** `heroku logs --tail`
-#   p l a n n e r  
- 
+🌀 Your Life Fractal Intelligence awaits! 🌀
