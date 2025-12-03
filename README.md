@@ -1,122 +1,163 @@
-# 🌀 LIFE FRACTAL INTELLIGENCE v8.0
+# 🌀 Life Fractal Intelligence v10.0
 
-## VISUALIZATION-FIRST LIFE PLANNING
+**Your Life • Visualized as Living Fractal Art**
 
-This is NOT just another organizer. This is a **visual thinking tool** for neurodivergent brains that need to SEE their life to understand it.
+A neurodivergent-focused life planning application that combines sacred mathematics, fractal geometry, and virtual pet companions. Designed for individuals with autism, ADHD, aphantasia, dysgraphia, and executive dysfunction.
 
----
+![Version](https://img.shields.io/badge/version-10.0-blue)
+![Python](https://img.shields.io/badge/python-3.11+-green)
+![License](https://img.shields.io/badge/license-MIT-orange)
 
-## 🌟 CORE FEATURES
+## ✨ Features
 
-### 🌌 3D FRACTAL UNIVERSE (`/universe`)
-The heart of the app. Your goals become glowing orbs positioned in 3D space using sacred geometry:
-- **Golden Angle Positioning** - Each goal orb is placed at 137.5° intervals
-- **Fibonacci Connections** - Goals connected by Fibonacci-sequence relationships
-- **Sacred Geometry Overlays** - Golden spiral, Flower of Life, Icosahedron wireframes
-- **Interactive Camera** - Click and drag to rotate, scroll to zoom
-- **Goal Focus** - Click any goal orb to fly camera to it
+### 🎯 Goal Management
+- Create and track short, medium, and long-term goals
+- Visual progress tracking with percentage completion
+- Priority levels and categorization
 
-### 🎨 ART THERAPY STUDIO (`/studio`)
-Create beautiful, shareable art from your life data:
-- **Poster Generation** - High-res printable posters with your fractal and goals
-- **Desktop Wallpapers** - HD/2K/4K fractal wallpapers
-- **Video Export** - Animated fractal videos (connects to HuggingFace for GPU rendering)
-- **Meditation Visuals** - Calming sacred geometry animations
-- **Share Links** - Unique shareable URLs for your art
+### ✅ Habit Tracking
+- Daily habit completion
+- Streak counting and personal records
+- Frequency customization
 
-### 📊 PROGRESS TIMELINE (`/timeline`)
-Watch how your fractal evolves over time:
-- **Fractal Snapshots** - Visual history of your life fractal
-- **Wellness Trends** - Chart showing wellness score over time
-- **Insights** - Goals completed, best streaks, energy averages, wellness peaks
+### 📊 Daily Wellness
+- Mood, energy, and stress tracking
+- Sleep quality monitoring
+- Journal entries with sentiment analysis
+- Automatic wellness score calculation
 
-### 📋 LIFE DASHBOARD (`/app`)
-The complete life planning interface:
-- **13 Life State Metrics** - Health, Skills, Finances, Relationships, Career, Mood, Energy, Purpose, Creativity, Spirituality, Belief, Focus, Gratitude
-- **Spoon Energy System** - Track energy using spoon theory
-- **Virtual Pet Companion** - Feed and play with your pet
-- **Recommended Tasks** - Daily habits with streak tracking
-- **Sacred Mathematics** - Live display of φ, golden angle, Fibonacci
+### 🎨 Fractal Visualization
+- 2D Mandelbrot fractals based on your metrics
+- 3D Mandelbulb-inspired visualizations
+- Sacred geometry overlays (Golden Ratio φ, Fibonacci)
+- Colors that respond to your emotional state
 
----
+### 🐾 Virtual Pet System
+- 5 unique species: Cat, Dragon, Phoenix, Owl, Fox
+- Pet mood reflects your wellness
+- Feed, play, and care for your companion
+- Level up system with experience points
 
-## 🚀 DEPLOYMENT
+### ♿ Accessibility First
+- Text-first interface design
+- Keyboard navigation support
+- Screen reader friendly
+- Optional visualizations (not required)
+- Designed for aphantasia compatibility
 
-### Render.com Deployment
+## 🚀 Quick Start
 
-1. Push to GitHub repository (onlinediscountsllc-web/planner)
-
-2. In Render dashboard:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn life_fractal_complete_v8:app`
-   - **Environment Variables**:
-     - `PORT`: 10000 (or auto)
-     - `SECRET_KEY`: (generate a secure key)
-     - `DATABASE_PATH`: /opt/render/project/src/life_fractal.db
-
-3. Deploy!
-
-### Local Testing
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/onlinediscountsllc-web/planner.git
+cd planner
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-python life_fractal_complete_v8.py
-# Open http://localhost:5000
+
+# Run the application
+python life_fractal_v10.py
 ```
 
+Visit `http://localhost:5000` in your browser.
+
+### Production Deployment (Render)
+
+1. Connect your GitHub repo to Render
+2. Set build command: `pip install -r requirements.txt`
+3. Set start command: `gunicorn life_fractal_v10:app`
+4. Deploy!
+
+## 📁 Project Structure
+
+```
+planner/
+├── life_fractal_v10.py    # Main application
+├── requirements.txt       # Python dependencies
+├── Procfile              # Process configuration
+├── render.yaml           # Render.com settings
+├── runtime.txt           # Python version
+├── .gitignore           # Git ignore rules
+└── README.md            # This file
+```
+
+## 🔌 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Create account
+- `POST /api/auth/login` - Login
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/me` - Get current user
+
+### Goals
+- `GET /api/goals` - List all goals
+- `POST /api/goals` - Create goal
+- `PUT /api/goals/<id>/progress` - Update progress
+- `DELETE /api/goals/<id>` - Delete goal
+
+### Habits
+- `GET /api/habits` - List habits
+- `POST /api/habits` - Create habit
+- `POST /api/habits/<id>/complete` - Mark complete
+
+### Daily Check-in
+- `GET /api/daily/today` - Get today's entry
+- `POST /api/daily/checkin` - Submit check-in
+- `GET /api/daily/history` - Get history
+
+### Visualization
+- `GET /api/visualization/fractal/2d` - 2D fractal image
+- `GET /api/visualization/fractal/3d` - 3D fractal image
+- `GET /api/visualization/fractal-base64/<mode>` - Base64 encoded
+
+### Pet
+- `GET /api/pet/status` - Get pet status
+- `POST /api/pet/feed` - Feed pet
+- `POST /api/pet/play` - Play with pet
+- `POST /api/pet/rest` - Rest pet
+
+### System
+- `GET /api/health` - Health check
+- `GET /api/dashboard` - Dashboard data
+- `GET /api/sacred-math` - Sacred math constants
+
+## 🧮 Sacred Mathematics
+
+The application uses ancient mathematical principles:
+
+- **Golden Ratio (φ):** 1.618033988749895
+- **Golden Angle:** 137.5077640500378°
+- **Fibonacci Sequence:** 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+- **Platonic Solids:** Tetrahedron, Cube, Octahedron, Dodecahedron, Icosahedron
+
+## 🛠️ Technology Stack
+
+- **Backend:** Flask 3.0, Python 3.11+
+- **Database:** SQLite (self-healing)
+- **Visualization:** NumPy, Pillow
+- **ML:** scikit-learn (optional)
+- **Server:** Gunicorn
+- **Frontend:** Vanilla JS, CSS3
+
+## 🌐 Live Demo
+
+**Production URL:** https://planner-1-pyd9.onrender.com
+
+## 💝 Support Development
+
+- **GoFundMe:** https://gofund.me/8d9303d27
+- **Email:** onlinediscountsllc@gmail.com
+
+## 📜 License
+
+MIT License - Feel free to use and modify!
+
 ---
 
-## 📐 SACRED MATHEMATICS
-
-The app uses these sacred mathematical principles:
-
-| Constant | Value | Usage |
-|----------|-------|-------|
-| φ (Golden Ratio) | 1.618033988749895 | Goal orb sizing, fractal generation |
-| φ⁻¹ (Discount Factor) | 0.618033988749895 | Color cycling, opacity curves |
-| Golden Angle | 137.5077640500378° | Goal orb positioning in 3D |
-| Fibonacci | 1,1,2,3,5,8,13,21... | Inter-goal connections |
-
----
-
-## 🧠 NEURODIVERGENT-FRIENDLY DESIGN
-
-- **Text-First**: All visual elements have text alternatives
-- **Predictable Layouts**: Consistent navigation and structure
-- **Shame-Free**: No judgment for progress levels
-- **Spoon Theory**: Energy tracking that understands limited capacity
-- **External Visualization**: For aphantasia - see your life when you can't picture it mentally
-
----
-
-## 🔗 API ENDPOINTS
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/register` | POST | Create new user |
-| `/api/login` | POST | Authenticate |
-| `/api/me` | GET | Current user info |
-| `/api/dashboard` | GET | Full dashboard data |
-| `/api/goals` | GET/POST | List/create goals |
-| `/api/tasks/{id}/complete` | POST | Complete a task |
-| `/api/pet/feed` | POST | Feed your pet |
-| `/api/pet/play` | POST | Play with pet |
-| `/api/timeline` | GET | Progress timeline data |
-| `/api/art/generate` | POST | Generate art exports |
-| `/share/{token}` | GET | View shared art |
-
----
-
-## 💡 WHAT MAKES THIS DIFFERENT
-
-Other organizers give you lists and checkboxes.
-
-**Life Fractal gives you a UNIVERSE.**
-
-Your goals aren't tasks to check off - they're **glowing orbs floating in a 3D fractal space**, connected by sacred geometry, evolving as you grow. You don't just track progress - you **watch your life transform** into living art.
-
-For brains that need to see things to understand them, this is the difference between reading about a place and actually BEING there.
-
----
-
-Built with 💜 for neurodivergent minds.
+*Built with 💜 for neurodivergent minds*

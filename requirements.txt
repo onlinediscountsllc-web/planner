@@ -1,18 +1,21 @@
-# Life Fractal Intelligence v10.0 - Requirements
-# For Render.com deployment
+# Life Fractal Intelligence v10.0
+# Production Dependencies for Render.com
 
-# Core Flask
+# Core Flask Framework
 Flask==3.0.0
 Flask-Cors==4.0.0
 Werkzeug==3.0.1
+
+# Production Server
 gunicorn==21.2.0
 
-# Data processing
+# Data Processing
 numpy==1.26.2
 Pillow==10.1.0
 
-# ML (optional but recommended)
-scikit-learn==1.3.2
+# Utilities
+requests==2.31.0
+python-dotenv==1.0.0
 
-# GPU Support (optional - will fall back to CPU if not available)
-# torch  # Uncomment if GPU support needed
+# ML Features (gracefully degrades if unavailable)
+scikit-learn==1.3.2

@@ -1,18 +1,17 @@
-# Render.com Blueprint - Life Fractal Intelligence
-# https://render.com/docs/blueprint-spec
+# render.yaml - Render.com Configuration
+# Life Fractal Intelligence v10.0
 
 services:
   - type: web
     name: life-fractal-intelligence
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    startCommand: gunicorn life_fractal_v10:app
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.4
       - key: SECRET_KEY
         generateValue: true
-      - key: PYTHON_VERSION
-        value: 3.11.6
-      - key: STRIPE_PAYMENT_LINK
-        value: https://buy.stripe.com/eVqeVd0GfadZaUXg8qcwg00
+      - key: FLASK_ENV
+        value: production
     healthCheckPath: /api/health
-    autoDeploy: true
