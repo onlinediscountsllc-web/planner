@@ -1,0 +1,166 @@
+═══════════════════════════════════════════════════════════════════════
+🌀 LIFE FRACTAL v8.0 - COMPLETE DEPLOYMENT GUIDE
+═══════════════════════════════════════════════════════════════════════
+
+PART 1: PREPARE YOUR LOCAL FILES
+─────────────────────────────────────────────────────────────────────────
+
+1. Create/open your project folder:
+   
+   cd C:\Users\YourName\planner
+   (or wherever your project is)
+
+2. Copy these files into the folder:
+   - life_fractal_complete_v8.py  (rename to app.py OR keep as is)
+   - requirements.txt
+   - README.md
+
+═══════════════════════════════════════════════════════════════════════
+
+PART 2: PUSH TO GITHUB
+─────────────────────────────────────────────────────────────────────────
+
+Open PowerShell and run these commands ONE BY ONE:
+
+STEP 1 - Go to your project folder:
+──────────────────────────────────────
+cd C:\Users\YourName\planner
+
+
+STEP 2 - Initialize git (if not already):
+──────────────────────────────────────
+git init
+
+
+STEP 3 - Connect to your GitHub repo:
+──────────────────────────────────────
+git remote add origin https://github.com/onlinediscountsllc-web/planner.git
+
+(If you get "remote already exists" error, that's OK - skip this step)
+
+
+STEP 4 - Add all your files:
+──────────────────────────────────────
+git add -A
+
+
+STEP 5 - Commit your changes:
+──────────────────────────────────────
+git commit -m "Deploy Life Fractal v8.0 with 3D Universe"
+
+
+STEP 6 - Push to GitHub:
+──────────────────────────────────────
+git push -u origin main
+
+(If that fails, try: git push -u origin master)
+(If it asks for credentials, use your GitHub username and Personal Access Token)
+
+
+═══════════════════════════════════════════════════════════════════════
+
+PART 3: DEPLOY ON RENDER.COM
+─────────────────────────────────────────────────────────────────────────
+
+1. Go to https://dashboard.render.com
+
+2. Click your existing service (planner) OR create new:
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repo: onlinediscountsllc-web/planner
+
+3. Configure these settings:
+
+   ┌─────────────────────────────────────────────────────────────────┐
+   │ Name:           planner (or life-fractal)                      │
+   │ Environment:    Python 3                                        │
+   │ Region:         Oregon (US West) or your preference            │
+   │ Branch:         main (or master)                                │
+   │ Root Directory: (leave blank)                                   │
+   │                                                                 │
+   │ Build Command:  pip install -r requirements.txt                │
+   │                                                                 │
+   │ Start Command:  gunicorn life_fractal_complete_v8:app          │
+   │                 OR if you renamed to app.py:                   │
+   │                 gunicorn app:app                                │
+   │                                                                 │
+   │ Instance Type:  Free (or Starter $7/mo for better performance) │
+   └─────────────────────────────────────────────────────────────────┘
+
+4. Add Environment Variables (click "Advanced" → "Add Environment Variable"):
+
+   ┌──────────────────┬─────────────────────────────────────────────┐
+   │ Key              │ Value                                       │
+   ├──────────────────┼─────────────────────────────────────────────┤
+   │ SECRET_KEY       │ (click Generate or type random string)     │
+   │ PYTHON_VERSION   │ 3.11.0                                      │
+   └──────────────────┴─────────────────────────────────────────────┘
+
+5. Click "Create Web Service" (or "Save Changes" if updating)
+
+6. Wait 2-5 minutes for deploy to complete
+
+7. Your app will be live at:
+   https://planner-xxxx.onrender.com
+   (Render will show you the exact URL)
+
+
+═══════════════════════════════════════════════════════════════════════
+
+PART 4: VERIFY IT WORKS
+─────────────────────────────────────────────────────────────────────────
+
+1. Visit your Render URL
+
+2. You should see the Life Fractal home page with:
+   - 🌌 3D Fractal Universe card
+   - 🎨 Art Therapy Studio card
+   - 📊 Progress Timeline card
+   - 📋 Life Dashboard card
+
+3. Click "3D Fractal Universe" to enter the visualization!
+
+
+═══════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING
+─────────────────────────────────────────────────────────────────────────
+
+ERROR: "gunicorn: command not found"
+→ Make sure requirements.txt includes: gunicorn>=21.0.0
+
+ERROR: "No module named 'life_fractal_complete_v8'"
+→ Check your Start Command matches your filename exactly
+→ If file is app.py, use: gunicorn app:app
+
+ERROR: Build fails on numpy
+→ Make sure requirements.txt has: numpy>=2.0.0
+
+ERROR: "Application failed to respond"
+→ Check Render logs (click "Logs" in dashboard)
+→ Make sure PORT environment variable is being used
+
+ERROR: Git push rejected
+→ Try: git pull origin main --rebase
+→ Then: git push origin main
+
+ERROR: "Permission denied" on git push
+→ Use Personal Access Token instead of password
+→ Go to GitHub → Settings → Developer Settings → Personal Access Tokens
+
+
+═══════════════════════════════════════════════════════════════════════
+
+QUICK REFERENCE - ALL COMMANDS IN ORDER
+─────────────────────────────────────────────────────────────────────────
+
+cd C:\Users\YourName\planner
+git add -A
+git commit -m "Deploy Life Fractal v8.0"
+git push origin main
+
+Then go to Render.com and click "Manual Deploy" → "Deploy latest commit"
+
+
+═══════════════════════════════════════════════════════════════════════
+🎉 THAT'S IT! Your 3D Fractal Universe should now be live!
+═══════════════════════════════════════════════════════════════════════

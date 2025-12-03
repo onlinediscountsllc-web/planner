@@ -1,21 +1,11 @@
-# COVER FACE / LIFE FRACTAL INTELLIGENCE - Production Dependencies
-
-# Web Framework
-Flask==3.0.0
-Flask-CORS==4.0.0
-Werkzeug==3.0.1
-
-# Authentication & Security
-argon2-cffi==23.1.0
-cryptography==41.0.7
-
-# Scientific Computing (for fractal mathematics)
+flask>=3.0.0
+flask-cors>=4.0.0
 numpy>=2.0.0
-scipy>=1.11.0
-matplotlib>=3.8.0
 Pillow>=10.0.0
+werkzeug>=3.0.0
+scikit-learn>=1.4.0
+gunicorn>=21.0.0
 
-# Server
-gunicorn==21.2.0
-
-# Note: sqlite3 is built into Python - do NOT include it here!
+# Optional GPU acceleration
+# torch>=2.0.0
+# cupy-cuda12x>=12.0.0
