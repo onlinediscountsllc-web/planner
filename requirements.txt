@@ -1,11 +1,11 @@
 flask>=3.0.0
 flask-cors>=4.0.0
-numpy>=2.0.0
+numpy>=1.26.0
 Pillow>=10.0.0
 werkzeug>=3.0.0
 scikit-learn>=1.4.0
 gunicorn>=21.0.0
 
-# Optional GPU acceleration
+# Optional GPU acceleration (uncomment for local GPU use)
 # torch>=2.0.0
 # cupy-cuda12x>=12.0.0
