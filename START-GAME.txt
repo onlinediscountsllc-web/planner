@@ -1,0 +1,117 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║     🎮 COVER FACE - START YOUR GAME IN 3 STEPS              ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+📍 YOU ARE HERE
+═══════════════
+
+All files are in: C:\Users\Luke\Desktop\planner
+You're ready to deploy!
+
+
+🚀 DEPLOY IN 3 STEPS (10 Minutes Total)
+════════════════════════════════════════
+
+STEP 1: Open PowerShell
+┌────────────────────────────────────────────────┐
+│  Press: Windows + X                            │
+│  Click: "Windows PowerShell"                   │
+└────────────────────────────────────────────────┘
+
+STEP 2: Run This Command
+┌────────────────────────────────────────────────┐
+│  cd C:\Users\Luke\Desktop\planner              │
+│  .\DEPLOY-NOW.ps1                              │
+└────────────────────────────────────────────────┘
+
+STEP 3: Wait & Play!
+┌────────────────────────────────────────────────┐
+│  Wait: 10 minutes                              │
+│  Go to: planner-1-pyd9.onrender.com/game      │
+│  PLAY YOUR GAME! 🎮                            │
+└────────────────────────────────────────────────┘
+
+
+🎯 THAT'S IT!
+═════════════
+
+No complicated steps. No configuration.
+Just run the script and play in 10 minutes!
+
+
+🎮 GAME CONTROLS
+════════════════
+
+W / A / S / D     →  Move your character
+Mouse             →  Look around
+Spacebar          →  Jump
+Click goal orbs   →  Interact
+C                 →  Capture screenshot
+
+
+⚡ SUPER QUICK REFERENCE
+════════════════════════
+
+Deploy:     .\DEPLOY-NOW.ps1
+Play:       planner-1-pyd9.onrender.com/game
+Monitor:    dashboard.render.com
+
+
+🎊 THREE DEPLOYMENT OPTIONS
+════════════════════════════
+
+FASTEST (10 seconds):
+  .\DEPLOY-NOW.ps1        ← Use this one!
+
+EASY (30 seconds):
+  .\DEPLOY-EASY.ps1       ← Shows progress
+
+ADVANCED (2 minutes):
+  .\DEPLOY-TO-RENDER.ps1  ← Full control
+
+
+📋 FIRST TIME? SET THESE IN RENDER
+═══════════════════════════════════
+
+Go to: dashboard.render.com → Environment
+
+Add:
+  SECRET_KEY=<generate with: python -c "import secrets; print(secrets.token_hex(32))">
+  SMTP_PASSWORD=<your-gmail-app-password>
+
+(Full guide in PLAY-GAME-NOW.md)
+
+
+🐛 PROBLEMS?
+════════════
+
+Script won't run?
+→ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Game not loading?
+→ Wait 10 minutes, check dashboard.render.com
+
+Black screen?
+→ Click on canvas, wait 10 seconds
+
+
+📞 NEED HELP?
+═════════════
+
+Email:     onlinediscountsllc@gmail.com
+GoFundMe:  gofund.me/8d9303d27
+Guide:     Read PLAY-GAME-NOW.md
+
+
+═══════════════════════════════════════════════════════════════
+
+        🎮 YOUR 3D LIFE PLANNING GAME AWAITS!
+
+    "Your Life. Your World. Your Game."
+
+    Ready? Run this now:  .\DEPLOY-NOW.ps1
+
+═══════════════════════════════════════════════════════════════
