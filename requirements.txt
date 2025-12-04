@@ -1,17 +1,22 @@
-# Life Fractal Intelligence v11.0 - Complete Dependencies
+# Life Fractal Intelligence v11.0 - Dependencies
 # Python 3.11+ compatible
 
-# Web Framework
+# Core Framework
 Flask>=3.0.0
-flask-cors>=4.0.0
+Flask-Cors>=4.0.0
 Werkzeug>=3.0.0
+gunicorn>=21.0.0
 
 # Data Processing
 numpy>=2.0.0
 Pillow>=10.2.0
 
-# Machine Learning (for AI Brain)
+# Machine Learning (optional but recommended)
 scikit-learn>=1.4.0
 
-# Production Server
-gunicorn>=21.0.0
+# Security
+argon2-cffi>=23.1.0
+
+# GPU Support (optional - install manually if needed)
+# torch>=2.0.0
+# torchvision>=0.15.0
