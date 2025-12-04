@@ -1,12 +1,17 @@
-# Life Fractal Intelligence v10.0
-# Render-Safe Dependencies (Python 3.11-3.13 Compatible)
+# Life Fractal Intelligence v11.0 - Complete Dependencies
+# Python 3.11+ compatible
 
+# Web Framework
 Flask>=3.0.0
-Flask-Cors>=4.0.0
+flask-cors>=4.0.0
 Werkzeug>=3.0.0
-gunicorn>=21.0.0
-numpy>=1.26.0
+
+# Data Processing
+numpy>=2.0.0
 Pillow>=10.2.0
-requests>=2.31.0
-python-dotenv>=1.0.0
+
+# Machine Learning (for AI Brain)
 scikit-learn>=1.4.0
+
+# Production Server
+gunicorn>=21.0.0
