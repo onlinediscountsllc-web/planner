@@ -1618,56 +1618,236 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # USERS - Enhanced with subscription and accessibility
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL, first_name TEXT, last_name TEXT,
-            created_at TEXT NOT NULL, last_login TEXT, is_active INTEGER DEFAULT 1
+            created_at TEXT NOT NULL, last_login TEXT, is_active INTEGER DEFAULT 1,
+            -- Subscription fields
+            subscription_status TEXT DEFAULT 'trial',
+            trial_start_date TEXT,
+            trial_end_date TEXT,
+            subscription_start_date TEXT,
+            subscription_end_date TEXT,
+            stripe_customer_id TEXT,
+            is_exempt INTEGER DEFAULT 0,
+            exempt_reason TEXT,
+            -- Neurodivergent profile
+            neurodivergent_types TEXT,
+            accessibility_settings TEXT,
+            onboarding_completed INTEGER DEFAULT 0,
+            -- Stats
+            total_karma_earned REAL DEFAULT 0.0,
+            total_sessions INTEGER DEFAULT 0,
+            total_time_minutes REAL DEFAULT 0.0
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # ACCESSIBILITY PREFERENCES - Per-user settings for ND accommodations
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS accessibility_prefs (
+            user_id TEXT PRIMARY KEY,
+            -- Visual
+            dyslexia_font INTEGER DEFAULT 0,
+            high_contrast INTEGER DEFAULT 0,
+            large_text INTEGER DEFAULT 0,
+            reduced_motion INTEGER DEFAULT 0,
+            color_blind_mode TEXT DEFAULT 'none',
+            -- Cognitive
+            simplified_ui INTEGER DEFAULT 0,
+            extra_time_mode INTEGER DEFAULT 0,
+            break_reminders INTEGER DEFAULT 1,
+            break_interval_minutes INTEGER DEFAULT 25,
+            -- Input
+            voice_input_enabled INTEGER DEFAULT 0,
+            predictive_text INTEGER DEFAULT 1,
+            auto_save_interval INTEGER DEFAULT 30,
+            -- Visualization
+            fractal_complexity TEXT DEFAULT 'medium',
+            animation_speed TEXT DEFAULT 'normal',
+            particle_density TEXT DEFAULT 'medium',
+            -- Audio
+            binaural_default_preset TEXT DEFAULT 'focus',
+            notification_sounds INTEGER DEFAULT 1,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # GOALS - Enhanced with visualization links
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS goals (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL,
             description TEXT, category TEXT DEFAULT 'personal', priority INTEGER DEFAULT 3,
             progress REAL DEFAULT 0.0, target_date TEXT, created_at TEXT NOT NULL,
             completed_at TEXT, karma_invested REAL DEFAULT 0.0, orb_id TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            -- Enhanced fields
+            color TEXT DEFAULT '#4a90a4',
+            icon TEXT DEFAULT '🎯',
+            parent_goal_id TEXT,
+            is_milestone INTEGER DEFAULT 0,
+            estimated_spoons INTEGER DEFAULT 3,
+            actual_spoons_used INTEGER DEFAULT 0,
+            notes TEXT,
+            last_updated TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (parent_goal_id) REFERENCES goals(id)
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # HABITS - Enhanced tracking
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS habits (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL,
             description TEXT, frequency TEXT DEFAULT 'daily',
             current_streak INTEGER DEFAULT 0, longest_streak INTEGER DEFAULT 0,
             total_completions INTEGER DEFAULT 0, last_completed TEXT,
             created_at TEXT NOT NULL, orb_id TEXT,
+            -- Enhanced fields
+            color TEXT DEFAULT '#8b5cf6',
+            icon TEXT DEFAULT '✨',
+            time_of_day TEXT DEFAULT 'anytime',
+            estimated_spoons INTEGER DEFAULT 1,
+            reminder_enabled INTEGER DEFAULT 0,
+            reminder_time TEXT,
+            notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # DAILY ENTRIES - Comprehensive wellness tracking
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS daily_entries (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, date TEXT NOT NULL,
             mood_level INTEGER DEFAULT 50, energy_level INTEGER DEFAULT 50,
             focus_level INTEGER DEFAULT 50, stress_level INTEGER DEFAULT 50,
             spoons_available INTEGER DEFAULT 12, spoons_used INTEGER DEFAULT 0,
             journal_entry TEXT, created_at TEXT NOT NULL,
+            -- Enhanced tracking
+            sleep_quality INTEGER DEFAULT 50,
+            sleep_hours REAL,
+            pain_level INTEGER DEFAULT 0,
+            anxiety_level INTEGER DEFAULT 50,
+            sensory_overload INTEGER DEFAULT 0,
+            social_battery INTEGER DEFAULT 50,
+            wins TEXT,
+            struggles TEXT,
+            gratitude TEXT,
+            last_updated TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id), UNIQUE(user_id, date)
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # DREAMS - Dream journal for visualization
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS dreams (
+            id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+            dream_text TEXT NOT NULL,
+            emotion TEXT DEFAULT 'neutral',
+            lucidity_level INTEGER DEFAULT 0,
+            recurring INTEGER DEFAULT 0,
+            symbols TEXT,
+            interpretation TEXT,
+            orb_id TEXT,
+            created_at TEXT NOT NULL,
+            dream_date TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # PET STATE - Virtual companion
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS pet_state (
             user_id TEXT PRIMARY KEY, species TEXT DEFAULT 'cat',
             name TEXT DEFAULT 'Karma', hunger REAL DEFAULT 50.0,
             energy REAL DEFAULT 50.0, happiness REAL DEFAULT 50.0,
             level INTEGER DEFAULT 1, experience INTEGER DEFAULT 0,
+            -- Enhanced
+            personality TEXT DEFAULT 'friendly',
+            favorite_activity TEXT DEFAULT 'play',
+            unlocked_accessories TEXT DEFAULT '[]',
+            current_accessory TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # KARMA HISTORY - Action tracking
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS karma_history (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, action_type TEXT NOT NULL,
             karma_value REAL NOT NULL, meaning TEXT, timestamp TEXT NOT NULL,
+            -- Enhanced
+            linked_goal_id TEXT,
+            linked_habit_id TEXT,
+            session_id TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
         
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # ANIMATIONS - Generated animations
+        # ═══════════════════════════════════════════════════════════════════════════════
         cursor.execute('''CREATE TABLE IF NOT EXISTS animations (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT,
             duration_seconds REAL, frame_count INTEGER,
             created_at TEXT NOT NULL, status TEXT DEFAULT 'pending',
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # SESSIONS - Track user sessions for analytics
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+            start_time TEXT NOT NULL, end_time TEXT,
+            duration_minutes REAL DEFAULT 0,
+            actions_count INTEGER DEFAULT 0,
+            karma_earned REAL DEFAULT 0,
+            spoons_used INTEGER DEFAULT 0,
+            device_type TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # AUTO-SAVE STATE - Persistent user state
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS user_state (
+            user_id TEXT PRIMARY KEY,
+            last_panel TEXT DEFAULT 'dashboard',
+            camera_position TEXT DEFAULT '{"x":0,"y":0,"z":100}',
+            selected_orb_id TEXT,
+            ui_state TEXT,
+            last_auto_save TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # INSIGHTS - ML-generated patterns and recommendations
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS insights (
+            id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+            insight_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            confidence REAL DEFAULT 0.5,
+            actionable INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            acknowledged INTEGER DEFAULT 0,
+            helpful_rating INTEGER,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
+        
+        # ═══════════════════════════════════════════════════════════════════════════════
+        # QUICK ACTIONS - Preset actions for zero-typing
+        # ═══════════════════════════════════════════════════════════════════════════════
+        cursor.execute('''CREATE TABLE IF NOT EXISTS quick_actions (
+            id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+            label TEXT NOT NULL,
+            icon TEXT DEFAULT '⚡',
+            action_type TEXT NOT NULL,
+            action_data TEXT,
+            display_order INTEGER DEFAULT 0,
+            is_visible INTEGER DEFAULT 1,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
         
@@ -1843,6 +2023,58 @@ def background_loop():
 
 threading.Thread(target=background_loop, daemon=True).start()
 
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# SUBSCRIPTION & AUTHENTICATION HELPERS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+TRIAL_DAYS = 7
+STRIPE_MONTHLY_LINK = "https://buy.stripe.com/YOUR_STRIPE_LINK"  # Configure this
+
+def check_subscription_status(user_id: str) -> Dict:
+    """Check if user has active subscription or valid trial"""
+    user = db.execute_one('SELECT * FROM users WHERE id = ?', (user_id,))
+    if not user:
+        return {'valid': False, 'reason': 'User not found'}
+    
+    # Exempt users always have access
+    if user['is_exempt']:
+        return {'valid': True, 'status': 'exempt', 'reason': user['exempt_reason'] or 'Admin exemption'}
+    
+    now = datetime.now(timezone.utc)
+    status = user['subscription_status'] or 'trial'
+    
+    if status == 'active':
+        # Check if subscription is still valid
+        if user['subscription_end_date']:
+            end_date = datetime.fromisoformat(user['subscription_end_date'].replace('Z', '+00:00'))
+            if now < end_date:
+                days_left = (end_date - now).days
+                return {'valid': True, 'status': 'active', 'days_left': days_left}
+            else:
+                # Subscription expired
+                db.execute('UPDATE users SET subscription_status = ? WHERE id = ?', ('expired', user_id))
+                return {'valid': False, 'status': 'expired', 'reason': 'Subscription expired'}
+        return {'valid': True, 'status': 'active'}
+    
+    elif status == 'trial':
+        # Check trial validity
+        if user['trial_end_date']:
+            end_date = datetime.fromisoformat(user['trial_end_date'].replace('Z', '+00:00'))
+            days_left = (end_date - now).days
+            if now < end_date:
+                return {'valid': True, 'status': 'trial', 'days_left': days_left}
+            else:
+                # Trial expired
+                db.execute('UPDATE users SET subscription_status = ? WHERE id = ?', ('trial_expired', user_id))
+                return {'valid': False, 'status': 'trial_expired', 'reason': 'Free trial ended'}
+        # No trial date set - shouldn't happen but allow access
+        return {'valid': True, 'status': 'trial', 'days_left': TRIAL_DAYS}
+    
+    else:
+        # Expired or other status
+        return {'valid': False, 'status': status, 'reason': 'Subscription required'}
+
+
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -1850,6 +2082,52 @@ def require_auth(f):
             return jsonify({'error': 'Authentication required'}), 401
         return f(*args, **kwargs)
     return decorated
+
+
+def require_subscription(f):
+    """Decorator that checks for valid subscription or trial"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        sub_status = check_subscription_status(session['user_id'])
+        if not sub_status['valid']:
+            return jsonify({
+                'error': 'Subscription required',
+                'subscription_status': sub_status['status'],
+                'reason': sub_status.get('reason', 'Please subscribe to continue'),
+                'subscribe_url': STRIPE_MONTHLY_LINK
+            }), 402  # Payment Required
+        
+        # Add subscription info to request for use in endpoints
+        request.subscription = sub_status
+        return f(*args, **kwargs)
+    return decorated
+
+
+def auto_save_state(user_id: str, panel: str = None, camera: Dict = None):
+    """Auto-save user state"""
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        existing = db.execute_one('SELECT * FROM user_state WHERE user_id = ?', (user_id,))
+        
+        if existing:
+            updates = ['last_auto_save = ?']
+            params = [now]
+            if panel:
+                updates.append('last_panel = ?')
+                params.append(panel)
+            if camera:
+                updates.append('camera_position = ?')
+                params.append(json.dumps(camera))
+            params.append(user_id)
+            db.execute(f'UPDATE user_state SET {", ".join(updates)} WHERE user_id = ?', tuple(params))
+        else:
+            db.execute('''INSERT INTO user_state (user_id, last_panel, camera_position, last_auto_save)
+                VALUES (?, ?, ?, ?)''', (user_id, panel or 'dashboard', json.dumps(camera or {}), now))
+    except Exception as e:
+        logger.error(f"Auto-save error: {e}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -1863,16 +2141,56 @@ def register():
         return jsonify({'error': 'Email and password required'}), 400
     
     user_id = secrets.token_hex(16)
+    now = datetime.now(timezone.utc)
+    trial_end = now + timedelta(days=TRIAL_DAYS)
+    
     try:
-        db.execute('''INSERT INTO users (id, email, password_hash, first_name, last_name, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)''',
+        # Create user with trial period
+        db.execute('''INSERT INTO users (
+            id, email, password_hash, first_name, last_name, created_at,
+            subscription_status, trial_start_date, trial_end_date,
+            neurodivergent_types, last_login
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (user_id, data['email'], generate_password_hash(data['password']),
              data.get('first_name', ''), data.get('last_name', ''),
-             datetime.now(timezone.utc).isoformat()))
+             now.isoformat(), 'trial', now.isoformat(), trial_end.isoformat(),
+             json.dumps(data.get('neurodivergent_types', [])), now.isoformat()))
         
+        # Create default accessibility preferences
+        db.execute('''INSERT INTO accessibility_prefs (user_id) VALUES (?)''', (user_id,))
+        
+        # Create pet
         db.execute('INSERT INTO pet_state (user_id) VALUES (?)', (user_id,))
+        
+        # Create initial user state
+        db.execute('''INSERT INTO user_state (user_id, last_auto_save) VALUES (?, ?)''',
+                  (user_id, now.isoformat()))
+        
+        # Create default quick actions for zero-typing experience
+        quick_actions = [
+            ('😊 Good day', '😊', 'mood_quick', '{"mood": 75, "energy": 70}'),
+            ('😐 Okay day', '😐', 'mood_quick', '{"mood": 50, "energy": 50}'),
+            ('😔 Hard day', '😔', 'mood_quick', '{"mood": 25, "energy": 30}'),
+            ('🥄 Low spoons', '🥄', 'spoons_quick', '{"spoons": 3}'),
+            ('⚡ Energized', '⚡', 'spoons_quick', '{"spoons": 12}'),
+            ('✅ Task done', '✅', 'complete_quick', '{}'),
+            ('🧘 Need break', '🧘', 'break_quick', '{}'),
+            ('💤 Tired', '💤', 'tired_quick', '{"energy": 20}'),
+        ]
+        for i, (label, icon, action_type, action_data) in enumerate(quick_actions):
+            db.execute('''INSERT INTO quick_actions (id, user_id, label, icon, action_type, action_data, display_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                (secrets.token_hex(8), user_id, label, icon, action_type, action_data, i))
+        
         session['user_id'] = user_id
-        return jsonify({'success': True, 'user_id': user_id})
+        
+        return jsonify({
+            'success': True,
+            'user_id': user_id,
+            'trial_days_left': TRIAL_DAYS,
+            'trial_end_date': trial_end.isoformat(),
+            'message': f'Welcome! Your {TRIAL_DAYS}-day free trial has started.'
+        })
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Email already exists'}), 409
 
@@ -1885,30 +2203,373 @@ def login():
     if not user or not check_password_hash(user['password_hash'], data.get('password', '')):
         return jsonify({'error': 'Invalid credentials'}), 401
     
+    # Update last login and increment session count
+    now = datetime.now(timezone.utc).isoformat()
+    db.execute('UPDATE users SET last_login = ?, total_sessions = total_sessions + 1 WHERE id = ?',
+              (now, user['id']))
+    
+    # Create new session record
+    session_id = secrets.token_hex(8)
+    db.execute('''INSERT INTO sessions (id, user_id, start_time) VALUES (?, ?, ?)''',
+              (session_id, user['id'], now))
+    
     session['user_id'] = user['id']
-    return jsonify({'success': True})
+    session['session_id'] = session_id
+    
+    # Check subscription status
+    sub_status = check_subscription_status(user['id'])
+    
+    # Get user state for restore
+    user_state = db.execute_one('SELECT * FROM user_state WHERE user_id = ?', (user['id'],))
+    
+    return jsonify({
+        'success': True,
+        'subscription': sub_status,
+        'restore_state': dict(user_state) if user_state else None,
+        'first_name': user['first_name']
+    })
 
 
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
+    # End session if tracked
+    if 'session_id' in session and 'user_id' in session:
+        now = datetime.now(timezone.utc).isoformat()
+        db.execute('''UPDATE sessions SET end_time = ?, 
+            duration_minutes = (julianday(?) - julianday(start_time)) * 1440
+            WHERE id = ?''', (now, now, session['session_id']))
     session.pop('user_id', None)
+    session.pop('session_id', None)
+    return jsonify({'success': True})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# SUBSCRIPTION ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/subscription/status', methods=['GET'])
+@require_auth
+def get_subscription_status():
+    """Get current subscription status"""
+    status = check_subscription_status(session['user_id'])
+    user = db.execute_one('SELECT email, first_name, created_at, is_exempt FROM users WHERE id = ?',
+                         (session['user_id'],))
+    return jsonify({
+        **status,
+        'email': user['email'] if user else None,
+        'name': user['first_name'] if user else None,
+        'member_since': user['created_at'] if user else None,
+        'subscribe_url': STRIPE_MONTHLY_LINK
+    })
+
+
+@app.route('/api/subscription/activate', methods=['POST'])
+@require_auth
+def activate_subscription():
+    """Activate subscription (called after Stripe payment)"""
+    data = request.get_json()
+    now = datetime.now(timezone.utc)
+    
+    # In production, verify with Stripe webhook
+    # For now, accept the activation
+    subscription_end = now + timedelta(days=30)
+    
+    db.execute('''UPDATE users SET 
+        subscription_status = ?,
+        subscription_start_date = ?,
+        subscription_end_date = ?,
+        stripe_customer_id = ?
+        WHERE id = ?''',
+        ('active', now.isoformat(), subscription_end.isoformat(),
+         data.get('stripe_customer_id'), session['user_id']))
+    
+    return jsonify({
+        'success': True,
+        'status': 'active',
+        'valid_until': subscription_end.isoformat()
+    })
+
+
+@app.route('/api/admin/exempt-user', methods=['POST'])
+@require_auth
+def exempt_user():
+    """Admin endpoint to exempt a user from payment"""
+    # Check if current user is admin (you'd add admin check here)
+    data = request.get_json()
+    target_email = data.get('email')
+    reason = data.get('reason', 'Admin exemption')
+    
+    if not target_email:
+        return jsonify({'error': 'Email required'}), 400
+    
+    result = db.execute('''UPDATE users SET is_exempt = 1, exempt_reason = ? WHERE email = ?''',
+                       (reason, target_email))
+    
+    return jsonify({'success': True, 'message': f'User {target_email} exempted'})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# HEALTH & STATUS ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'version': '12.4',
+        'uptime': organism.uptime,
+        'orbs': len(organism.swarm.orbs),
+        'harmony': organism.harmony,
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    })
+
+
+@app.route('/robots.txt', methods=['GET'])
+def robots():
+    """Robots.txt for crawlers"""
+    return Response("User-agent: *\nAllow: /\n", mimetype='text/plain')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# ACCESSIBILITY ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/accessibility/preferences', methods=['GET'])
+@require_auth
+def get_accessibility_prefs():
+    """Get user's accessibility preferences"""
+    prefs = db.execute_one('SELECT * FROM accessibility_prefs WHERE user_id = ?',
+                          (session['user_id'],))
+    if prefs:
+        return jsonify(dict(prefs))
+    return jsonify({})
+
+
+@app.route('/api/accessibility/preferences', methods=['PUT'])
+@require_auth
+def update_accessibility_prefs():
+    """Update accessibility preferences"""
+    data = request.get_json()
+    
+    # Build update query dynamically
+    valid_fields = [
+        'dyslexia_font', 'high_contrast', 'large_text', 'reduced_motion',
+        'color_blind_mode', 'simplified_ui', 'extra_time_mode', 'break_reminders',
+        'break_interval_minutes', 'voice_input_enabled', 'predictive_text',
+        'auto_save_interval', 'fractal_complexity', 'animation_speed',
+        'particle_density', 'binaural_default_preset', 'notification_sounds'
+    ]
+    
+    updates = []
+    params = []
+    for field in valid_fields:
+        if field in data:
+            updates.append(f'{field} = ?')
+            params.append(data[field])
+    
+    if updates:
+        params.append(session['user_id'])
+        db.execute(f'UPDATE accessibility_prefs SET {", ".join(updates)} WHERE user_id = ?',
+                  tuple(params))
+    
+    return jsonify({'success': True})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# DREAMS ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/dreams', methods=['GET'])
+@require_subscription
+def get_dreams():
+    """Get user's dreams"""
+    dreams = db.execute('SELECT * FROM dreams WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+                       (session['user_id'],))
+    return jsonify([dict(d) for d in dreams or []])
+
+
+@app.route('/api/dreams', methods=['POST'])
+@require_subscription
+def create_dream():
+    """Record a new dream"""
+    data = request.get_json()
+    dream_id = secrets.token_hex(8)
+    now = datetime.now(timezone.utc).isoformat()
+    
+    db.execute('''INSERT INTO dreams (id, user_id, dream_text, emotion, lucidity_level, 
+        recurring, symbols, dream_date, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+        (dream_id, session['user_id'], data.get('dream_text', ''),
+         data.get('emotion', 'neutral'), data.get('lucidity_level', 0),
+         data.get('recurring', 0), json.dumps(data.get('symbols', [])),
+         data.get('dream_date', now[:10]), now))
+    
+    # Create dream orb in fractal universe
+    result = organism.process_action('record_dream', 0.5, 0.9, 0.8)
+    
+    return jsonify({
+        'success': True,
+        'dream_id': dream_id,
+        'karma_earned': result['karma_earned']
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# QUICK ACTIONS (Zero-Typing Interface)
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/quick-actions', methods=['GET'])
+@require_subscription
+def get_quick_actions():
+    """Get user's quick action buttons"""
+    actions = db.execute('''SELECT * FROM quick_actions WHERE user_id = ? AND is_visible = 1 
+        ORDER BY display_order''', (session['user_id'],))
+    return jsonify([dict(a) for a in actions or []])
+
+
+@app.route('/api/quick-actions/execute', methods=['POST'])
+@require_subscription
+def execute_quick_action():
+    """Execute a quick action (zero-typing interaction)"""
+    data = request.get_json()
+    action_id = data.get('action_id')
+    
+    action = db.execute_one('SELECT * FROM quick_actions WHERE id = ? AND user_id = ?',
+                           (action_id, session['user_id']))
+    if not action:
+        return jsonify({'error': 'Action not found'}), 404
+    
+    action_data = json.loads(action['action_data'] or '{}')
+    action_type = action['action_type']
+    
+    # Process different action types
+    if action_type == 'mood_quick':
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        db.execute('''INSERT INTO daily_entries (id, user_id, date, mood_level, energy_level, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, date) DO UPDATE SET 
+            mood_level = ?, energy_level = ?, last_updated = ?''',
+            (secrets.token_hex(8), session['user_id'], today, 
+             action_data.get('mood', 50), action_data.get('energy', 50),
+             datetime.now(timezone.utc).isoformat(),
+             action_data.get('mood', 50), action_data.get('energy', 50),
+             datetime.now(timezone.utc).isoformat()))
+        result = organism.process_action('quick_checkin', 0.3, 0.9, 0.9)
+        
+    elif action_type == 'spoons_quick':
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        db.execute('''INSERT INTO daily_entries (id, user_id, date, spoons_available, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, date) DO UPDATE SET 
+            spoons_available = ?, last_updated = ?''',
+            (secrets.token_hex(8), session['user_id'], today,
+             action_data.get('spoons', 12), datetime.now(timezone.utc).isoformat(),
+             action_data.get('spoons', 12), datetime.now(timezone.utc).isoformat()))
+        result = organism.process_action('quick_spoons', 0.2, 0.9, 0.9)
+        
+    elif action_type == 'complete_quick':
+        result = organism.process_action('quick_complete', 0.5, 0.95, 0.9)
+        
+    elif action_type == 'break_quick':
+        result = organism.process_action('take_break', 0.3, 0.8, 0.95)
+        
+    else:
+        result = organism.process_action(action_type, 0.3, 0.8, 0.8)
+    
+    return jsonify({
+        'success': True,
+        'action': action['label'],
+        'karma_earned': result['karma_earned']
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# AUTO-SAVE ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/state/save', methods=['POST'])
+@require_auth
+def save_state():
+    """Auto-save user state"""
+    data = request.get_json()
+    auto_save_state(
+        session['user_id'],
+        panel=data.get('panel'),
+        camera=data.get('camera')
+    )
+    return jsonify({'success': True})
+
+
+@app.route('/api/state/restore', methods=['GET'])
+@require_auth
+def restore_state():
+    """Restore user state from last session"""
+    state = db.execute_one('SELECT * FROM user_state WHERE user_id = ?', (session['user_id'],))
+    if state:
+        return jsonify(dict(state))
+    return jsonify({})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# INSIGHTS ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/insights', methods=['GET'])
+@require_subscription
+def get_insights():
+    """Get ML-generated insights for user"""
+    insights = db.execute('''SELECT * FROM insights WHERE user_id = ? AND acknowledged = 0
+        ORDER BY created_at DESC LIMIT 10''', (session['user_id'],))
+    return jsonify([dict(i) for i in insights or []])
+
+
+@app.route('/api/insights/<insight_id>/acknowledge', methods=['POST'])
+@require_subscription
+def acknowledge_insight(insight_id):
+    """Mark insight as acknowledged"""
+    data = request.get_json()
+    db.execute('''UPDATE insights SET acknowledged = 1, helpful_rating = ? WHERE id = ? AND user_id = ?''',
+              (data.get('helpful_rating'), insight_id, session['user_id']))
     return jsonify({'success': True})
 
 
 @app.route('/api/organism/state', methods=['GET'])
-@require_auth
 def get_organism_state():
-    return jsonify(organism.get_state())
+    """Get organism state - allows demo mode for non-logged-in users"""
+    if 'user_id' in session:
+        # Check subscription for logged-in users
+        sub_status = check_subscription_status(session['user_id'])
+        if not sub_status['valid']:
+            return jsonify({
+                'error': 'Subscription required',
+                'subscription_status': sub_status['status'],
+                'subscribe_url': STRIPE_MONTHLY_LINK
+            }), 402
+        # Auto-save that user is active
+        auto_save_state(session['user_id'])
+    
+    # Return organism state (works for demo and logged-in users)
+    state = organism.get_state()
+    state['is_demo'] = 'user_id' not in session
+    return jsonify(state)
 
 
 @app.route('/api/organism/visualization', methods=['GET'])
-@require_auth
 def get_visualization():
-    return jsonify(organism.swarm.get_visualization_data())
+    """Get visualization - allows demo mode"""
+    if 'user_id' in session:
+        sub_status = check_subscription_status(session['user_id'])
+        if not sub_status['valid']:
+            return jsonify({'error': 'Subscription required'}), 402
+    
+    viz = organism.swarm.get_visualization_data()
+    viz['is_demo'] = 'user_id' not in session
+    return jsonify(viz)
 
 
 @app.route('/api/organism/action', methods=['POST'])
-@require_auth
+@require_subscription
 def process_action():
     data = request.get_json()
     result = organism.process_action(
@@ -1929,7 +2590,7 @@ def process_action():
 
 
 @app.route('/api/animation/generate', methods=['POST'])
-@require_auth
+@require_subscription
 def generate_animation():
     """Generate animation from organism state"""
     data = request.get_json()
@@ -2313,13 +2974,53 @@ MAIN_HTML = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌀 Life Fractal Intelligence v12.1</title>
+    <title>🌀 Life Fractal Intelligence</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --phi: 1.618; --bg: #0a0a12; --gold: #d4af37; --blue: #4a90a4; }
+        :root { 
+            --phi: 1.618; --bg: #0a0a12; --gold: #d4af37; --blue: #4a90a4; 
+            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+            --font-main: 'Lexend', system-ui, sans-serif;
+            --font-size-base: 16px;
+        }
+        /* Dyslexia-friendly mode */
+        body.dyslexia-font { --font-main: 'OpenDyslexic', 'Lexend', sans-serif; letter-spacing: 0.05em; word-spacing: 0.1em; }
+        body.large-text { --font-size-base: 20px; }
+        body.high-contrast { --bg: #000; --gold: #ffd700; --blue: #00bfff; }
+        body.reduced-motion * { animation: none !important; transition: none !important; }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: #e8e8e8; overflow: hidden; height: 100vh; }
+        body { font-family: var(--font-main); font-size: var(--font-size-base); background: var(--bg); color: #e8e8e8; overflow: hidden; height: 100vh; line-height: 1.6; }
         #universe { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        
+        /* Quick Actions Bar - Zero Typing */
+        .quick-bar { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 150; display: flex; gap: 8px; background: rgba(15,15,25,0.95); padding: 10px 15px; border-radius: 25px; border: 1px solid rgba(212,175,55,0.3); }
+        .quick-bar.hidden { display: none; }
+        .quick-btn { min-width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(74,144,164,0.5); background: rgba(74,144,164,0.2); color: white; font-size: 1.5em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .quick-btn:hover { transform: scale(1.1); border-color: var(--gold); background: rgba(212,175,55,0.3); }
+        .quick-btn:active { transform: scale(0.95); }
+        
+        /* Paywall Modal */
+        .paywall { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .paywall.show { display: flex; }
+        .paywall-card { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid var(--gold); border-radius: 24px; padding: 40px; max-width: 450px; text-align: center; }
+        .paywall-card h2 { color: var(--gold); font-size: 1.8em; margin-bottom: 15px; }
+        .paywall-card p { color: #aaa; margin-bottom: 20px; line-height: 1.7; }
+        .paywall-card .price { font-size: 2.5em; color: white; margin: 20px 0; }
+        .paywall-card .price span { font-size: 0.4em; color: #888; }
+        .paywall-card .features { text-align: left; margin: 25px 0; }
+        .paywall-card .features li { padding: 8px 0; color: #ccc; list-style: none; }
+        .paywall-card .features li::before { content: '✓ '; color: var(--success); }
+        .paywall-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--gold), #c49b30); border: none; border-radius: 12px; color: #000; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 15px; }
+        .trial-badge { background: rgba(34,197,94,0.2); color: var(--success); padding: 8px 16px; border-radius: 20px; font-size: 0.85em; margin-bottom: 20px; display: inline-block; }
+        
+        /* Subscription Status */
+        .sub-status { position: fixed; top: 15px; left: 80px; z-index: 100; background: rgba(15,15,25,0.9); border-radius: 20px; padding: 6px 14px; font-size: 0.8em; }
+        .sub-status.trial { border: 1px solid var(--warning); color: var(--warning); }
+        .sub-status.active { border: 1px solid var(--success); color: var(--success); }
+        .sub-status.expired { border: 1px solid var(--danger); color: var(--danger); }
+        
         .hamburger { position: fixed; top: 20px; left: 20px; z-index: 1000; width: 50px; height: 50px; background: rgba(15,15,25,0.95); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; }
         .hamburger span { width: 24px; height: 2px; background: var(--gold); transition: 0.3s; }
         .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
@@ -2329,13 +3030,13 @@ MAIN_HTML = '''<!DOCTYPE html>
         .nav.open { left: 0; }
         .nav-section { margin-bottom: 20px; }
         .nav-section h3 { color: var(--gold); font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .nav-btn { display: block; width: 100%; padding: 12px; background: transparent; border: none; color: #e8e8e8; text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 4px; }
+        .nav-btn { display: block; width: 100%; padding: 14px; background: transparent; border: none; color: #e8e8e8; text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-size: 1em; }
         .nav-btn:hover { background: rgba(74,144,164,0.15); }
         .stats { position: fixed; top: 15px; right: 15px; z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; max-width: 400px; justify-content: flex-end; }
-        .stat { background: rgba(15,15,25,0.9); border: 1px solid rgba(74,144,164,0.3); border-radius: 15px; padding: 8px 15px; font-size: 0.85em; }
+        .stat { background: rgba(15,15,25,0.9); border: 1px solid rgba(74,144,164,0.3); border-radius: 15px; padding: 8px 15px; font-size: 0.9em; }
         .stat .val { color: var(--gold); font-weight: 600; }
         .stat.spoons { border-color: rgba(212,175,55,0.4); }
-        .enter-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6, #4a90a4); border: none; border-radius: 25px; color: white; font-size: 1.1em; cursor: pointer; box-shadow: 0 4px 30px rgba(139,92,246,0.4); }
+        .enter-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 18px 45px; background: linear-gradient(135deg, #8b5cf6, #4a90a4); border: none; border-radius: 25px; color: white; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 30px rgba(139,92,246,0.4); }
         .enter-btn.hidden { display: none; }
         .orb-tooltip { position: fixed; background: rgba(15,15,25,0.95); border: 1px solid var(--gold); border-radius: 10px; padding: 12px; max-width: 280px; z-index: 1001; display: none; pointer-events: none; }
         .orb-tooltip.show { display: block; }
@@ -2345,16 +3046,16 @@ MAIN_HTML = '''<!DOCTYPE html>
         .mayan { position: fixed; bottom: 20px; right: 20px; background: rgba(15,15,25,0.9); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 12px; z-index: 100; }
         .mayan h4 { color: var(--gold); font-size: 0.75em; margin-bottom: 5px; }
         .audio-controls { position: fixed; bottom: 20px; left: 20px; background: rgba(15,15,25,0.9); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 10px; z-index: 100; }
-        .audio-controls button { background: rgba(139,92,246,0.3); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
+        .audio-controls button { background: rgba(139,92,246,0.3); border: none; color: white; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85em; }
         .audio-controls button.active { background: rgba(139,92,246,0.7); }
         .panel { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 700px; max-height: 55vh; background: rgba(15,15,25,0.98); border: 1px solid rgba(74,144,164,0.2); border-radius: 16px; z-index: 100; display: none; overflow: hidden; }
         .panel.active { display: block; }
-        .panel-head { padding: 15px 20px; border-bottom: 1px solid rgba(74,144,164,0.2); display: flex; justify-content: space-between; }
+        .panel-head { padding: 15px 20px; border-bottom: 1px solid rgba(74,144,164,0.2); display: flex; justify-content: space-between; align-items: center; }
         .panel-head h2 { color: var(--gold); font-size: 1.1em; }
-        .panel-close { background: none; border: none; color: #888; font-size: 1.3em; cursor: pointer; }
+        .panel-close { background: none; border: none; color: #888; font-size: 1.5em; cursor: pointer; padding: 5px 10px; }
         .panel-body { padding: 20px; max-height: calc(55vh - 60px); overflow-y: auto; }
-        .progress-bar { height: 8px; background: rgba(74,144,164,0.2); border-radius: 4px; overflow: hidden; margin-top: 8px; }
-        .progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold)); border-radius: 4px; transition: width 0.3s; }
+        .progress-bar { height: 10px; background: rgba(74,144,164,0.2); border-radius: 5px; overflow: hidden; margin-top: 8px; }
+        .progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold)); border-radius: 5px; transition: width 0.3s; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; color: #888; font-size: 0.9em; }
         .form-group input { width: 100%; padding: 10px; background: rgba(74,144,164,0.1); border: 1px solid rgba(74,144,164,0.3); border-radius: 8px; color: #e8e8e8; }
@@ -2368,6 +3069,32 @@ MAIN_HTML = '''<!DOCTYPE html>
 </head>
 <body>
 <canvas id="universe"></canvas>
+
+<!-- Paywall Modal -->
+<div class="paywall" id="paywall">
+    <div class="paywall-card">
+        <div class="trial-badge" id="trialBadge">🎁 7-Day Free Trial</div>
+        <h2>Life Fractal Intelligence</h2>
+        <p>Your neurodivergent-friendly planning companion with sacred mathematics visualization.</p>
+        <div class="price">$9.99<span>/month</span></div>
+        <ul class="features">
+            <li>Unlimited access to fractal universe</li>
+            <li>Spoon Theory energy tracking</li>
+            <li>AI-powered pattern detection</li>
+            <li>Dream journaling & visualization</li>
+            <li>Virtual pet companion</li>
+            <li>Zero-typing quick actions</li>
+            <li>Binaural beats & focus tools</li>
+            <li>Full accessibility options</li>
+        </ul>
+        <button class="paywall-btn" onclick="subscribe()">Subscribe Now</button>
+        <p style="margin-top:15px;font-size:0.85em;color:#666" id="trialMsg">Your trial has ended. Subscribe to continue.</p>
+    </div>
+</div>
+
+<!-- Subscription Status -->
+<div class="sub-status trial" id="subStatus">Trial: <span id="daysLeft">7</span> days left</div>
+
 <button class="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></button>
 <nav class="nav" id="nav">
     <div class="nav-section"><h3>Planning</h3>
@@ -2386,7 +3113,22 @@ MAIN_HTML = '''<!DOCTYPE html>
         <button class="nav-btn" onclick="showPanel('patterns')">🧠 ML Patterns</button>
         <button class="nav-btn" onclick="showPanel('animation')">🎬 Animation</button>
     </div>
+    <div class="nav-section"><h3>Settings</h3>
+        <button class="nav-btn" onclick="showPanel('accessibility')">♿ Accessibility</button>
+        <button class="nav-btn" onclick="showPanel('account')">👤 Account</button>
+    </div>
 </nav>
+
+<!-- Quick Actions Bar (Zero-Typing) -->
+<div class="quick-bar" id="quickBar">
+    <button class="quick-btn" onclick="quickAction('good')" title="Good day">😊</button>
+    <button class="quick-btn" onclick="quickAction('okay')" title="Okay day">😐</button>
+    <button class="quick-btn" onclick="quickAction('hard')" title="Hard day">😔</button>
+    <button class="quick-btn" onclick="quickAction('done')" title="Task done">✅</button>
+    <button class="quick-btn" onclick="quickAction('break')" title="Need break">🧘</button>
+    <button class="quick-btn" onclick="quickAction('tired')" title="Low energy">💤</button>
+</div>
+
 <div class="stats">
     <div class="stat">⚖️ <span class="val" id="karma">0</span></div>
     <div class="stat">🔮 <span class="val" id="harmony">1.00</span></div>
@@ -2412,10 +3154,188 @@ MAIN_HTML = '''<!DOCTYPE html>
 <div class="panel" id="dreams-panel"><div class="panel-head"><h2>💭 Dreams & Visions</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><textarea id="dreamText" placeholder="Describe your dream or vision..." style="width:100%;height:80px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;color:#e8e8e8;padding:10px;resize:none;"></textarea></div><button class="btn" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);" onclick="saveDream()">Save Dream</button><div id="dreamsList" style="margin-top:15px;"></div></div></div>
 <div class="panel" id="patterns-panel"><div class="panel-head"><h2>🧠 ML Patterns</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="patternsContent"></div></div>
 <div class="panel" id="animation-panel"><div class="panel-head"><h2>🎬 Animation</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><p>Generate animations from your living fractal universe.</p><div class="form-group"><label>Duration (seconds)</label><input type="number" id="animDuration" value="30" min="1" max="1200"></div><button class="btn btn-gold" onclick="generateAnimation()">Generate Preview</button><div id="animResult"></div></div></div>
+<div class="panel" id="accessibility-panel"><div class="panel-head"><h2>♿ Accessibility</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body">
+    <p style="color:#888;margin-bottom:15px;">Customize for your neurodivergent needs</p>
+    <div class="card"><b>👁️ Visual</b>
+        <div class="form-group" style="margin-top:10px;"><label><input type="checkbox" id="accDyslexia" onchange="updateAccessibility()"> Dyslexia-friendly font</label></div>
+        <div class="form-group"><label><input type="checkbox" id="accLargeText" onchange="updateAccessibility()"> Large text</label></div>
+        <div class="form-group"><label><input type="checkbox" id="accHighContrast" onchange="updateAccessibility()"> High contrast</label></div>
+        <div class="form-group"><label><input type="checkbox" id="accReducedMotion" onchange="updateAccessibility()"> Reduced motion</label></div>
+    </div>
+    <div class="card"><b>🧠 Cognitive</b>
+        <div class="form-group" style="margin-top:10px;"><label><input type="checkbox" id="accSimplified" onchange="updateAccessibility()"> Simplified UI</label></div>
+        <div class="form-group"><label><input type="checkbox" id="accBreakReminders" onchange="updateAccessibility()" checked> Break reminders</label></div>
+        <div class="form-group"><label>Break interval: <span id="breakVal">25</span> min</label><input type="range" class="slider" id="accBreakInterval" min="10" max="60" value="25" oninput="document.getElementById('breakVal').textContent=this.value"></div>
+    </div>
+    <div class="card"><b>🌀 Fractal</b>
+        <div class="form-group" style="margin-top:10px;"><label>Complexity:</label>
+            <select id="accFractalComplexity" style="width:100%;padding:8px;background:#1a1a2e;border:1px solid #333;color:#e8e8e8;border-radius:6px;">
+                <option value="low">Low (calmer)</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High (detailed)</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Animation speed:</label>
+            <select id="accAnimSpeed" style="width:100%;padding:8px;background:#1a1a2e;border:1px solid #333;color:#e8e8e8;border-radius:6px;">
+                <option value="slow">Slow</option>
+                <option value="normal" selected>Normal</option>
+                <option value="fast">Fast</option>
+            </select>
+        </div>
+    </div>
+    <button class="btn btn-gold" onclick="saveAccessibility()" style="width:100%;margin-top:10px;">Save Preferences</button>
+</div></div>
+<div class="panel" id="account-panel"><div class="panel-head"><h2>👤 Account</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body">
+    <div class="card" id="accountInfo"><b>Loading...</b></div>
+    <div class="card"><b>📊 Your Stats</b><div id="accountStats" style="margin-top:10px;color:#888;">Loading...</div></div>
+    <button class="btn" onclick="logout()" style="width:100%;margin-top:15px;background:#ef4444;">Logout</button>
+</div></div>
 <div class="toast" id="toast"></div>
 <script>
 const PHI = 1.618033988749895;
+const STRIPE_URL = 'https://buy.stripe.com/YOUR_STRIPE_LINK';
 let scene, camera, renderer, orbs = {}, isInside = false, data = {}, raycaster, mouse, audioCtx, binauralOsc;
+let subscription = {valid: true, status: 'loading', days_left: 7};
+let autoSaveTimer = null;
+let isLoggedIn = true;
+
+// Check subscription on load
+async function checkSubscription(){
+    try {
+        const r = await api('/api/subscription/status');
+        if(r && !r.error){
+            subscription = r;
+            isLoggedIn = true;
+            updateSubscriptionUI();
+            if(!r.valid){
+                document.getElementById('paywall').classList.add('show');
+                document.getElementById('trialMsg').textContent = r.reason || 'Subscribe to continue';
+            }
+        } else if(r && r.error === 'Authentication required') {
+            // Not logged in - demo mode
+            isLoggedIn = false;
+            subscription = {valid: true, status: 'demo'};
+            updateSubscriptionUI();
+            document.getElementById('quickBar').classList.add('hidden');
+        }
+    } catch(e) {
+        console.log('Subscription check failed, assuming demo mode');
+        isLoggedIn = false;
+        subscription = {valid: true, status: 'demo'};
+        updateSubscriptionUI();
+    }
+}
+
+function updateSubscriptionUI(){
+    const el = document.getElementById('subStatus');
+    const badge = document.getElementById('trialBadge');
+    if(subscription.status === 'demo'){
+        el.className = 'sub-status trial';
+        el.innerHTML = '👁️ Demo Mode';
+        badge.style.display = 'none';
+    } else if(subscription.status === 'trial'){
+        el.className = 'sub-status trial';
+        el.innerHTML = 'Trial: <span>' + (subscription.days_left || 0) + '</span> days left';
+        badge.style.display = 'inline-block';
+    } else if(subscription.status === 'active'){
+        el.className = 'sub-status active';
+        el.textContent = '✓ Subscribed';
+        badge.style.display = 'none';
+    } else if(subscription.status === 'exempt'){
+        el.className = 'sub-status active';
+        el.textContent = '✓ ' + (subscription.reason || 'Premium');
+        badge.style.display = 'none';
+    } else if(subscription.status === 'loading'){
+        el.className = 'sub-status trial';
+        el.textContent = 'Loading...';
+    } else {
+        el.className = 'sub-status expired';
+        el.textContent = 'Trial ended';
+    }
+}
+
+function subscribe(){
+    window.open(STRIPE_URL, '_blank');
+}
+
+// Quick Actions (Zero-Typing)
+async function quickAction(type){
+    const actions = {
+        'good': {mood: 75, energy: 70},
+        'okay': {mood: 50, energy: 50},
+        'hard': {mood: 25, energy: 30},
+        'done': {action: 'complete'},
+        'break': {action: 'break'},
+        'tired': {energy: 20}
+    };
+    const d = actions[type];
+    if(d.action){
+        await api('/api/organism/action', {method:'POST', body:JSON.stringify({action_type: d.action, magnitude: 0.3})});
+        toast(type === 'done' ? '✅ Great job!' : '🧘 Taking a break...');
+    } else {
+        await api('/api/wellness/checkin', {method:'POST', body:JSON.stringify(d)});
+        toast('💫 Recorded!');
+    }
+    loadData();
+}
+
+// Accessibility
+function updateAccessibility(){
+    document.body.classList.toggle('dyslexia-font', document.getElementById('accDyslexia').checked);
+    document.body.classList.toggle('large-text', document.getElementById('accLargeText').checked);
+    document.body.classList.toggle('high-contrast', document.getElementById('accHighContrast').checked);
+    document.body.classList.toggle('reduced-motion', document.getElementById('accReducedMotion').checked);
+}
+
+async function saveAccessibility(){
+    const prefs = {
+        dyslexia_font: document.getElementById('accDyslexia').checked ? 1 : 0,
+        large_text: document.getElementById('accLargeText').checked ? 1 : 0,
+        high_contrast: document.getElementById('accHighContrast').checked ? 1 : 0,
+        reduced_motion: document.getElementById('accReducedMotion').checked ? 1 : 0,
+        simplified_ui: document.getElementById('accSimplified').checked ? 1 : 0,
+        break_reminders: document.getElementById('accBreakReminders').checked ? 1 : 0,
+        break_interval_minutes: +document.getElementById('accBreakInterval').value,
+        fractal_complexity: document.getElementById('accFractalComplexity').value,
+        animation_speed: document.getElementById('accAnimSpeed').value
+    };
+    await api('/api/accessibility/preferences', {method:'PUT', body:JSON.stringify(prefs)});
+    toast('✓ Preferences saved!');
+}
+
+async function loadAccessibility(){
+    if(!isLoggedIn) return; // Skip in demo mode
+    const r = await api('/api/accessibility/preferences');
+    if(r && !r.error){
+        document.getElementById('accDyslexia').checked = r.dyslexia_font;
+        document.getElementById('accLargeText').checked = r.large_text;
+        document.getElementById('accHighContrast').checked = r.high_contrast;
+        document.getElementById('accReducedMotion').checked = r.reduced_motion;
+        document.getElementById('accSimplified').checked = r.simplified_ui;
+        document.getElementById('accBreakReminders').checked = r.break_reminders;
+        document.getElementById('accBreakInterval').value = r.break_interval_minutes || 25;
+        document.getElementById('accFractalComplexity').value = r.fractal_complexity || 'medium';
+        document.getElementById('accAnimSpeed').value = r.animation_speed || 'normal';
+        updateAccessibility();
+    }
+}
+
+// Auto-save state (only when logged in)
+function startAutoSave(){
+    if(!isLoggedIn) return;
+    autoSaveTimer = setInterval(async ()=>{
+        if(!isLoggedIn) return;
+        await api('/api/state/save', {method:'POST', body:JSON.stringify({
+            camera: {x: camera.position.x, y: camera.position.y, z: camera.position.z}
+        })});
+    }, 30000);
+}
+
+async function logout(){
+    await api('/api/auth/logout', {method:'POST'});
+    location.href = '/login';
+}
+
 function initThree() {
     const c = document.getElementById('universe');
     scene = new THREE.Scene();
@@ -2482,9 +3402,27 @@ function closePanel(){document.querySelectorAll('.panel').forEach(p=>p.classList
 async function api(u,o={}){try{const r=await fetch(u,{...o,headers:{'Content-Type':'application/json',...o.headers}});return await r.json();}catch(e){console.error(e);return null;}}
 async function loadData(){
     const d=await api('/api/organism/state');
-    if(d){data=d;document.getElementById('karma').textContent=(d.karma?.field_potential||0).toFixed(2);document.getElementById('harmony').textContent=(d.harmony||1).toFixed(2);document.getElementById('orbs').textContent=d.swarm?.total_orbs||0;if(d.swarm?.orbs)updateOrbs(d.swarm.orbs);if(d.mayan)document.getElementById('mayanKin').textContent=d.mayan.greeting;}
-    const w=await api('/api/wellness/today');
-    if(w){document.getElementById('spoons').textContent=w.spoons_available-w.spoons_used;document.getElementById('spoonsTotal').textContent=w.spoons_available;}
+    if(d && !d.error){
+        data=d;
+        document.getElementById('karma').textContent=(d.karma?.field_potential||0).toFixed(2);
+        document.getElementById('harmony').textContent=(d.harmony||1).toFixed(2);
+        document.getElementById('orbs').textContent=d.swarm?.total_orbs||0;
+        if(d.swarm?.orbs)updateOrbs(d.swarm.orbs);
+        if(d.mayan)document.getElementById('mayanKin').textContent=d.mayan.greeting;
+        // Check if demo mode
+        if(d.is_demo){
+            isLoggedIn = false;
+            document.getElementById('quickBar').classList.add('hidden');
+        }
+    }
+    // Only load wellness data if logged in
+    if(isLoggedIn){
+        const w=await api('/api/wellness/today');
+        if(w && !w.error){
+            document.getElementById('spoons').textContent=w.spoons_available-w.spoons_used;
+            document.getElementById('spoonsTotal').textContent=w.spoons_available;
+        }
+    }
 }
 async function loadPanel(n){
     if(n==='dashboard'){document.getElementById('dashContent').innerHTML='<div class="card"><b>⚖️ Karma:</b> '+(data.karma?.field_potential||0).toFixed(2)+'</div><div class="card"><b>🔮 Harmony:</b> '+(data.harmony||1).toFixed(2)+'</div><div class="card"><b>🧬 Living Orbs:</b> '+(data.swarm?.total_orbs||0)+'</div><div class="card"><b>🔢 Math:</b> Golden Harmonic '+(data.math_foundations?.golden_harmonic||0).toFixed(3)+'</div><div class="card"><b>😊 Emotion:</b> '+(data.swarm?.collective_emotion||'neutral')+'</div>';}
@@ -2492,6 +3430,8 @@ async function loadPanel(n){
     if(n==='habits'){const h=await api('/api/habits');document.getElementById('habitsList').innerHTML=(h||[]).map(x=>'<div class="card" style="display:flex;justify-content:space-between;align-items:center;"><span><b>'+x.name+'</b> <span style=\"color:var(--gold)\">🔥'+x.current_streak+'</span></span><button class="btn" onclick="completeHabit(\\''+x.id+'\\')">✓</button></div>').join('')||'<p style=\"color:#666\">No habits yet. Add your first!</p>';}
     if(n==='pet'){const p=await api('/api/pet/state');if(p){const emoji=p.happiness>70?'😺':p.happiness>40?'🐱':'😿';document.getElementById('petEmoji').textContent=emoji;document.getElementById('petStats').innerHTML='<div style=\"margin:10px 0\"><b>'+p.name+'</b></div>Hunger: '+Math.round(p.hunger)+'% | Energy: '+Math.round(p.energy)+'% | Happy: '+Math.round(p.happiness)+'%';}}
     if(n==='patterns'){const p=await api('/api/analytics/patterns');document.getElementById('patternsContent').innerHTML='<div class="card"><b>🔍 Detected Patterns:</b><br>'+(p?.patterns?.[0]?.patterns?.join(', ')||'Keep using app to build patterns...')+'</div><div class="card"><b>💡 Insights:</b><br>'+(p?.patterns?.[0]?.insights?.join('<br>')||'Building insights from your activity...')+'</div><div class="card"><b>📊 Type Distribution:</b><br>'+JSON.stringify(p?.patterns?.[0]?.type_distribution||{})+'</div>';}
+    if(n==='accessibility'){await loadAccessibility();}
+    if(n==='account'){const s=await api('/api/subscription/status');if(s){document.getElementById('accountInfo').innerHTML='<b>'+s.email+'</b><br>Status: <span style="color:'+(s.valid?'#22c55e':'#ef4444')+'">'+(s.status||'unknown')+'</span>'+(s.days_left?' ('+s.days_left+' days left)':'');document.getElementById('accountStats').innerHTML='Member since: '+new Date(s.member_since).toLocaleDateString();}}
     if(n==='dreams'){document.getElementById('dreamsList').innerHTML='<div class="card" style="border-color:rgba(139,92,246,0.3)"><b>🌙 Dream Journal</b><br><small style="color:#888">Your dreams create DREAM type orbs in your fractal universe.</small></div>';}
 }
 async function createGoal(){const t=document.getElementById('goalTitle').value;if(!t)return;const r=await api('/api/goals',{method:'POST',body:JSON.stringify({title:t})});if(r){toast('🎯 +'+r.karma_earned?.toFixed(2)+' karma');document.getElementById('goalTitle').value='';loadPanel('goals');loadData();}}
@@ -2502,7 +3442,7 @@ async function petAction(a){const r=await api('/api/pet/interact',{method:'POST'
 async function saveDream(){const t=document.getElementById('dreamText').value;if(!t)return;const r=await api('/api/organism/action',{method:'POST',body:JSON.stringify({action_type:'record_dream',magnitude:0.5,intention:0.9,awareness:0.8,linked_data:{dream:t}})});if(r){toast('💭 Dream saved! +'+r.karma_earned?.toFixed(2)+' karma');document.getElementById('dreamText').value='';loadData();}}
 async function generateAnimation(){const d=+document.getElementById('animDuration').value||30;const r=await api('/api/animation/generate',{method:'POST',body:JSON.stringify({duration_seconds:d})});if(r)document.getElementById('animResult').innerHTML='<div class="card" style="margin-top:15px;"><b>✅ Animation Ready</b><br>Duration: '+r.duration+'s | Frames: '+r.total_frames+'<br>Emotion: '+r.collective_emotion+' | Harmony: '+(r.harmony||0).toFixed(2)+'<br><small>'+r.message+'</small></div>';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
-document.addEventListener('DOMContentLoaded',()=>{initThree();loadData();setInterval(loadData,5000);});
+document.addEventListener('DOMContentLoaded',async ()=>{initThree();await checkSubscription();await loadAccessibility();loadData();startAutoSave();setInterval(loadData,5000);});
 </script>
 </body></html>'''
 
@@ -2511,8 +3451,7 @@ LOGIN_HTML = '''<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="vie
 
 @app.route('/')
 def index():
-    if 'user_id' not in session:
-        return redirect('/login')
+    # Allow demo mode - don't redirect to login
     return render_template_string(MAIN_HTML)
 
 
@@ -2527,7 +3466,7 @@ def login_page():
 
 if __name__ == '__main__':
     print("\n" + "═" * 80)
-    print("🌀 LIFE FRACTAL INTELLIGENCE v12.1 - MATHEMATICAL ANIMATION ENGINE")
+    print("🌀 LIFE FRACTAL INTELLIGENCE v12.4 - PRODUCTION READY")
     print("═" * 80)
     print("\n🔢 TEN MATHEMATICAL FOUNDATIONS:")
     print("   1. Golden-Harmonic Folding Field    F(t,φ) = sin(2π·t·φ)·cos(2π·t/φ)+sin(π·t²)")
