@@ -2331,23 +2331,30 @@ MAIN_HTML = '''<!DOCTYPE html>
         .nav-section h3 { color: var(--gold); font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         .nav-btn { display: block; width: 100%; padding: 12px; background: transparent; border: none; color: #e8e8e8; text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 4px; }
         .nav-btn:hover { background: rgba(74,144,164,0.15); }
-        .stats { position: fixed; top: 15px; right: 15px; z-index: 100; display: flex; gap: 10px; }
+        .stats { position: fixed; top: 15px; right: 15px; z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; max-width: 400px; justify-content: flex-end; }
         .stat { background: rgba(15,15,25,0.9); border: 1px solid rgba(74,144,164,0.3); border-radius: 15px; padding: 8px 15px; font-size: 0.85em; }
         .stat .val { color: var(--gold); font-weight: 600; }
+        .stat.spoons { border-color: rgba(212,175,55,0.4); }
         .enter-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6, #4a90a4); border: none; border-radius: 25px; color: white; font-size: 1.1em; cursor: pointer; box-shadow: 0 4px 30px rgba(139,92,246,0.4); }
         .enter-btn.hidden { display: none; }
-        .tooltip { position: fixed; background: rgba(15,15,25,0.95); border: 1px solid var(--gold); border-radius: 10px; padding: 12px; max-width: 280px; z-index: 1001; display: none; }
-        .tooltip.show { display: block; }
-        .tooltip h4 { color: var(--gold); margin-bottom: 5px; }
-        .tooltip p { color: #888; font-size: 0.9em; line-height: 1.4; }
+        .orb-tooltip { position: fixed; background: rgba(15,15,25,0.95); border: 1px solid var(--gold); border-radius: 10px; padding: 12px; max-width: 280px; z-index: 1001; display: none; pointer-events: none; }
+        .orb-tooltip.show { display: block; }
+        .orb-tooltip h4 { color: var(--gold); margin-bottom: 5px; font-size: 0.9em; }
+        .orb-tooltip p { color: #aaa; font-size: 0.85em; line-height: 1.4; margin-bottom: 5px; }
+        .orb-tooltip .tags { color: #666; font-size: 0.75em; }
         .mayan { position: fixed; bottom: 20px; right: 20px; background: rgba(15,15,25,0.9); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 12px; z-index: 100; }
         .mayan h4 { color: var(--gold); font-size: 0.75em; margin-bottom: 5px; }
+        .audio-controls { position: fixed; bottom: 20px; left: 20px; background: rgba(15,15,25,0.9); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 10px; z-index: 100; }
+        .audio-controls button { background: rgba(139,92,246,0.3); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; }
+        .audio-controls button.active { background: rgba(139,92,246,0.7); }
         .panel { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 700px; max-height: 55vh; background: rgba(15,15,25,0.98); border: 1px solid rgba(74,144,164,0.2); border-radius: 16px; z-index: 100; display: none; overflow: hidden; }
         .panel.active { display: block; }
         .panel-head { padding: 15px 20px; border-bottom: 1px solid rgba(74,144,164,0.2); display: flex; justify-content: space-between; }
         .panel-head h2 { color: var(--gold); font-size: 1.1em; }
         .panel-close { background: none; border: none; color: #888; font-size: 1.3em; cursor: pointer; }
         .panel-body { padding: 20px; max-height: calc(55vh - 60px); overflow-y: auto; }
+        .progress-bar { height: 8px; background: rgba(74,144,164,0.2); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold)); border-radius: 4px; transition: width 0.3s; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; color: #888; font-size: 0.9em; }
         .form-group input { width: 100%; padding: 10px; background: rgba(74,144,164,0.1); border: 1px solid rgba(74,144,164,0.3); border-radius: 8px; color: #e8e8e8; }
@@ -2370,6 +2377,7 @@ MAIN_HTML = '''<!DOCTYPE html>
     </div>
     <div class="nav-section"><h3>Wellness</h3>
         <button class="nav-btn" onclick="showPanel('checkin')">💫 Check-in</button>
+        <button class="nav-btn" onclick="showPanel('dreams')">💭 Dreams</button>
     </div>
     <div class="nav-section"><h3>Companions</h3>
         <button class="nav-btn" onclick="showPanel('pet')">🐱 Pet</button>
@@ -2383,21 +2391,31 @@ MAIN_HTML = '''<!DOCTYPE html>
     <div class="stat">⚖️ <span class="val" id="karma">0</span></div>
     <div class="stat">🔮 <span class="val" id="harmony">1.00</span></div>
     <div class="stat">🧬 <span class="val" id="orbs">0</span></div>
+    <div class="stat spoons">🥄 <span class="val" id="spoons">12</span>/<span id="spoonsTotal">12</span></div>
 </div>
 <button class="enter-btn" id="enterBtn" onclick="enterFractal()">🌀 Enter the Fractal</button>
-<div class="tooltip" id="tooltip"><h4 id="ttTitle">Orb</h4><p id="ttMeaning">...</p></div>
+<div class="orb-tooltip" id="orbTooltip"><h4 id="ttType">STEM</h4><p id="ttMeaning">The seed of infinite possibility...</p><div class="tags" id="ttTags">stem, nascent</div></div>
 <div class="mayan"><h4>📅 Mayan</h4><div id="mayanKin">Loading...</div></div>
+<div class="audio-controls"><button id="binauralBtn" onclick="toggleBinaural()">🎧 Binaural</button></div>
 <div class="panel" id="dashboard-panel"><div class="panel-head"><h2>📊 Dashboard</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="dashContent"></div></div>
-<div class="panel" id="goals-panel"><div class="panel-head"><h2>🎯 Goals</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="goalTitle" placeholder="New goal..."></div><button class="btn btn-gold" onclick="createGoal()">Create</button><div id="goalsList"></div></div></div>
-<div class="panel" id="habits-panel"><div class="panel-head"><h2>✨ Habits</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="habitName" placeholder="New habit..."></div><button class="btn btn-gold" onclick="createHabit()">Add</button><div id="habitsList"></div></div></div>
-<div class="panel" id="checkin-panel"><div class="panel-head"><h2>💫 Check-in</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><label>Energy: <span id="eVal">50</span></label><input type="range" class="slider" id="energy" value="50" oninput="document.getElementById('eVal').textContent=this.value"></div><div class="form-group"><label>Mood: <span id="mVal">50</span></label><input type="range" class="slider" id="mood" value="50" oninput="document.getElementById('mVal').textContent=this.value"></div><button class="btn btn-gold" onclick="submitCheckin()">Submit</button></div></div>
-<div class="panel" id="pet-panel"><div class="panel-head"><h2>🐱 Pet</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" style="text-align:center;"><div style="font-size:3em;" id="petEmoji">🐱</div><div id="petStats"></div><div style="display:flex;gap:8px;justify-content:center;margin-top:15px;"><button class="btn" onclick="petAction('feed')">🍖</button><button class="btn" onclick="petAction('play')">🎾</button><button class="btn" onclick="petAction('pet')">🤗</button></div></div></div>
-<div class="panel" id="patterns-panel"><div class="panel-head"><h2>🧠 Patterns</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="patternsContent"></div></div>
+<div class="panel" id="goals-panel"><div class="panel-head"><h2>🎯 Goals</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="goalTitle" placeholder="New goal..."></div><button class="btn btn-gold" onclick="createGoal()">Create</button><div id="goalsList" style="margin-top:15px;"></div></div></div>
+<div class="panel" id="habits-panel"><div class="panel-head"><h2>✨ Habits</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="habitName" placeholder="New habit..."></div><button class="btn btn-gold" onclick="createHabit()">Add</button><div id="habitsList" style="margin-top:15px;"></div></div></div>
+<div class="panel" id="checkin-panel"><div class="panel-head"><h2>💫 Wellness Check-in</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body">
+    <div class="form-group"><label>🔋 Energy: <span id="eVal">50</span></label><input type="range" class="slider" id="energy" value="50" oninput="document.getElementById('eVal').textContent=this.value"></div>
+    <div class="form-group"><label>😊 Mood: <span id="mVal">50</span></label><input type="range" class="slider" id="mood" value="50" oninput="document.getElementById('mVal').textContent=this.value"></div>
+    <div class="form-group"><label>🎯 Focus: <span id="fVal">50</span></label><input type="range" class="slider" id="focus" value="50" oninput="document.getElementById('fVal').textContent=this.value"></div>
+    <div class="form-group"><label>😰 Stress: <span id="sVal">50</span></label><input type="range" class="slider" id="stress" value="50" oninput="document.getElementById('sVal').textContent=this.value"></div>
+    <div class="form-group"><label>🥄 Spoons Available: <span id="spVal">12</span></label><input type="range" class="slider" id="spoonsInput" min="0" max="20" value="12" oninput="document.getElementById('spVal').textContent=this.value"></div>
+    <button class="btn btn-gold" onclick="submitCheckin()">Submit Check-in</button>
+</div></div>
+<div class="panel" id="pet-panel"><div class="panel-head"><h2>🐱 Pet Companion</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" style="text-align:center;"><div style="font-size:3em;" id="petEmoji">🐱</div><div id="petStats"></div><div style="display:flex;gap:8px;justify-content:center;margin-top:15px;"><button class="btn" onclick="petAction('feed')">🍖 Feed</button><button class="btn" onclick="petAction('play')">🎾 Play</button><button class="btn" onclick="petAction('pet')">🤗 Pet</button><button class="btn" onclick="petAction('rest')">😴 Rest</button></div></div></div>
+<div class="panel" id="dreams-panel"><div class="panel-head"><h2>💭 Dreams & Visions</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><textarea id="dreamText" placeholder="Describe your dream or vision..." style="width:100%;height:80px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;color:#e8e8e8;padding:10px;resize:none;"></textarea></div><button class="btn" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);" onclick="saveDream()">Save Dream</button><div id="dreamsList" style="margin-top:15px;"></div></div></div>
+<div class="panel" id="patterns-panel"><div class="panel-head"><h2>🧠 ML Patterns</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="patternsContent"></div></div>
 <div class="panel" id="animation-panel"><div class="panel-head"><h2>🎬 Animation</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><p>Generate animations from your living fractal universe.</p><div class="form-group"><label>Duration (seconds)</label><input type="number" id="animDuration" value="30" min="1" max="1200"></div><button class="btn btn-gold" onclick="generateAnimation()">Generate Preview</button><div id="animResult"></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const PHI = 1.618033988749895;
-let scene, camera, renderer, orbs = {}, isInside = false, data = {};
+let scene, camera, renderer, orbs = {}, isInside = false, data = {}, raycaster, mouse, audioCtx, binauralOsc;
 function initThree() {
     const c = document.getElementById('universe');
     scene = new THREE.Scene();
@@ -2407,6 +2425,8 @@ function initThree() {
     camera.position.z = 100;
     renderer = new THREE.WebGLRenderer({canvas: c, antialias: true});
     renderer.setSize(innerWidth, innerHeight);
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
     const al = new THREE.AmbientLight(0x404040, 0.5);
     scene.add(al);
     const pl = new THREE.PointLight(0xd4af37, 1, 500);
@@ -2415,8 +2435,27 @@ function initThree() {
     for(let i=0;i<3000;i++){const g=new THREE.SphereGeometry(0.3);const m=new THREE.MeshBasicMaterial({color:0xffffff});const s=new THREE.Mesh(g,m);s.position.set((Math.random()-0.5)*1500,(Math.random()-0.5)*1500,(Math.random()-0.5)*1500);scene.add(s);}
     addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
     c.addEventListener('wheel',e=>{camera.position.z+=e.deltaY*0.1;camera.position.z=Math.max(20,Math.min(200,camera.position.z));});
-    c.addEventListener('mousemove',e=>{if(!isInside){scene.rotation.y=(e.clientX/innerWidth-0.5)*0.3;scene.rotation.x=(e.clientY/innerHeight-0.5)*0.15;}});
+    c.addEventListener('mousemove',onMouseMove);
     animate();
+}
+function onMouseMove(e){
+    if(!isInside){scene.rotation.y=(e.clientX/innerWidth-0.5)*0.3;scene.rotation.x=(e.clientY/innerHeight-0.5)*0.15;}
+    mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
+    checkOrbHover(e.clientX,e.clientY);
+}
+function checkOrbHover(mx,my){
+    if(camera.position.z>80){document.getElementById('orbTooltip').classList.remove('show');return;}
+    raycaster.setFromCamera(mouse,camera);
+    const meshes=Object.values(orbs);
+    const hits=raycaster.intersectObjects(meshes);
+    const tt=document.getElementById('orbTooltip');
+    if(hits.length>0){
+        const o=hits[0].object.userData;
+        document.getElementById('ttType').textContent=(o.type||'ORB').toUpperCase()+' #'+(o.index||0);
+        document.getElementById('ttMeaning').textContent=o.meaning||'A living cell in your fractal universe';
+        document.getElementById('ttTags').textContent=(o.tags||[]).join(', ')||o.state||'active';
+        tt.style.left=(mx+15)+'px';tt.style.top=(my+15)+'px';tt.classList.add('show');
+    }else{tt.classList.remove('show');}
 }
 function animate(){requestAnimationFrame(animate);Object.values(orbs).forEach(m=>{m.rotation.y+=0.002;});if(!isInside)scene.rotation.y+=0.0003;renderer.render(scene,camera);}
 function updateOrbs(list){
@@ -2426,6 +2465,16 @@ function updateOrbs(list){
         else{const g=new THREE.SphereGeometry(o.radius||1,24,24);const c=new THREE.Color(o.color?.[0]||0.3,o.color?.[1]||0.6,o.color?.[2]||0.9);const m=new THREE.MeshPhongMaterial({color:c,emissive:c,emissiveIntensity:o.glow||0.3,shininess:100,transparent:true,opacity:0.9});const mesh=new THREE.Mesh(g,m);mesh.position.set(...o.position);mesh.userData=o;scene.add(mesh);orbs[o.id]=mesh;}
     });
 }
+function toggleBinaural(){
+    const btn=document.getElementById('binauralBtn');
+    if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+    if(binauralOsc){binauralOsc.stop();binauralOsc=null;btn.classList.remove('active');toast('🔇 Binaural beats stopped');return;}
+    const osc1=audioCtx.createOscillator(),osc2=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc1.frequency.value=432;osc2.frequency.value=432+7.83;gain.gain.value=0.1;
+    osc1.connect(gain);osc2.connect(gain);gain.connect(audioCtx.destination);
+    osc1.start();osc2.start();binauralOsc={stop:()=>{osc1.stop();osc2.stop();}};btn.classList.add('active');
+    toast('🎧 432Hz + 7.83Hz Schumann');
+}
 function enterFractal(){isInside=true;document.getElementById('enterBtn').classList.add('hidden');const i=setInterval(()=>{camera.position.z-=2;if(camera.position.z<=30)clearInterval(i);},16);toast('🌀 Entering fractal universe...');}
 function toggleNav(){document.querySelector('.hamburger').classList.toggle('open');document.getElementById('nav').classList.toggle('open');}
 function showPanel(n){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));const p=document.getElementById(n+'-panel');if(p){p.classList.add('active');loadPanel(n);}toggleNav();}
@@ -2434,19 +2483,23 @@ async function api(u,o={}){try{const r=await fetch(u,{...o,headers:{'Content-Typ
 async function loadData(){
     const d=await api('/api/organism/state');
     if(d){data=d;document.getElementById('karma').textContent=(d.karma?.field_potential||0).toFixed(2);document.getElementById('harmony').textContent=(d.harmony||1).toFixed(2);document.getElementById('orbs').textContent=d.swarm?.total_orbs||0;if(d.swarm?.orbs)updateOrbs(d.swarm.orbs);if(d.mayan)document.getElementById('mayanKin').textContent=d.mayan.greeting;}
+    const w=await api('/api/wellness/today');
+    if(w){document.getElementById('spoons').textContent=w.spoons_available-w.spoons_used;document.getElementById('spoonsTotal').textContent=w.spoons_available;}
 }
 async function loadPanel(n){
-    if(n==='dashboard'){document.getElementById('dashContent').innerHTML='<div class="card"><b>Karma:</b> '+(data.karma?.field_potential||0).toFixed(2)+'</div><div class="card"><b>Harmony:</b> '+(data.harmony||1).toFixed(2)+'</div><div class="card"><b>Orbs:</b> '+(data.swarm?.total_orbs||0)+'</div><div class="card"><b>Math Active:</b> Golden Harmonic '+(data.math_foundations?.golden_harmonic||0).toFixed(3)+'</div>';}
-    if(n==='goals'){const g=await api('/api/goals');document.getElementById('goalsList').innerHTML=(g||[]).map(x=>'<div class="card"><b>'+x.title+'</b><br>'+x.progress+'%</div>').join('');}
-    if(n==='habits'){const h=await api('/api/habits');document.getElementById('habitsList').innerHTML=(h||[]).map(x=>'<div class="card" style="display:flex;justify-content:space-between;"><span><b>'+x.name+'</b> 🔥'+x.current_streak+'</span><button class="btn" onclick="completeHabit(\\''+x.id+'\\')">✓</button></div>').join('');}
-    if(n==='pet'){const p=await api('/api/pet/state');if(p)document.getElementById('petStats').innerHTML='Hunger: '+Math.round(p.hunger)+' | Energy: '+Math.round(p.energy)+' | Happy: '+Math.round(p.happiness);}
-    if(n==='patterns'){const p=await api('/api/analytics/patterns');document.getElementById('patternsContent').innerHTML='<div class="card"><b>Patterns:</b><br>'+(p?.patterns?.[0]?.patterns?.join(', ')||'Keep using app...')+'</div><div class="card"><b>Insights:</b><br>'+(p?.patterns?.[0]?.insights?.join('<br>')||'Building insights...')+'</div>';}
+    if(n==='dashboard'){document.getElementById('dashContent').innerHTML='<div class="card"><b>⚖️ Karma:</b> '+(data.karma?.field_potential||0).toFixed(2)+'</div><div class="card"><b>🔮 Harmony:</b> '+(data.harmony||1).toFixed(2)+'</div><div class="card"><b>🧬 Living Orbs:</b> '+(data.swarm?.total_orbs||0)+'</div><div class="card"><b>🔢 Math:</b> Golden Harmonic '+(data.math_foundations?.golden_harmonic||0).toFixed(3)+'</div><div class="card"><b>😊 Emotion:</b> '+(data.swarm?.collective_emotion||'neutral')+'</div>';}
+    if(n==='goals'){const g=await api('/api/goals');document.getElementById('goalsList').innerHTML=(g||[]).map(x=>'<div class="card"><b>'+x.title+'</b><div class="progress-bar"><div class="fill" style="width:'+(x.progress||0)+'%"></div></div><small>'+(x.progress||0)+'% complete</small></div>').join('')||'<p style=\"color:#666\">No goals yet. Create your first!</p>';}
+    if(n==='habits'){const h=await api('/api/habits');document.getElementById('habitsList').innerHTML=(h||[]).map(x=>'<div class="card" style="display:flex;justify-content:space-between;align-items:center;"><span><b>'+x.name+'</b> <span style=\"color:var(--gold)\">🔥'+x.current_streak+'</span></span><button class="btn" onclick="completeHabit(\\''+x.id+'\\')">✓</button></div>').join('')||'<p style=\"color:#666\">No habits yet. Add your first!</p>';}
+    if(n==='pet'){const p=await api('/api/pet/state');if(p){const emoji=p.happiness>70?'😺':p.happiness>40?'🐱':'😿';document.getElementById('petEmoji').textContent=emoji;document.getElementById('petStats').innerHTML='<div style=\"margin:10px 0\"><b>'+p.name+'</b></div>Hunger: '+Math.round(p.hunger)+'% | Energy: '+Math.round(p.energy)+'% | Happy: '+Math.round(p.happiness)+'%';}}
+    if(n==='patterns'){const p=await api('/api/analytics/patterns');document.getElementById('patternsContent').innerHTML='<div class="card"><b>🔍 Detected Patterns:</b><br>'+(p?.patterns?.[0]?.patterns?.join(', ')||'Keep using app to build patterns...')+'</div><div class="card"><b>💡 Insights:</b><br>'+(p?.patterns?.[0]?.insights?.join('<br>')||'Building insights from your activity...')+'</div><div class="card"><b>📊 Type Distribution:</b><br>'+JSON.stringify(p?.patterns?.[0]?.type_distribution||{})+'</div>';}
+    if(n==='dreams'){document.getElementById('dreamsList').innerHTML='<div class="card" style="border-color:rgba(139,92,246,0.3)"><b>🌙 Dream Journal</b><br><small style="color:#888">Your dreams create DREAM type orbs in your fractal universe.</small></div>';}
 }
 async function createGoal(){const t=document.getElementById('goalTitle').value;if(!t)return;const r=await api('/api/goals',{method:'POST',body:JSON.stringify({title:t})});if(r){toast('🎯 +'+r.karma_earned?.toFixed(2)+' karma');document.getElementById('goalTitle').value='';loadPanel('goals');loadData();}}
 async function createHabit(){const n=document.getElementById('habitName').value;if(!n)return;await api('/api/habits',{method:'POST',body:JSON.stringify({name:n})});toast('✨ Habit created!');document.getElementById('habitName').value='';loadPanel('habits');}
 async function completeHabit(id){const r=await api('/api/habits/'+id+'/complete',{method:'POST'});if(r){toast('✅ +'+r.karma_earned?.toFixed(2)+' karma'+(r.fibonacci_bonus?' 🌟 Fibonacci!':''));loadPanel('habits');loadData();}}
-async function submitCheckin(){const d={energy:+document.getElementById('energy').value,mood:+document.getElementById('mood').value};const r=await api('/api/wellness/checkin',{method:'POST',body:JSON.stringify(d)});if(r){toast('💫 +'+r.karma_earned?.toFixed(2)+' karma');closePanel();loadData();}}
+async function submitCheckin(){const d={energy:+document.getElementById('energy').value,mood:+document.getElementById('mood').value,focus:+document.getElementById('focus').value,stress:+document.getElementById('stress').value,spoons_available:+document.getElementById('spoonsInput').value};const r=await api('/api/wellness/checkin',{method:'POST',body:JSON.stringify(d)});if(r){toast('💫 +'+r.karma_earned?.toFixed(2)+' karma');closePanel();loadData();}}
 async function petAction(a){const r=await api('/api/pet/interact',{method:'POST',body:JSON.stringify({action:a})});if(r){toast('🐱 '+r.emotion+'!');loadPanel('pet');loadData();}}
+async function saveDream(){const t=document.getElementById('dreamText').value;if(!t)return;const r=await api('/api/organism/action',{method:'POST',body:JSON.stringify({action_type:'record_dream',magnitude:0.5,intention:0.9,awareness:0.8,linked_data:{dream:t}})});if(r){toast('💭 Dream saved! +'+r.karma_earned?.toFixed(2)+' karma');document.getElementById('dreamText').value='';loadData();}}
 async function generateAnimation(){const d=+document.getElementById('animDuration').value||30;const r=await api('/api/animation/generate',{method:'POST',body:JSON.stringify({duration_seconds:d})});if(r)document.getElementById('animResult').innerHTML='<div class="card" style="margin-top:15px;"><b>✅ Animation Ready</b><br>Duration: '+r.duration+'s | Frames: '+r.total_frames+'<br>Emotion: '+r.collective_emotion+' | Harmony: '+(r.harmony||0).toFixed(2)+'<br><small>'+r.message+'</small></div>';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 document.addEventListener('DOMContentLoaded',()=>{initThree();loadData();setInterval(loadData,5000);});
