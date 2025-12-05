@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 """
 ╔══════════════════════════════════════════════════════════════════════════════════════════════════╗
-║  LIFE FRACTAL INTELLIGENCE v12.0 - LIVING MATHEMATICAL ORGANISM                                  ║
+║  LIFE FRACTAL INTELLIGENCE v12.1 - MATHEMATICAL ANIMATION ENGINE                                 ║
 ║  ════════════════════════════════════════════════════════════════════════════════════════════════║
 ║                                                                                                  ║
-║  🌀 FULL-SCREEN INTERACTIVE 3D FRACTAL UNIVERSE                                                  ║
-║  🧠 OLLAMA AI INTEGRATION - Self-spawning intelligent orbs with generated meaning                ║
-║  🔬 ZOOM-BASED LABELS - Text visible on zoom, hidden when pulled out                             ║
-║  🧬 SELF-AWARE ORBS - Each cell knows its purpose, replicates organically                        ║
-║  🎨 NORDIC MINIMAL GUI - Hamburger menu, app-like navigation                                     ║
-║  📅 MAYAN CALENDAR - Sacred time science for task prioritization                                 ║
-║  🌊 SWARM INTELLIGENCE - Pattern seeking, trend analysis                                         ║
-║  ⚖️ KARMA-DHARMA MATHEMATICS - Spiritual scoring engine                                          ║
-║  🤖 FEDERATED AI - Recursive self-improvement on server                                          ║
+║  🔢 TEN MATHEMATICAL FOUNDATIONS FOR PHOTOREALISTIC VISUAL GENERATION                            ║
+║  ═══════════════════════════════════════════════════════════════════════════════════════════════ ║
+║  1. Golden-Harmonic Folding Field     - F(t,φ) = sin(2π·t·φ)·cos(2π·t/φ)+sin(π·t²)              ║
+║  2. Pareidolia Detection Field        - Pattern recognition in noise                             ║
+║  3. Sacred Blend Energy Map           - Tone density modulation with tanh                        ║
+║  4. Fractal Bloom Expansion           - Z(n+1) = Z(n)² + C recursive structures                  ║
+║  5. Centralized Origami Curve         - O(u,v) = sin(u·v)+cos(φ·u)·sin(φ·v)                     ║
+║  6. Emotionally Tuned Harmonic Wave   - H(t,e) = |sin(π·t·E[e])| + tanh(t·0.2)                  ║
+║  7. Fourier Sketch Synthesis          - Σ(aₙ·cos(n·x) + bₙ·sin(n·y))                            ║
+║  8. GPU Parallel Frame Queue          - Vectorized batch rendering                               ║
+║  9. Temporal Origami Compression      - Cₜ = Σ Mf·(1/φ)ⁿ fold/unfold                            ║
+║  10. Full-Scene Emotional Manifold    - E(x,y,t) = ∇²B + H(t,e)·F(t,φ)                          ║
 ║                                                                                                  ║
-║  For neurodivergent minds: External visualization, energy tracking, compassionate UX            ║
+║  🧬 SELF-REPLICATING ORBS WITH ORIGAMI FOLDING                                                   ║
+║  🎬 1-20 MINUTE ANIMATION GENERATION                                                             ║
+║  🌊 SWARM INTELLIGENCE + CELLULAR AUTOMATA                                                       ║
+║                                                                                                  ║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════════╝
 """
 
@@ -28,9 +34,8 @@ import logging
 import sqlite3
 import hashlib
 import random
-import asyncio
 import threading
-import re
+import struct
 from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Any, Tuple, Callable, Set
@@ -72,26 +77,23 @@ logger = logging.getLogger(__name__)
 # SACRED MATHEMATICS - UNIVERSAL CONSTANTS
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
-PHI = (1 + math.sqrt(5)) / 2
-PHI_INVERSE = 1 / PHI
-PHI_SQUARED = PHI * PHI
-GOLDEN_ANGLE = 360 / (PHI ** 2)
+PHI = (1 + math.sqrt(5)) / 2  # Golden Ratio: 1.618033988749895
+PHI_INVERSE = 1 / PHI          # 0.618033988749895
+PHI_SQUARED = PHI * PHI        # 2.618033988749895
+GOLDEN_ANGLE = 360 / (PHI ** 2)  # 137.5077640500378°
 GOLDEN_ANGLE_RAD = math.radians(GOLDEN_ANGLE)
 FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584]
 PLANCK_KARMA = 1e-43
-DHARMA_FREQUENCY = 432
-SCHUMANN_RESONANCE = 7.83
+DHARMA_FREQUENCY = 432  # Hz
+SCHUMANN_RESONANCE = 7.83  # Hz
 SOLFEGGIO = [174, 285, 396, 417, 528, 639, 741, 852, 963]
 
 # Mayan Calendar Constants
-MAYAN_KIN = 20  # Day signs
-MAYAN_TRECENA = 13  # Number cycle
-MAYAN_TZOLKIN = 260  # Sacred calendar cycle (13 × 20)
-MAYAN_HAAB = 365  # Solar calendar
-MAYAN_KATUN = 7200  # 20 years
-MAYAN_BAKTUN = 144000  # 400 years
+MAYAN_KIN = 20
+MAYAN_TRECENA = 13
+MAYAN_TZOLKIN = 260
+MAYAN_HAAB = 365
 
-# Mayan day signs (Nahual)
 MAYAN_SIGNS = [
     "Imix (Dragon)", "Ik (Wind)", "Akbal (Night)", "Kan (Seed)", "Chicchan (Serpent)",
     "Cimi (Death)", "Manik (Deer)", "Lamat (Star)", "Muluc (Water)", "Oc (Dog)",
@@ -99,458 +101,612 @@ MAYAN_SIGNS = [
     "Cib (Owl)", "Caban (Earth)", "Etznab (Mirror)", "Cauac (Storm)", "Ahau (Sun)"
 ]
 
-
-# ═══════════════════════════════════════════════════════════════════════════════════════════
-# OLLAMA AI INTEGRATION
-# ═══════════════════════════════════════════════════════════════════════════════════════════
-
-class OllamaAI:
-    """
-    Integration with Ollama for AI-generated orb meanings and self-spawning intelligence.
-    Falls back to pattern-based generation if Ollama unavailable.
-    """
-    
-    def __init__(self, base_url: str = "http://localhost:11434"):
-        self.base_url = base_url
-        self.model = "llama3.1"
-        self.available = False
-        self.cache: Dict[str, str] = {}
-        self._check_availability()
-    
-    def _check_availability(self):
-        """Check if Ollama is running"""
-        try:
-            req = urllib.request.Request(f"{self.base_url}/api/tags", method='GET')
-            with urllib.request.urlopen(req, timeout=2) as response:
-                self.available = response.status == 200
-                logger.info(f"🤖 Ollama AI: {'Connected' if self.available else 'Not available'}")
-        except:
-            self.available = False
-            logger.info("🤖 Ollama AI: Using pattern-based generation (offline mode)")
-    
-    def generate(self, prompt: str, context: Dict = None) -> str:
-        """Generate text using Ollama or fallback"""
-        cache_key = hashlib.md5(prompt.encode()).hexdigest()[:16]
-        if cache_key in self.cache:
-            return self.cache[cache_key]
-        
-        if self.available:
-            try:
-                return self._ollama_generate(prompt)
-            except:
-                pass
-        
-        # Fallback to pattern-based generation
-        return self._pattern_generate(prompt, context)
-    
-    def _ollama_generate(self, prompt: str) -> str:
-        """Call Ollama API"""
-        data = json.dumps({
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.7, "num_predict": 100}
-        }).encode('utf-8')
-        
-        req = urllib.request.Request(
-            f"{self.base_url}/api/generate",
-            data=data,
-            headers={'Content-Type': 'application/json'},
-            method='POST'
-        )
-        
-        with urllib.request.urlopen(req, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            text = result.get('response', '').strip()
-            self.cache[hashlib.md5(prompt.encode()).hexdigest()[:16]] = text
-            return text
-    
-    def _pattern_generate(self, prompt: str, context: Dict = None) -> str:
-        """Generate meaningful text using sacred mathematics patterns"""
-        context = context or {}
-        
-        # Meaning templates based on orb type
-        meanings = {
-            'stem': [
-                "The seed of infinite possibility, containing all paths",
-                "Undifferentiated potential awaiting purpose",
-                "The origin point from which all growth emerges",
-                "Pure creative energy before manifestation"
-            ],
-            'neuron': [
-                "A bridge connecting thought to action",
-                "Processing the signals of intention",
-                "The spark of consciousness in motion",
-                "Weaving patterns of understanding"
-            ],
-            'memory': [
-                "Holding the echoes of experience",
-                "A vessel for learned wisdom",
-                "The accumulation of past moments",
-                "Preserving what matters for tomorrow"
-            ],
-            'sensor': [
-                "Perceiving the subtle currents of change",
-                "Attuned to the vibrations of environment",
-                "Receiving messages from the universe",
-                "The gateway between inner and outer worlds"
-            ],
-            'effector': [
-                "Translating intention into reality",
-                "The hand that shapes the world",
-                "Where thought becomes action",
-                "Manifesting will into being"
-            ],
-            'structural': [
-                "The foundation upon which growth builds",
-                "Providing stability in chaos",
-                "The skeleton of possibility",
-                "Supporting the architecture of dreams"
-            ],
-            'transport': [
-                "Carrying energy where it's needed",
-                "The river of life flowing through",
-                "Connecting distant parts into whole",
-                "Movement is the essence of life"
-            ],
-            'goal': [
-                "A star to navigate by",
-                "The destination that gives journey meaning",
-                "Crystallized intention waiting to manifest",
-                "Where desire meets determination"
-            ],
-            'habit': [
-                "The groove worn by repetition",
-                "Small actions, great transformations",
-                "Building the self through daily practice",
-                "The compound interest of self-improvement"
-            ],
-            'karma': [
-                f"Resonating at {context.get('karma', 0):.2f} karmic frequency",
-                "The echo of actions past and future",
-                "Cause and effect in eternal dance",
-                "What you send returns transformed"
-            ]
-        }
-        
-        orb_type = context.get('type', 'stem').lower()
-        templates = meanings.get(orb_type, meanings['stem'])
-        
-        # Use golden ratio to select template
-        index = int(abs(context.get('karma', 0) * PHI * 100)) % len(templates)
-        base_meaning = templates[index]
-        
-        # Add contextual details
-        if context.get('generation', 0) > 0:
-            base_meaning += f" [Generation {context.get('generation')}]"
-        
-        if context.get('energy', 0) > 0.8:
-            base_meaning += " ✨ High energy"
-        elif context.get('energy', 0) < 0.3:
-            base_meaning += " 🌙 Resting state"
-        
-        return base_meaning
-    
-    def generate_orb_meaning(self, orb_data: Dict) -> str:
-        """Generate meaning for a specific orb"""
-        prompt = f"""Generate a brief, poetic meaning (1-2 sentences) for a living orb with these properties:
-Type: {orb_data.get('type', 'stem')}
-Karma: {orb_data.get('karma', 0):.2f}
-Energy: {orb_data.get('energy', 1.0):.2f}
-Generation: {orb_data.get('generation', 0)}
-State: {orb_data.get('state', 'growing')}
-
-The meaning should be mystical but relevant to personal growth and planning."""
-        
-        return self.generate(prompt, orb_data)
-    
-    def generate_insight(self, patterns: Dict) -> str:
-        """Generate AI insight from detected patterns"""
-        prompt = f"""Based on these user patterns, provide one encouraging insight (1-2 sentences):
-Karma trend: {patterns.get('karma_trend', 0):.3f}
-Harmony level: {patterns.get('harmony', 0.5):.2f}
-Active goals: {patterns.get('goals', 0)}
-Habit streaks: {patterns.get('streaks', [])}
-
-Be warm, supportive, and neurodivergent-friendly."""
-        
-        return self.generate(prompt, patterns)
+# Emotion indices for harmonic wave modulation
+EMOTION_INDEX = {
+    'hope': 1.0, 'joy': 1.2, 'peace': 0.8, 'love': 1.5,
+    'sadness': 2.0, 'fear': 2.5, 'anger': 3.0,
+    'calm': 0.5, 'excitement': 1.8, 'wonder': 1.3,
+    'neutral': 1.0
+}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
-# MAYAN CALENDAR SYSTEM
+# 🔢 TEN MATHEMATICAL FOUNDATIONS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
-class MayanCalendar:
+class MathematicalFoundations:
     """
-    Sacred Mayan time science for task prioritization and cosmic alignment.
+    Ten Mathematical Foundations for Photorealistic Visual Generation.
+    These drive animation, drawing, and unfolding across the organism.
     """
-    
-    # Mayan epoch: August 11, 3114 BCE (Julian) = September 6, 3114 BCE (Gregorian)
-    MAYAN_EPOCH = datetime(3114, 8, 11)  # Simplified
     
     def __init__(self):
-        self.today = datetime.now()
+        self.phi = PHI
+        self.phi_inv = PHI_INVERSE
+        self.cache = {}
+        self.frame_queue = []
+        self.compressed_states = []
+        
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 1. Golden-Harmonic Folding Field
+    # F(t,φ) = sin(2π·t·φ)·cos(2π·t/φ)+sin(π·t²)
+    # ─────────────────────────────────────────────────────────────────────────────────────
     
-    def get_tzolkin(self, date: datetime = None) -> Dict:
-        """Calculate Tzolkin (sacred 260-day calendar) position"""
-        date = date or datetime.now()
-        
-        # Days since a reference point (simplified calculation)
-        ref_date = datetime(2012, 12, 21)  # End of 13th Baktun
-        days_diff = (date - ref_date).days
-        
-        # Tzolkin position
-        day_number = ((days_diff % 13) + 1)  # 1-13
-        day_sign_index = days_diff % 20
-        day_sign = MAYAN_SIGNS[day_sign_index]
-        
-        return {
-            'number': day_number,
-            'sign': day_sign,
-            'sign_index': day_sign_index,
-            'kin': (days_diff % 260) + 1,
-            'energy': self._calculate_day_energy(day_number, day_sign_index)
-        }
+    def golden_harmonic_fold(self, t: float) -> float:
+        """
+        Unfolds and folds visual energy organically using Golden Ratio.
+        Used for trajectory mapping, particle animation curves, and symmetry.
+        """
+        term1 = math.sin(2 * math.pi * t * self.phi)
+        term2 = math.cos(2 * math.pi * t / self.phi)
+        term3 = math.sin(math.pi * t * t)
+        return term1 * term2 + term3
     
-    def _calculate_day_energy(self, number: int, sign_index: int) -> Dict:
-        """Calculate the energetic quality of a Tzolkin day"""
-        # Each number has meaning
-        number_meanings = {
-            1: "New beginnings, unity",
-            2: "Duality, choices",
-            3: "Action, movement",
-            4: "Stability, foundation",
-            5: "Center, empowerment",
-            6: "Flow, organic growth",
-            7: "Reflection, mysticism",
-            8: "Harmony, justice",
-            9: "Completion, patience",
-            10: "Manifestation, intention",
-            11: "Resolution, change",
-            12: "Understanding, wisdom",
-            13: "Transcendence, completion"
-        }
-        
-        # Sign element associations
-        sign_elements = ['water', 'air', 'earth', 'earth', 'fire',
-                        'earth', 'air', 'fire', 'water', 'fire',
-                        'air', 'earth', 'water', 'earth', 'air',
-                        'earth', 'earth', 'air', 'water', 'fire']
-        
-        return {
-            'number_meaning': number_meanings.get(number, "Mystery"),
-            'element': sign_elements[sign_index],
-            'power_level': (number + sign_index) % 10 / 10,  # 0-1
-            'recommended_activities': self._get_recommended_activities(number, sign_index)
-        }
+    def golden_harmonic_field(self, x: float, y: float, t: float) -> float:
+        """2D field version for spatial applications"""
+        fx = self.golden_harmonic_fold(x + t)
+        fy = self.golden_harmonic_fold(y + t * self.phi_inv)
+        return (fx + fy) / 2
     
-    def _get_recommended_activities(self, number: int, sign_index: int) -> List[str]:
-        """Get recommended activities for this day's energy"""
-        activities = []
-        
-        # Number-based recommendations
-        if number in [1, 3, 5]:
-            activities.append("Start new projects")
-        if number in [4, 8]:
-            activities.append("Work on foundations")
-        if number in [7, 9, 13]:
-            activities.append("Reflect and integrate")
-        if number in [2, 6, 10]:
-            activities.append("Collaborate with others")
-        
-        # Sign-based recommendations
-        sign_activities = {
-            0: "Creative work", 1: "Communication", 2: "Inner work",
-            3: "Planting seeds", 4: "Transformation", 5: "Release",
-            6: "Healing", 7: "Celebration", 8: "Purification",
-            9: "Loyalty tasks", 10: "Play and art", 11: "Service",
-            12: "Leadership", 13: "Intuition work", 14: "Vision",
-            15: "Wisdom sharing", 16: "Grounding", 17: "Self-reflection",
-            18: "Cleansing", 19: "Enlightenment"
-        }
-        
-        activities.append(sign_activities.get(sign_index, "General tasks"))
-        
-        return activities
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 2. Pareidolia Detection Field
+    # P(x,y,t) = sigmoid(cos(x²+y²+sin(t·π)))·L(x,y)
+    # ─────────────────────────────────────────────────────────────────────────────────────
     
-    def get_task_alignment(self, task_type: str, date: datetime = None) -> float:
-        """Calculate how well a task type aligns with today's energy (0-1)"""
-        tzolkin = self.get_tzolkin(date)
-        energy = tzolkin['energy']
-        
-        # Task type to element mapping
-        task_elements = {
-            'creative': 'fire',
-            'analytical': 'air',
-            'physical': 'earth',
-            'emotional': 'water',
-            'social': 'air',
-            'planning': 'earth',
-            'rest': 'water',
-            'learning': 'fire'
-        }
-        
-        task_element = task_elements.get(task_type.lower(), 'earth')
-        
-        # Element harmony (simplified)
-        element_harmony = {
-            ('fire', 'fire'): 1.0, ('fire', 'air'): 0.8, ('fire', 'earth'): 0.5, ('fire', 'water'): 0.3,
-            ('air', 'air'): 1.0, ('air', 'fire'): 0.8, ('air', 'water'): 0.5, ('air', 'earth'): 0.4,
-            ('earth', 'earth'): 1.0, ('earth', 'water'): 0.7, ('earth', 'fire'): 0.5, ('earth', 'air'): 0.4,
-            ('water', 'water'): 1.0, ('water', 'earth'): 0.7, ('water', 'air'): 0.5, ('water', 'fire'): 0.3
-        }
-        
-        harmony = element_harmony.get((task_element, energy['element']), 0.5)
-        
-        # Adjust by power level
-        return harmony * (0.5 + energy['power_level'] * 0.5)
+    def sigmoid(self, x: float) -> float:
+        """Sigmoid activation function"""
+        return 1 / (1 + math.exp(-max(-500, min(500, x))))
     
-    def get_today_summary(self) -> Dict:
-        """Get complete Mayan calendar summary for today"""
-        tzolkin = self.get_tzolkin()
-        
-        return {
-            'tzolkin': tzolkin,
-            'greeting': f"Today is {tzolkin['number']} {tzolkin['sign']}",
-            'kin_number': tzolkin['kin'],
-            'energy': tzolkin['energy'],
-            'best_for': tzolkin['energy']['recommended_activities'],
-            'power_level': tzolkin['energy']['power_level'],
-            'cosmic_tone': self._get_cosmic_tone(tzolkin['number'])
-        }
+    def pareidolia_field(self, x: float, y: float, t: float, 
+                         laplacian: float = 1.0) -> float:
+        """
+        Simulates pattern recognition in noise, enhancing fractal symmetry.
+        Helps simulate emergent human-recognizable features (faces, forms).
+        """
+        inner = x*x + y*y + math.sin(t * math.pi)
+        return self.sigmoid(math.cos(inner)) * laplacian
     
-    def _get_cosmic_tone(self, number: int) -> str:
-        """Get the cosmic tone name"""
-        tones = {
-            1: "Magnetic", 2: "Lunar", 3: "Electric", 4: "Self-Existing",
-            5: "Overtone", 6: "Rhythmic", 7: "Resonant", 8: "Galactic",
-            9: "Solar", 10: "Planetary", 11: "Spectral", 12: "Crystal", 13: "Cosmic"
-        }
-        return tones.get(number, "Unknown")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════════════════
-# KARMA-DHARMA ENGINE (Enhanced)
-# ═══════════════════════════════════════════════════════════════════════════════════════════
-
-class KarmicValence(Enum):
-    POSITIVE = 1
-    NEUTRAL = 0
-    NEGATIVE = -1
-    TRANSFORMATIVE = 2
-
-
-@dataclass
-class KarmicVector:
-    """Multidimensional karmic representation"""
-    id: str = field(default_factory=lambda: secrets.token_hex(8))
-    magnitude: float = 0.0
-    valence: KarmicValence = KarmicValence.NEUTRAL
-    velocity: float = 0.0
-    spin: float = 0.0
-    intention: float = 1.0
-    awareness: float = 1.0
-    timestamp: float = field(default_factory=time.time)
-    source: str = ""
-    meaning: str = ""
+    def detect_patterns(self, data: np.ndarray, threshold: float = 0.5) -> List[Tuple[int, int]]:
+        """Detect pattern hotspots in 2D data"""
+        hotspots = []
+        h, w = data.shape[:2] if len(data.shape) >= 2 else (1, len(data))
+        for y in range(1, h-1):
+            for x in range(1, w-1):
+                val = self.pareidolia_field(x/w, y/h, time.time() % 10)
+                if val > threshold:
+                    hotspots.append((x, y))
+        return hotspots[:100]  # Limit for performance
     
-    @property
-    def weight(self) -> float:
-        base = self.magnitude * self.intention * self.awareness
-        harmonic = PHI if self.valence == KarmicValence.POSITIVE else PHI_INVERSE
-        return base * harmonic * (1 + abs(self.spin) * 0.1)
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 3. Sacred Blend Energy Map
+    # B(x,y,t) = tanh(α·sin(2π·x)+β·cos(2π·y))·γ(t)
+    # ─────────────────────────────────────────────────────────────────────────────────────
     
-    def evolve(self, dt: float) -> 'KarmicVector':
-        decay = PHI_INVERSE if self.valence == KarmicValence.NEGATIVE else 1.0
-        growth = PHI if self.valence == KarmicValence.POSITIVE else 1.0
-        new_mag = self.magnitude * (growth ** (dt * self.awareness)) * (decay ** (dt * (1 - self.awareness)))
-        return KarmicVector(
-            id=self.id, magnitude=new_mag, valence=self.valence,
-            velocity=self.velocity * 0.99, spin=self.spin * 0.999,
-            intention=self.intention, awareness=self.awareness,
-            source=self.source, meaning=self.meaning
-        )
-
-
-class KarmaDharmaEngine:
-    """Core spiritual mathematics engine with federated learning"""
+    def sacred_blend(self, x: float, y: float, t: float,
+                     alpha: float = 1.0, beta: float = 1.0,
+                     gamma_func: Callable = None) -> float:
+        """
+        Modulates tone density over frame regions using harmonic overlays.
+        Controlled by memory-tuned parameters from adaptive tuner.
+        """
+        gamma = gamma_func(t) if gamma_func else (0.5 + 0.5 * math.sin(t))
+        inner = alpha * math.sin(2 * math.pi * x) + beta * math.cos(2 * math.pi * y)
+        return math.tanh(inner) * gamma
     
-    def __init__(self, ai: OllamaAI = None):
-        self.vectors: List[KarmicVector] = []
-        self.field_potential: float = 0.0
-        self.dharmic_angle: float = 0.0
-        self.ai = ai
-        self.history: List[Dict] = []
-        self.learning_rate: float = 0.01
+    def blend_energy_map(self, width: int, height: int, t: float,
+                         emotion: str = 'neutral') -> np.ndarray:
+        """Generate full energy map for frame"""
+        emap = np.zeros((height, width))
+        emotion_mod = EMOTION_INDEX.get(emotion, 1.0)
+        
+        for y in range(height):
+            for x in range(width):
+                nx, ny = x / width, y / height
+                emap[y, x] = self.sacred_blend(nx, ny, t, 
+                                               alpha=self.phi * emotion_mod,
+                                               beta=self.phi_inv * emotion_mod)
+        return emap
     
-    def add_action(self, action_type: str, magnitude: float, 
-                   intention: float = 0.8, awareness: float = 0.7) -> KarmicVector:
-        positive = {'complete', 'achieve', 'help', 'create', 'meditate', 'learn', 'grow'}
-        negative = {'skip', 'avoid', 'procrastinate', 'abandon'}
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 4. Fractal Bloom Expansion
+    # Z(n+1) = Z(n)² + C where |Z(n)| < threshold
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def fractal_bloom(self, x: float, y: float, t: float,
+                      max_iter: int = 50, threshold: float = 4.0) -> Tuple[int, float]:
+        """
+        Used for branching edge effects and recursive spatial structures.
+        Enables infinite resolution pseudo-depth while remaining tractable.
+        """
+        # Dynamic C based on time
+        c_real = x + 0.1 * math.sin(t * self.phi)
+        c_imag = y + 0.1 * math.cos(t * self.phi_inv)
         
-        if action_type.lower() in positive:
-            valence = KarmicValence.POSITIVE
-        elif action_type.lower() in negative:
-            valence = KarmicValence.NEGATIVE
-        else:
-            valence = KarmicValence.NEUTRAL
+        z_real, z_imag = 0.0, 0.0
         
-        fib_idx = int(magnitude * 10) % len(FIBONACCI)
-        spin = FIBONACCI[fib_idx] * PHI_INVERSE
+        for n in range(max_iter):
+            z_real_new = z_real * z_real - z_imag * z_imag + c_real
+            z_imag = 2 * z_real * z_imag + c_imag
+            z_real = z_real_new
+            
+            magnitude = z_real * z_real + z_imag * z_imag
+            if magnitude > threshold:
+                # Smooth iteration count
+                smooth = n + 1 - math.log(math.log(max(1, magnitude))) / math.log(2)
+                return n, smooth
         
-        # Generate meaning
-        meaning = ""
-        if self.ai:
-            meaning = self.ai.generate_orb_meaning({
-                'type': 'karma', 'karma': magnitude * valence.value,
-                'energy': awareness, 'generation': len(self.vectors)
-            })
+        return max_iter, float(max_iter)
+    
+    def bloom_expansion_field(self, width: int, height: int, t: float,
+                              zoom: float = 1.0, center: Tuple[float, float] = (-0.5, 0)) -> np.ndarray:
+        """Generate full bloom field for frame"""
+        field = np.zeros((height, width))
         
-        vector = KarmicVector(
-            magnitude=magnitude, valence=valence,
-            velocity=intention * awareness, spin=spin,
-            intention=intention, awareness=awareness,
-            source=action_type, meaning=meaning
-        )
+        for py in range(height):
+            for px in range(width):
+                x = center[0] + (px - width/2) / (width * zoom / 4)
+                y = center[1] + (py - height/2) / (height * zoom / 4)
+                _, smooth = self.fractal_bloom(x, y, t)
+                field[py, px] = smooth
         
-        self.vectors.append(vector)
-        self._recalculate()
+        return field
+    
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 5. Centralized Origami Curve Envelope
+    # O(u,v) = sin(u·v) + cos(φ·u)·sin(φ·v)
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def origami_curve(self, u: float, v: float) -> float:
+        """
+        Fold/unfold logic inspired by Japanese origami simulation.
+        Simulates "creased" visual compression and expansion per frame.
+        """
+        return math.sin(u * v) + math.cos(self.phi * u) * math.sin(self.phi * v)
+    
+    def origami_fold_matrix(self, data: np.ndarray, fold_angle: float) -> np.ndarray:
+        """Apply origami fold transformation to data matrix"""
+        h, w = data.shape[:2]
+        folded = np.zeros_like(data)
         
-        self.history.append({
-            'id': vector.id, 'action': action_type,
-            'weight': vector.weight, 'valence': valence.name,
-            'timestamp': time.time(), 'meaning': meaning
+        for y in range(h):
+            for x in range(w):
+                # Normalized coordinates
+                u = (x / w - 0.5) * 2 * math.pi
+                v = (y / h - 0.5) * 2 * math.pi
+                
+                # Apply origami curve transformation
+                fold_factor = self.origami_curve(u * fold_angle, v * fold_angle)
+                
+                # Map to new position
+                new_x = int((x + fold_factor * w * 0.1) % w)
+                new_y = int((y + fold_factor * h * 0.1) % h)
+                
+                if len(data.shape) == 3:
+                    folded[new_y, new_x] = data[y, x]
+                else:
+                    folded[new_y, new_x] = data[y, x]
+        
+        return folded
+    
+    def unfold_origami(self, compressed: np.ndarray, iterations: int = 3) -> np.ndarray:
+        """Unfold compressed data through inverse origami transformation"""
+        result = compressed.copy()
+        for i in range(iterations):
+            angle = self.phi_inv ** i  # Decreasing fold angles
+            result = self.origami_fold_matrix(result, -angle)  # Inverse fold
+        return result
+    
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 6. Emotionally Tuned Harmonic Wave
+    # H(t,e) = |sin(π·t·E[e])| + tanh(t·0.2)
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def emotional_harmonic(self, t: float, emotion: str = 'neutral') -> float:
+        """
+        Provides adaptable curve control for animation timing and intensity.
+        Directly modulates narration tone and line-weight fidelity.
+        """
+        e_index = EMOTION_INDEX.get(emotion.lower(), 1.0)
+        term1 = abs(math.sin(math.pi * t * e_index))
+        term2 = math.tanh(t * 0.2)
+        return term1 + term2
+    
+    def emotional_wave_sequence(self, duration: float, fps: int,
+                                emotions: List[Tuple[float, str]]) -> List[float]:
+        """Generate emotion-modulated wave for animation sequence"""
+        total_frames = int(duration * fps)
+        waves = []
+        
+        for frame in range(total_frames):
+            t = frame / fps
+            
+            # Find current emotion based on time
+            current_emotion = 'neutral'
+            for emotion_time, emotion in emotions:
+                if t >= emotion_time:
+                    current_emotion = emotion
+            
+            waves.append(self.emotional_harmonic(t, current_emotion))
+        
+        return waves
+    
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 7. Fourier Sketch Synthesis
+    # Sₖ(x,y) = Σ(aₙ·cos(n·x) + bₙ·sin(n·y)), n ∈ [1,N]
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def fourier_sketch(self, x: float, y: float, coefficients: List[Tuple[float, float]],
+                       N: int = 10) -> float:
+        """
+        Dynamically applies sketch harmonics using emotion as seed data.
+        Enables realistic-looking hand-drawn simulations.
+        """
+        result = 0.0
+        for n in range(1, min(N + 1, len(coefficients) + 1)):
+            a_n, b_n = coefficients[n-1] if n-1 < len(coefficients) else (1.0/n, 1.0/n)
+            result += a_n * math.cos(n * x) + b_n * math.sin(n * y)
+        return result
+    
+    def generate_sketch_coefficients(self, emotion: str, complexity: int = 10) -> List[Tuple[float, float]]:
+        """Generate Fourier coefficients based on emotional seed"""
+        e_index = EMOTION_INDEX.get(emotion.lower(), 1.0)
+        coeffs = []
+        
+        for n in range(complexity):
+            # Use golden ratio and emotion to generate coefficients
+            a_n = math.sin(n * self.phi * e_index) / (n + 1)
+            b_n = math.cos(n * self.phi_inv * e_index) / (n + 1)
+            coeffs.append((a_n, b_n))
+        
+        return coeffs
+    
+    def sketch_field(self, width: int, height: int, emotion: str = 'neutral') -> np.ndarray:
+        """Generate full sketch field for frame"""
+        coeffs = self.generate_sketch_coefficients(emotion)
+        field = np.zeros((height, width))
+        
+        for y in range(height):
+            for x in range(width):
+                nx = (x / width - 0.5) * 2 * math.pi
+                ny = (y / height - 0.5) * 2 * math.pi
+                field[y, x] = self.fourier_sketch(nx, ny, coeffs)
+        
+        return field
+    
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 8. GPU Parallel Frame Queue (Vectorized Batch Processing)
+    # Fᵢ = U(Dᵢ, Tᵢ) ∀i ∈ queue where GPU(Fᵢ) = maxₗoad
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def queue_frame(self, frame_data: Dict, target_time: float):
+        """Add frame to processing queue"""
+        self.frame_queue.append({
+            'data': frame_data,
+            'target_time': target_time,
+            'queued_at': time.time()
+        })
+    
+    def process_frame_batch(self, batch_size: int = 10) -> List[np.ndarray]:
+        """Process batch of frames in parallel (simulated for CPU)"""
+        batch = self.frame_queue[:batch_size]
+        self.frame_queue = self.frame_queue[batch_size:]
+        
+        results = []
+        for frame_job in batch:
+            # Unfold and process each frame
+            data = frame_job['data']
+            t = frame_job['target_time']
+            
+            # Apply golden harmonic unfolding
+            if 'field' in data:
+                unfolded = self.unfold_origami(data['field'])
+                results.append(unfolded)
+        
+        return results
+    
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 9. Temporal Origami Compression Engine
+    # Cₜ = Σ Mf·(1/φ)ⁿ for frames f = 1 → N
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    
+    def compress_temporal(self, frames: List[np.ndarray]) -> np.ndarray:
+        """
+        Compress sequence of frames using origami mathematics.
+        Enables prediction of upcoming frames from compressed snapshots.
+        Greatly reduces recomputation overhead between scenes.
+        """
+        if not frames:
+            return np.zeros((100, 100))
+        
+        # Initialize with first frame shape
+        compressed = np.zeros_like(frames[0], dtype=np.float64)
+        
+        for n, frame in enumerate(frames):
+            weight = self.phi_inv ** n  # Decreasing weight
+            compressed += frame.astype(np.float64) * weight
+        
+        # Normalize
+        total_weight = sum(self.phi_inv ** i for i in range(len(frames)))
+        compressed /= total_weight
+        
+        # Store for later unfolding
+        self.compressed_states.append({
+            'data': compressed,
+            'frame_count': len(frames),
+            'timestamp': time.time()
         })
         
-        return vector
+        return compressed.astype(frames[0].dtype)
     
-    def _recalculate(self):
-        pos = sum(v.weight for v in self.vectors if v.valence == KarmicValence.POSITIVE)
-        neg = sum(v.weight for v in self.vectors if v.valence == KarmicValence.NEGATIVE)
-        trans = sum(v.weight for v in self.vectors if v.valence == KarmicValence.TRANSFORMATIVE)
-        self.field_potential = pos * PHI - neg * PHI_INVERSE + trans * math.sqrt(PHI)
+    def expand_temporal(self, compressed: np.ndarray, target_frames: int) -> List[np.ndarray]:
+        """Expand compressed state back to frame sequence"""
+        frames = []
+        
+        for n in range(target_frames):
+            # Use origami unfolding to regenerate frames
+            t = n / target_frames
+            weight = self.phi ** (n * 0.1)  # Increasing expansion
+            
+            # Apply phase-shifted unfolding
+            expanded = self.origami_fold_matrix(compressed, t * math.pi)
+            expanded = expanded * weight
+            
+            # Normalize to valid range
+            expanded = np.clip(expanded, 0, 255).astype(np.uint8)
+            frames.append(expanded)
+        
+        return frames
     
-    def evolve(self, dt: float = 0.1):
-        self.vectors = [v.evolve(dt) for v in self.vectors if v.magnitude > PLANCK_KARMA]
-        self._recalculate()
-        if self.field_potential > 0:
-            self.dharmic_angle *= (1 - self.learning_rate * dt)
+    # ─────────────────────────────────────────────────────────────────────────────────────
+    # 10. Full-Scene Emotional Manifold Map
+    # E_scene(x,y,t) = ∇²B(x,y,t) + H(t,e)·F(t,φ)
+    # ─────────────────────────────────────────────────────────────────────────────────────
     
-    def get_dharmic_alignment(self) -> float:
-        return math.cos(self.dharmic_angle)
+    def emotional_manifold(self, x: float, y: float, t: float,
+                           emotion: str = 'neutral') -> float:
+        """
+        Couples harmonic energy, unfolding field, and motion bloom.
+        Used to simulate mood-per-frame in the orchestrator.
+        """
+        # Blend energy (B)
+        B = self.sacred_blend(x, y, t)
+        
+        # Laplacian approximation (∇²B) - using neighbors
+        dx = 0.01
+        B_xp = self.sacred_blend(x + dx, y, t)
+        B_xm = self.sacred_blend(x - dx, y, t)
+        B_yp = self.sacred_blend(x, y + dx, t)
+        B_ym = self.sacred_blend(x, y - dx, t)
+        laplacian_B = (B_xp + B_xm + B_yp + B_ym - 4 * B) / (dx * dx)
+        
+        # Harmonic wave (H)
+        H = self.emotional_harmonic(t, emotion)
+        
+        # Golden fold (F)
+        F = self.golden_harmonic_fold(t)
+        
+        return laplacian_B + H * F
     
-    def get_state(self) -> Dict:
-        return {
-            'field_potential': self.field_potential,
-            'dharmic_alignment': self.get_dharmic_alignment(),
-            'vector_count': len(self.vectors),
-            'recent_actions': self.history[-20:]
-        }
+    def generate_manifold_frame(self, width: int, height: int, t: float,
+                                emotion: str = 'neutral') -> np.ndarray:
+        """Generate complete emotional manifold frame"""
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        for y in range(height):
+            for x in range(width):
+                nx, ny = x / width, y / height
+                value = self.emotional_manifold(nx, ny, t, emotion)
+                
+                # Map to color using golden ratio
+                hue = (value * self.phi * 60 + 200) % 360
+                sat = 0.7 + 0.3 * abs(math.sin(value * math.pi))
+                val = 0.5 + 0.5 * math.tanh(value)
+                
+                # HSV to RGB
+                r, g, b = self._hsv_to_rgb(hue, sat, val)
+                frame[y, x] = [int(r*255), int(g*255), int(b*255)]
+        
+        return frame
+    
+    def _hsv_to_rgb(self, h: float, s: float, v: float) -> Tuple[float, float, float]:
+        """Convert HSV to RGB"""
+        c = v * s
+        x = c * (1 - abs((h / 60) % 2 - 1))
+        m = v - c
+        
+        if h < 60: r, g, b = c, x, 0
+        elif h < 120: r, g, b = x, c, 0
+        elif h < 180: r, g, b = 0, c, x
+        elif h < 240: r, g, b = 0, x, c
+        elif h < 300: r, g, b = x, 0, c
+        else: r, g, b = c, 0, x
+        
+        return (r + m, g + m, b + m)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
-# SELF-AWARE ORB SYSTEM
+# ANIMATION GENERATION ENGINE
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+class AnimationEngine:
+    """
+    Generates 1-20 minute animations from mathematical foundations.
+    Uses all ten mathematical principles for photorealistic output.
+    """
+    
+    def __init__(self, math_engine: MathematicalFoundations):
+        self.math = math_engine
+        self.fps = 30
+        self.resolution = (1280, 720)  # HD
+        self.current_emotion = 'neutral'
+        self.keyframes = []
+        
+    def set_resolution(self, width: int, height: int):
+        """Set output resolution"""
+        self.resolution = (width, height)
+    
+    def add_keyframe(self, time_seconds: float, emotion: str, 
+                     zoom: float = 1.0, rotation: float = 0.0,
+                     bloom_center: Tuple[float, float] = (-0.5, 0)):
+        """Add animation keyframe"""
+        self.keyframes.append({
+            'time': time_seconds,
+            'emotion': emotion,
+            'zoom': zoom,
+            'rotation': rotation,
+            'bloom_center': bloom_center
+        })
+        self.keyframes.sort(key=lambda k: k['time'])
+    
+    def interpolate_keyframes(self, t: float) -> Dict:
+        """Interpolate between keyframes at time t"""
+        if not self.keyframes:
+            return {
+                'emotion': 'neutral', 'zoom': 1.0,
+                'rotation': 0.0, 'bloom_center': (-0.5, 0)
+            }
+        
+        # Find surrounding keyframes
+        prev_kf = self.keyframes[0]
+        next_kf = self.keyframes[-1]
+        
+        for i, kf in enumerate(self.keyframes):
+            if kf['time'] > t:
+                next_kf = kf
+                prev_kf = self.keyframes[max(0, i-1)]
+                break
+        
+        # Calculate interpolation factor
+        if next_kf['time'] == prev_kf['time']:
+            factor = 0
+        else:
+            factor = (t - prev_kf['time']) / (next_kf['time'] - prev_kf['time'])
+        
+        # Smooth interpolation using golden ratio easing
+        factor = self._golden_ease(factor)
+        
+        return {
+            'emotion': prev_kf['emotion'] if factor < 0.5 else next_kf['emotion'],
+            'zoom': prev_kf['zoom'] + (next_kf['zoom'] - prev_kf['zoom']) * factor,
+            'rotation': prev_kf['rotation'] + (next_kf['rotation'] - prev_kf['rotation']) * factor,
+            'bloom_center': (
+                prev_kf['bloom_center'][0] + (next_kf['bloom_center'][0] - prev_kf['bloom_center'][0]) * factor,
+                prev_kf['bloom_center'][1] + (next_kf['bloom_center'][1] - prev_kf['bloom_center'][1]) * factor
+            )
+        }
+    
+    def _golden_ease(self, t: float) -> float:
+        """Golden ratio based easing function"""
+        return t * t * (3 - 2 * t) * PHI_INVERSE + t * (1 - PHI_INVERSE)
+    
+    def generate_frame(self, frame_number: int, total_frames: int) -> np.ndarray:
+        """Generate single animation frame"""
+        t = frame_number / self.fps
+        params = self.interpolate_keyframes(t)
+        
+        width, height = self.resolution
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Layer 1: Fractal bloom background
+        bloom = self.math.bloom_expansion_field(
+            width, height, t,
+            zoom=params['zoom'],
+            center=params['bloom_center']
+        )
+        
+        # Layer 2: Emotional manifold overlay
+        manifold_small = self.math.generate_manifold_frame(
+            width // 4, height // 4, t, params['emotion']
+        )
+        # Upscale manifold
+        manifold = np.repeat(np.repeat(manifold_small, 4, axis=0), 4, axis=1)
+        
+        # Layer 3: Sketch harmonics
+        sketch = self.math.sketch_field(width, height, params['emotion'])
+        
+        # Layer 4: Golden harmonic modulation
+        harmonic = self.math.emotional_harmonic(t, params['emotion'])
+        
+        # Composite layers
+        for y in range(height):
+            for x in range(width):
+                # Bloom contribution (normalized)
+                bloom_val = bloom[y, x] / 50.0  # Normalize
+                bloom_color = self._bloom_to_color(bloom_val, t)
+                
+                # Manifold contribution
+                manifold_color = manifold[y, x] / 255.0
+                
+                # Sketch contribution
+                sketch_val = (sketch[y, x] + 1) / 2  # Normalize to 0-1
+                
+                # Blend with golden ratio weights
+                r = bloom_color[0] * PHI_INVERSE + manifold_color[0] * (1 - PHI_INVERSE) * PHI_INVERSE
+                g = bloom_color[1] * PHI_INVERSE + manifold_color[1] * (1 - PHI_INVERSE) * PHI_INVERSE
+                b = bloom_color[2] * PHI_INVERSE + manifold_color[2] * (1 - PHI_INVERSE) * PHI_INVERSE
+                
+                # Apply sketch overlay
+                sketch_blend = 0.1 * sketch_val * harmonic
+                r = min(1.0, r + sketch_blend)
+                g = min(1.0, g + sketch_blend * 0.8)
+                b = min(1.0, b + sketch_blend * 0.6)
+                
+                frame[y, x] = [int(r * 255), int(g * 255), int(b * 255)]
+        
+        # Apply origami fold effect for visual interest
+        if params['rotation'] != 0:
+            frame = self.math.origami_fold_matrix(frame, params['rotation'] * 0.1)
+        
+        return frame
+    
+    def _bloom_to_color(self, value: float, t: float) -> Tuple[float, float, float]:
+        """Convert bloom value to RGB color"""
+        # Use golden ratio for color cycling
+        hue = (value * PHI * 60 + t * 20) % 360
+        sat = 0.8
+        val = 0.3 + 0.7 * min(1, value)
+        return self.math._hsv_to_rgb(hue, sat, val)
+    
+    def generate_animation(self, duration_seconds: float, 
+                           output_path: str = None) -> List[np.ndarray]:
+        """
+        Generate complete animation sequence.
+        Duration: 1-1200 seconds (1-20 minutes)
+        """
+        total_frames = int(duration_seconds * self.fps)
+        frames = []
+        
+        logger.info(f"🎬 Generating {total_frames} frames ({duration_seconds}s at {self.fps}fps)")
+        
+        for frame_num in range(total_frames):
+            frame = self.generate_frame(frame_num, total_frames)
+            frames.append(frame)
+            
+            if frame_num % self.fps == 0:
+                logger.info(f"   Frame {frame_num}/{total_frames} ({frame_num/total_frames*100:.1f}%)")
+        
+        # Compress using temporal origami
+        compressed = self.math.compress_temporal(frames[::10])  # Sample every 10th
+        logger.info(f"📦 Compressed {len(frames)} frames to temporal state")
+        
+        return frames
+    
+    def generate_preview(self, duration_seconds: float, 
+                         preview_frames: int = 10) -> List[np.ndarray]:
+        """Generate quick preview with fewer frames"""
+        frame_indices = np.linspace(0, duration_seconds * self.fps - 1, preview_frames).astype(int)
+        total_frames = int(duration_seconds * self.fps)
+        
+        frames = []
+        for frame_num in frame_indices:
+            frame = self.generate_frame(int(frame_num), total_frames)
+            frames.append(frame)
+        
+        return frames
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# ENHANCED SELF-AWARE ORB WITH MATHEMATICAL FOUNDATIONS
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
 class CellType(Enum):
@@ -564,6 +720,8 @@ class CellType(Enum):
     GOAL = "goal"
     HABIT = "habit"
     DREAM = "dream"
+    FRACTAL = "fractal"  # New: Mathematical fractal cell
+    ORIGAMI = "origami"  # New: Folding/unfolding cell
 
 
 class CellState(Enum):
@@ -572,13 +730,16 @@ class CellState(Enum):
     MATURE = "mature"
     DIVIDING = "dividing"
     ENLIGHTENED = "enlightened"
+    FOLDING = "folding"    # New: Origami compression state
+    UNFOLDING = "unfolding"  # New: Origami expansion state
 
 
 @dataclass
-class SelfAwareOrb:
+class MathematicalOrb:
     """
-    A self-aware, self-replicating orb with AI-generated meaning.
-    Each orb knows its purpose and can spawn children.
+    Self-aware, self-replicating orb enhanced with all ten mathematical foundations.
+    Each orb can fold/unfold using origami math, spawn intelligent children,
+    and maintain complex internal state.
     """
     id: str = field(default_factory=lambda: secrets.token_hex(6))
     position: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
@@ -598,6 +759,17 @@ class SelfAwareOrb:
     tags: List[str] = field(default_factory=list)
     index: int = 0
     
+    # Mathematical state (NEW)
+    harmonic_phase: float = 0.0
+    origami_fold_level: float = 0.0  # 0 = unfolded, 1 = fully folded
+    emotional_resonance: str = "neutral"
+    fourier_coefficients: List[Tuple[float, float]] = field(default_factory=list)
+    bloom_seed: Tuple[float, float] = field(default_factory=lambda: (0.0, 0.0))
+    
+    # Compressed state storage
+    compressed_memory: bytes = b""
+    memory_depth: int = 0
+    
     # Connections
     parent_id: Optional[str] = None
     children_ids: List[str] = field(default_factory=list)
@@ -608,18 +780,58 @@ class SelfAwareOrb:
     glow: float = 0.5
     pulse_phase: float = 0.0
     
-    # Linked data (goals, habits, etc)
+    # Linked data
     linked_data: Dict = field(default_factory=dict)
     
-    def update(self, dt: float, environment: Dict, ai: OllamaAI = None) -> Optional['SelfAwareOrb']:
-        """Update orb state, may spawn child"""
+    def __post_init__(self):
+        """Initialize mathematical properties"""
+        if not self.fourier_coefficients:
+            self.fourier_coefficients = self._generate_fourier_identity()
+        if self.bloom_seed == (0.0, 0.0):
+            self.bloom_seed = (
+                random.uniform(-2, 0.5),
+                random.uniform(-1, 1)
+            )
+    
+    def _generate_fourier_identity(self) -> List[Tuple[float, float]]:
+        """Generate unique Fourier identity for this orb"""
+        coeffs = []
+        seed = hash(self.id) % 1000000
+        random.seed(seed)
+        
+        for n in range(10):
+            a_n = random.uniform(-1, 1) / (n + 1)
+            b_n = random.uniform(-1, 1) / (n + 1)
+            coeffs.append((a_n * PHI_INVERSE, b_n * PHI_INVERSE))
+        
+        random.seed()  # Reset
+        return coeffs
+    
+    def update(self, dt: float, environment: Dict, math_engine: MathematicalFoundations) -> Optional['MathematicalOrb']:
+        """Update orb state using mathematical foundations"""
         self.age += dt
+        
+        # Apply golden-harmonic folding to phase
+        self.harmonic_phase = math_engine.golden_harmonic_fold(self.age)
         self.pulse_phase = (self.pulse_phase + dt * PHI) % (2 * math.pi)
         
-        # Energy dynamics
+        # Energy dynamics with emotional harmonic
+        harmonic_energy = math_engine.emotional_harmonic(self.age, self.emotional_resonance)
         nutrients = environment.get('harmony', 0.5)
-        self.energy += nutrients * dt * PHI * 0.1 - dt * 0.02
+        self.energy += nutrients * dt * harmonic_energy * 0.1 - dt * 0.02
         self.energy = max(0.1, min(2.0, self.energy))
+        
+        # Origami folding dynamics
+        if self.state == CellState.FOLDING:
+            self.origami_fold_level = min(1.0, self.origami_fold_level + dt * 0.2)
+            if self.origami_fold_level >= 0.99:
+                self._compress_memory(math_engine)
+                self.state = CellState.MATURE
+        elif self.state == CellState.UNFOLDING:
+            self.origami_fold_level = max(0.0, self.origami_fold_level - dt * 0.2)
+            if self.origami_fold_level <= 0.01:
+                self._expand_memory(math_engine)
+                self.state = CellState.GROWING
         
         # State transitions
         if self.state == CellState.NASCENT and self.age > 1.0:
@@ -627,37 +839,55 @@ class SelfAwareOrb:
         elif self.state == CellState.GROWING and self.age > 5.0:
             self.state = CellState.MATURE
         elif self.state == CellState.MATURE and self.energy > 1.5:
-            self.state = CellState.DIVIDING
+            # Decide: divide or fold
+            if self.karma > 0.3 and random.random() > 0.7:
+                self.state = CellState.FOLDING  # Compress memories
+            else:
+                self.state = CellState.DIVIDING
         elif self.age > 50.0 and self.karma > 0.5:
             self.state = CellState.ENLIGHTENED
         
-        # Division
+        # Division with mathematical enhancement
         if self.state == CellState.DIVIDING:
-            child = self._spawn_child(ai)
+            child = self._spawn_mathematical_child(math_engine, environment)
             self.state = CellState.MATURE
             self.energy *= 0.6
             return child
         
-        # Update color based on state
-        self._update_visuals()
+        # Update visuals with mathematical modulation
+        self._update_visuals(math_engine)
         
         return None
     
-    def _spawn_child(self, ai: OllamaAI = None) -> 'SelfAwareOrb':
-        """Create child orb with inherited and mutated properties"""
-        angle = random.random() * 2 * math.pi
+    def _spawn_mathematical_child(self, math_engine: MathematicalFoundations, 
+                                   environment: Dict) -> 'MathematicalOrb':
+        """Create child orb with inherited and evolved mathematical properties"""
+        # Golden angle position offset
+        angle = self.age * GOLDEN_ANGLE_RAD
         offset = self.radius * PHI
         
         child_pos = [
             self.position[0] + math.cos(angle) * offset,
             self.position[1] + math.sin(angle) * offset,
-            self.position[2] + random.uniform(-1, 1) * offset * 0.3
+            self.position[2] + math_engine.origami_curve(angle, self.age) * offset * 0.3
         ]
         
-        # Differentiate
-        new_type = self._differentiate()
+        # Differentiation with fractal bloom
+        new_type = self._differentiate_with_bloom(math_engine)
         
-        child = SelfAwareOrb(
+        # Inherit and mutate Fourier coefficients
+        child_coeffs = []
+        for a, b in self.fourier_coefficients:
+            mutation = 0.1 * math_engine.pareidolia_field(a, b, self.age)
+            child_coeffs.append((a + mutation, b - mutation))
+        
+        # Inherit bloom seed with golden shift
+        child_bloom = (
+            self.bloom_seed[0] + math_engine.golden_harmonic_fold(self.age) * 0.1,
+            self.bloom_seed[1] + math_engine.golden_harmonic_fold(self.age + PHI) * 0.1
+        )
+        
+        child = MathematicalOrb(
             position=child_pos,
             radius=self.radius * PHI_INVERSE,
             cell_type=new_type,
@@ -667,36 +897,152 @@ class SelfAwareOrb:
             dharma=self.dharma,
             parent_id=self.id,
             index=self.index + 1,
-            tags=self.tags.copy()
+            tags=self.tags.copy(),
+            fourier_coefficients=child_coeffs,
+            bloom_seed=child_bloom,
+            emotional_resonance=self._evolve_emotion()
         )
         
-        # Generate meaning for child
-        if ai:
-            child.meaning = ai.generate_orb_meaning({
-                'type': new_type.value, 'karma': child.karma,
-                'energy': child.energy, 'generation': child.generation,
-                'state': child.state.value
-            })
-            child.purpose = f"Born from {self.cell_type.value}, seeking {new_type.value} expression"
+        # Generate meaning using Fourier sketch
+        sketch_val = sum(a * math.cos(i) + b * math.sin(i) 
+                        for i, (a, b) in enumerate(child_coeffs[:5]))
+        child.meaning = self._generate_meaning(new_type, sketch_val, child.generation)
+        child.purpose = f"Born from {self.cell_type.value}, seeking {new_type.value} expression"
         
         self.children_ids.append(child.id)
         
         return child
     
-    def _differentiate(self) -> CellType:
-        """Determine child type based on karma and randomness"""
+    def _differentiate_with_bloom(self, math_engine: MathematicalFoundations) -> CellType:
+        """Determine child type using fractal bloom"""
+        _, bloom_value = math_engine.fractal_bloom(
+            self.bloom_seed[0], self.bloom_seed[1], self.age
+        )
+        
+        # Normalize bloom to 0-1
+        normalized = (bloom_value % 50) / 50
+        
+        # Map to cell types with bias based on parent
         if self.cell_type == CellType.STEM:
-            weights = [0.1, 0.2, 0.15, 0.15, 0.15, 0.1, 0.1, 0.025, 0.025]
-            if self.karma > 0.5:
-                weights[7] = 0.2  # More likely to be GOAL
-            types = [CellType.STEM, CellType.NEURON, CellType.MEMORY, CellType.SENSOR,
-                    CellType.EFFECTOR, CellType.STRUCTURAL, CellType.TRANSPORT,
-                    CellType.GOAL, CellType.HABIT]
-            return random.choices(types, weights=weights)[0]
-        return self.cell_type
+            if normalized < 0.1: return CellType.STEM
+            elif normalized < 0.25: return CellType.NEURON
+            elif normalized < 0.35: return CellType.MEMORY
+            elif normalized < 0.45: return CellType.SENSOR
+            elif normalized < 0.55: return CellType.EFFECTOR
+            elif normalized < 0.65: return CellType.STRUCTURAL
+            elif normalized < 0.75: return CellType.TRANSPORT
+            elif normalized < 0.85: return CellType.FRACTAL
+            elif normalized < 0.95: return CellType.ORIGAMI
+            else: return CellType.DREAM
+        elif self.cell_type in [CellType.FRACTAL, CellType.ORIGAMI]:
+            # Mathematical cells tend to spawn more mathematical cells
+            return random.choice([CellType.FRACTAL, CellType.ORIGAMI, CellType.NEURON])
+        else:
+            return self.cell_type
     
-    def _update_visuals(self):
-        """Update color and glow based on state"""
+    def _evolve_emotion(self) -> str:
+        """Evolve emotional resonance for child"""
+        emotions = list(EMOTION_INDEX.keys())
+        current_idx = emotions.index(self.emotional_resonance) if self.emotional_resonance in emotions else 0
+        
+        # Small random walk in emotion space
+        shift = random.choice([-1, 0, 0, 1])
+        new_idx = max(0, min(len(emotions) - 1, current_idx + shift))
+        
+        return emotions[new_idx]
+    
+    def _generate_meaning(self, cell_type: CellType, sketch_val: float, generation: int) -> str:
+        """Generate deep meaning using mathematical state"""
+        meanings = {
+            CellType.STEM: [
+                "The seed of infinite possibility, containing all paths",
+                "Undifferentiated potential awaiting purpose",
+                "Pure creative energy before manifestation"
+            ],
+            CellType.NEURON: [
+                "A bridge connecting thought to action",
+                "Processing the signals of intention",
+                "The spark of consciousness in motion"
+            ],
+            CellType.FRACTAL: [
+                "Self-similar patterns reflecting the whole in each part",
+                "Infinite complexity emerging from simple rules",
+                "The mathematical heartbeat of existence"
+            ],
+            CellType.ORIGAMI: [
+                "Folding dimensions to reveal hidden truths",
+                "Compressing wisdom for future unfolding",
+                "The art of transformation through geometry"
+            ],
+            CellType.MEMORY: [
+                "Holding the echoes of experience",
+                "A vessel for learned wisdom",
+                "The accumulation of past moments"
+            ],
+            CellType.DREAM: [
+                "Visions of what could be, unbound by now",
+                "The imagination's infinite canvas",
+                "Possibilities crystallizing into form"
+            ]
+        }
+        
+        base_meanings = meanings.get(cell_type, meanings[CellType.STEM])
+        idx = int(abs(sketch_val * 100)) % len(base_meanings)
+        meaning = base_meanings[idx]
+        
+        # Add generational wisdom
+        if generation > 5:
+            meaning += f" [Lineage depth: {generation}]"
+        if sketch_val > 0.5:
+            meaning += " ✨ Harmonically resonant"
+        
+        return meaning
+    
+    def _compress_memory(self, math_engine: MathematicalFoundations):
+        """Compress orb's state using temporal origami"""
+        # Serialize key state data
+        state_data = {
+            'karma_history': self.karma,
+            'emotional_journey': self.emotional_resonance,
+            'fourier_identity': self.fourier_coefficients,
+            'children_count': len(self.children_ids),
+            'age': self.age
+        }
+        
+        # Apply origami compression
+        json_data = json.dumps(state_data).encode('utf-8')
+        
+        # Fold using golden ratio weights
+        compressed = bytearray()
+        for i, byte in enumerate(json_data):
+            fold_factor = int(math_engine.origami_curve(i * 0.1, self.age * 0.1) * 10) % 256
+            compressed.append((byte + fold_factor) % 256)
+        
+        self.compressed_memory = bytes(compressed)
+        self.memory_depth += 1
+    
+    def _expand_memory(self, math_engine: MathematicalFoundations):
+        """Expand compressed memory"""
+        if not self.compressed_memory:
+            return
+        
+        # Unfold using inverse origami
+        expanded = bytearray()
+        for i, byte in enumerate(self.compressed_memory):
+            fold_factor = int(math_engine.origami_curve(i * 0.1, self.age * 0.1) * 10) % 256
+            expanded.append((byte - fold_factor) % 256)
+        
+        try:
+            state_data = json.loads(bytes(expanded).decode('utf-8'))
+            # Restore enhanced state
+            self.karma = (self.karma + state_data.get('karma_history', 0)) / 2
+        except:
+            pass
+        
+        self.compressed_memory = b""
+    
+    def _update_visuals(self, math_engine: MathematicalFoundations):
+        """Update visual properties using mathematical foundations"""
         type_colors = {
             CellType.STEM: [0.8, 0.8, 0.8],
             CellType.NEURON: [0.3, 0.7, 1.0],
@@ -707,21 +1053,62 @@ class SelfAwareOrb:
             CellType.TRANSPORT: [0.9, 0.9, 0.3],
             CellType.GOAL: [1.0, 0.84, 0.0],
             CellType.HABIT: [0.5, 1.0, 0.5],
-            CellType.DREAM: [0.8, 0.5, 1.0]
+            CellType.DREAM: [0.8, 0.5, 1.0],
+            CellType.FRACTAL: [0.2, 0.8, 0.8],
+            CellType.ORIGAMI: [1.0, 0.6, 0.8]
         }
         
         base_color = type_colors.get(self.cell_type, [0.5, 0.5, 0.5])
         
-        # Modulate by karma
-        karma_mod = 0.5 + self.karma * 0.5
-        self.color = [min(1.0, c * karma_mod) for c in base_color]
+        # Modulate by harmonic phase
+        harmonic = (1 + self.harmonic_phase) / 2  # Normalize to 0-1
         
-        # Glow based on energy and state
-        self.glow = 0.3 + self.energy * 0.3
+        # Apply emotional coloring
+        emotion_mod = EMOTION_INDEX.get(self.emotional_resonance, 1.0)
+        
+        self.color = [
+            min(1.0, base_color[0] * harmonic * emotion_mod),
+            min(1.0, base_color[1] * harmonic),
+            min(1.0, base_color[2] * (2 - harmonic))
+        ]
+        
+        # Glow based on energy and origami state
+        self.glow = 0.3 + self.energy * 0.3 + (1 - self.origami_fold_level) * 0.2
+        
         if self.state == CellState.ENLIGHTENED:
             self.glow = 1.0
+        elif self.state == CellState.FOLDING:
+            self.glow *= 0.5  # Dimmer when folding
+    
+    def get_animation_frame(self, math_engine: MathematicalFoundations, 
+                            frame_time: float) -> Dict:
+        """Get animation data for this orb at given time"""
+        # Calculate current visual state
+        harmonic = math_engine.golden_harmonic_fold(frame_time + self.age)
+        emotional = math_engine.emotional_harmonic(frame_time, self.emotional_resonance)
+        
+        # Position modulation
+        animated_pos = [
+            self.position[0] + harmonic * 0.5,
+            self.position[1] + math.sin(frame_time * PHI) * 0.3,
+            self.position[2] + emotional * 0.2
+        ]
+        
+        # Scale pulsing
+        pulse = 1 + 0.1 * math.sin(self.pulse_phase + frame_time * 2)
+        
+        return {
+            'id': self.id,
+            'position': animated_pos,
+            'scale': self.radius * pulse * (1 - self.origami_fold_level * 0.5),
+            'color': self.color,
+            'glow': self.glow * emotional,
+            'rotation': harmonic * math.pi * 0.1,
+            'fold_level': self.origami_fold_level
+        }
     
     def to_dict(self) -> Dict:
+        """Serialize orb to dictionary"""
         return {
             'id': self.id,
             'position': self.position,
@@ -741,6 +1128,10 @@ class SelfAwareOrb:
             'color': self.color,
             'glow': self.glow,
             'pulse_phase': self.pulse_phase,
+            'harmonic_phase': self.harmonic_phase,
+            'origami_fold_level': self.origami_fold_level,
+            'emotional_resonance': self.emotional_resonance,
+            'memory_depth': self.memory_depth,
             'children_count': len(self.children_ids),
             'bindings_count': len(self.bindings),
             'linked_data': self.linked_data
@@ -748,24 +1139,30 @@ class SelfAwareOrb:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
-# SWARM INTELLIGENCE (Pattern Seeking)
+# ENHANCED SWARM WITH MATHEMATICAL INTELLIGENCE
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
-class SwarmCollective:
-    """Swarm intelligence for pattern detection and trend analysis"""
+class MathematicalSwarm:
+    """
+    Swarm intelligence enhanced with all ten mathematical foundations.
+    Pattern seeking, trend analysis, and collective consciousness.
+    """
     
-    def __init__(self, ai: OllamaAI = None):
-        self.orbs: Dict[str, SelfAwareOrb] = {}
-        self.ai = ai
+    def __init__(self, math_engine: MathematicalFoundations):
+        self.math = math_engine
+        self.orbs: Dict[str, MathematicalOrb] = {}
         self.collective_karma: float = 0.0
         self.collective_dharma: float = 1.0
+        self.collective_emotion: str = 'neutral'
         self.patterns_detected: List[Dict] = []
         self.trend_data: List[Dict] = []
         self.orb_index: int = 0
+        self.animation_cache: List[np.ndarray] = []
     
     def spawn_orb(self, position: List[float] = None, cell_type: CellType = CellType.STEM,
-                  karma: float = 0.0, linked_data: Dict = None) -> SelfAwareOrb:
-        """Spawn a new self-aware orb"""
+                  karma: float = 0.0, emotion: str = 'neutral', 
+                  linked_data: Dict = None) -> MathematicalOrb:
+        """Spawn a new mathematically-enhanced orb"""
         pos = position or [
             random.uniform(-30, 30),
             random.uniform(-30, 30),
@@ -774,49 +1171,60 @@ class SwarmCollective:
         
         self.orb_index += 1
         
-        orb = SelfAwareOrb(
-            position=pos, cell_type=cell_type,
-            karma=karma, index=self.orb_index,
+        orb = MathematicalOrb(
+            position=pos,
+            cell_type=cell_type,
+            karma=karma,
+            index=self.orb_index,
+            emotional_resonance=emotion,
             linked_data=linked_data or {}
         )
         
-        # Generate meaning
-        if self.ai:
-            orb.meaning = self.ai.generate_orb_meaning({
-                'type': cell_type.value, 'karma': karma,
-                'energy': orb.energy, 'generation': 0,
-                'state': orb.state.value
-            })
-            orb.purpose = f"Manifested as {cell_type.value} orb #{self.orb_index}"
+        # Generate meaning using mathematical foundations
+        sketch_val = sum(a * math.cos(i) + b * math.sin(i) 
+                        for i, (a, b) in enumerate(orb.fourier_coefficients[:5]))
+        orb.meaning = orb._generate_meaning(cell_type, sketch_val, 0)
+        orb.purpose = f"Manifested as {cell_type.value} orb #{self.orb_index}"
         
         self.orbs[orb.id] = orb
         return orb
     
     def spawn_golden_spiral(self, count: int = 21, center: List[float] = None):
-        """Spawn orbs in golden spiral pattern"""
+        """Spawn orbs in golden spiral pattern with mathematical diversity"""
         center = center or [0, 0, 0]
         
         for i in range(count):
             angle = i * GOLDEN_ANGLE_RAD
             radius = math.sqrt(i + 1) * 5
             
+            # Apply harmonic modulation to z
+            z_mod = self.math.golden_harmonic_fold(i * 0.1) * 3
+            
             pos = [
                 center[0] + math.cos(angle) * radius,
                 center[1] + math.sin(angle) * radius,
-                center[2] + (i % 5 - 2) * 3
+                center[2] + z_mod
             ]
             
-            cell_type = list(CellType)[i % len(CellType)]
+            # Cycle through cell types including new mathematical types
+            all_types = list(CellType)
+            cell_type = all_types[i % len(all_types)]
+            
+            # Karma from Fourier sketch
             karma = math.sin(i * PHI) * 0.5
             
-            self.spawn_orb(pos, cell_type, karma)
+            # Emotion from harmonic
+            emotions = list(EMOTION_INDEX.keys())
+            emotion = emotions[i % len(emotions)]
+            
+            self.spawn_orb(pos, cell_type, karma, emotion)
     
     def update(self, dt: float, environment: Dict):
-        """Update all orbs and detect patterns"""
+        """Update all orbs with mathematical evolution"""
         new_orbs = []
         
         for orb in list(self.orbs.values()):
-            child = orb.update(dt, environment, self.ai)
+            child = orb.update(dt, environment, self.math)
             if child:
                 new_orbs.append(child)
         
@@ -827,25 +1235,32 @@ class SwarmCollective:
         if self.orbs:
             self.collective_karma = sum(o.karma for o in self.orbs.values()) / len(self.orbs)
             self.collective_dharma = sum(o.dharma for o in self.orbs.values()) / len(self.orbs)
+            
+            # Collective emotion from dominant type
+            emotion_counts = defaultdict(int)
+            for orb in self.orbs.values():
+                emotion_counts[orb.emotional_resonance] += 1
+            self.collective_emotion = max(emotion_counts.keys(), key=lambda e: emotion_counts[e])
         
         # Record trend data
         self.trend_data.append({
             'timestamp': time.time(),
             'orb_count': len(self.orbs),
             'karma': self.collective_karma,
-            'dharma': self.collective_dharma
+            'dharma': self.collective_dharma,
+            'emotion': self.collective_emotion
         })
         
         # Keep last 1000 data points
         if len(self.trend_data) > 1000:
             self.trend_data = self.trend_data[-1000:]
         
-        # Detect patterns periodically
+        # Detect patterns with enhanced analysis
         if len(self.trend_data) % 50 == 0:
-            self._detect_patterns()
+            self._detect_patterns_enhanced()
     
-    def _detect_patterns(self):
-        """Use swarm intelligence to detect patterns"""
+    def _detect_patterns_enhanced(self):
+        """Detect patterns using mathematical foundations"""
         if len(self.trend_data) < 20:
             return
         
@@ -855,9 +1270,15 @@ class SwarmCollective:
         karma_values = [d['karma'] for d in recent]
         karma_trend = karma_values[-1] - karma_values[0]
         
-        # Growth trend
-        orb_counts = [d['orb_count'] for d in recent]
-        growth_trend = orb_counts[-1] - orb_counts[0]
+        # Apply Fourier analysis to trend
+        fourier_energy = sum(
+            abs(sum(karma_values[i] * math.cos(i * n * 0.1) for i in range(len(karma_values))))
+            for n in range(1, 6)
+        )
+        
+        # Emotional transitions
+        emotions = [d['emotion'] for d in recent]
+        emotion_changes = sum(1 for i in range(1, len(emotions)) if emotions[i] != emotions[i-1])
         
         patterns = []
         insights = []
@@ -869,9 +1290,13 @@ class SwarmCollective:
             patterns.append('karma_falling')
             insights.append("Consider mindful actions to restore karmic balance.")
         
-        if growth_trend > 5:
-            patterns.append('rapid_growth')
-            insights.append("Your life fractal is expanding rapidly. Embrace the growth.")
+        if fourier_energy > 5:
+            patterns.append('harmonic_oscillation')
+            insights.append("Your life fractal shows beautiful harmonic patterns. You're in resonance.")
+        
+        if emotion_changes > 5:
+            patterns.append('emotional_flux')
+            insights.append("High emotional dynamics detected. Embrace the transformation.")
         
         # Type clustering
         type_counts = defaultdict(int)
@@ -881,151 +1306,296 @@ class SwarmCollective:
         dominant_type = max(type_counts.keys(), key=lambda k: type_counts[k]) if type_counts else 'stem'
         patterns.append(f'dominant_{dominant_type}')
         
+        # Origami folding analysis
+        folded_count = sum(1 for o in self.orbs.values() if o.origami_fold_level > 0.5)
+        if folded_count > len(self.orbs) * 0.3:
+            patterns.append('collective_compression')
+            insights.append("Many orbs are in folded state. Wisdom is being compressed for future unfolding.")
+        
         self.patterns_detected = [{
             'patterns': patterns,
             'insights': insights,
             'karma_trend': karma_trend,
-            'growth_trend': growth_trend,
+            'fourier_energy': fourier_energy,
+            'emotion_changes': emotion_changes,
             'dominant_type': dominant_type,
             'type_distribution': dict(type_counts),
+            'collective_emotion': self.collective_emotion,
             'timestamp': time.time()
         }]
     
+    def generate_swarm_animation_frame(self, frame_time: float) -> List[Dict]:
+        """Generate animation data for all orbs at given time"""
+        return [orb.get_animation_frame(self.math, frame_time) for orb in self.orbs.values()]
+    
     def get_visualization_data(self) -> Dict:
-        """Get data for Three.js visualization with zoom-based labels"""
+        """Get complete visualization data"""
         return {
             'orbs': [o.to_dict() for o in self.orbs.values()],
             'total_orbs': len(self.orbs),
             'collective_karma': self.collective_karma,
             'collective_dharma': self.collective_dharma,
+            'collective_emotion': self.collective_emotion,
             'patterns': self.patterns_detected,
             'connections': self._get_connections()
         }
     
     def _get_connections(self) -> List[Dict]:
-        """Get orb-to-orb connections for visualization"""
+        """Get orb-to-orb connections based on mathematical affinity"""
         connections = []
         orb_list = list(self.orbs.values())
         
         for i, orb in enumerate(orb_list):
-            # Connect to nearby orbs
             for other in orb_list[i+1:]:
+                # Distance-based
                 dist = math.sqrt(sum((a-b)**2 for a, b in zip(orb.position, other.position)))
-                if dist < 15:  # Connection threshold
-                    strength = 1 - dist / 15
+                
+                # Emotional affinity
+                emotion_match = 1.0 if orb.emotional_resonance == other.emotional_resonance else 0.5
+                
+                # Fourier similarity
+                fourier_sim = sum(abs(a1*a2 + b1*b2) 
+                                 for (a1, b1), (a2, b2) in zip(orb.fourier_coefficients[:3], 
+                                                               other.fourier_coefficients[:3]))
+                
+                if dist < 15:
+                    strength = (1 - dist / 15) * emotion_match * (0.5 + fourier_sim * 0.5)
                     connections.append({
                         'source': orb.id,
                         'target': other.id,
-                        'strength': strength
+                        'strength': min(1.0, strength)
                     })
         
-        return connections[:200]  # Limit for performance
+        return connections[:200]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
-# FEDERATED AI ENGINE
+# OLLAMA AI INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
-class FederatedAI:
-    """
-    Federated AI that lives on the server, learns from all users,
-    and provides recursive self-improvement.
-    """
+class OllamaAI:
+    """Integration with Ollama for AI-generated content"""
+    
+    def __init__(self, base_url: str = "http://localhost:11434"):
+        self.base_url = base_url
+        self.model = "llama3.1"
+        self.available = False
+        self.cache: Dict[str, str] = {}
+        self._check_availability()
+    
+    def _check_availability(self):
+        try:
+            req = urllib.request.Request(f"{self.base_url}/api/tags", method='GET')
+            with urllib.request.urlopen(req, timeout=2) as response:
+                self.available = response.status == 200
+        except:
+            self.available = False
+        logger.info(f"🤖 Ollama AI: {'Connected' if self.available else 'Pattern-based mode'}")
+    
+    def generate(self, prompt: str, context: Dict = None) -> str:
+        cache_key = hashlib.md5(prompt.encode()).hexdigest()[:16]
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+        
+        if self.available:
+            try:
+                return self._ollama_generate(prompt)
+            except:
+                pass
+        
+        return self._pattern_generate(prompt, context or {})
+    
+    def _ollama_generate(self, prompt: str) -> str:
+        data = json.dumps({
+            "model": self.model, "prompt": prompt, "stream": False,
+            "options": {"temperature": 0.7, "num_predict": 100}
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(
+            f"{self.base_url}/api/generate", data=data,
+            headers={'Content-Type': 'application/json'}, method='POST'
+        )
+        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            text = result.get('response', '').strip()
+            self.cache[hashlib.md5(prompt.encode()).hexdigest()[:16]] = text
+            return text
+    
+    def _pattern_generate(self, prompt: str, context: Dict) -> str:
+        # Use mathematical foundations for generation
+        seed = hash(prompt) % 1000
+        random.seed(seed)
+        
+        templates = [
+            "The {type} orb resonates with {emotion} energy, manifesting {purpose}.",
+            "In the golden spiral of existence, this {type} cell carries {purpose}.",
+            "Emerging from fractal depths, the {type} speaks of {emotion} transformation."
+        ]
+        
+        template = random.choice(templates)
+        random.seed()
+        
+        return template.format(
+            type=context.get('type', 'stem'),
+            emotion=context.get('emotion', 'harmonious'),
+            purpose=context.get('purpose', 'infinite possibility')
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# MAYAN CALENDAR
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+class MayanCalendar:
+    """Sacred Mayan time science"""
     
     def __init__(self):
-        self.collective_knowledge: Dict[str, Any] = {
-            'patterns': [],
-            'insights': [],
-            'optimal_actions': {},
-            'learning_iterations': 0
-        }
-        self.user_contributions: List[Dict] = []
-        self.model_version: str = "1.0.0"
-        self.last_training: float = 0
+        self.today = datetime.now()
     
-    def contribute(self, user_data: Dict):
-        """Receive anonymized user data for collective learning"""
-        # Strip identifying info
-        contribution = {
-            'karma_trend': user_data.get('karma_trend', 0),
-            'habit_completion_rate': user_data.get('habit_rate', 0),
-            'goal_progress': user_data.get('goal_progress', 0),
-            'activity_patterns': user_data.get('patterns', []),
+    def get_tzolkin(self, date: datetime = None) -> Dict:
+        date = date or datetime.now()
+        ref_date = datetime(2012, 12, 21)
+        days_diff = (date - ref_date).days
+        
+        day_number = ((days_diff % 13) + 1)
+        day_sign_index = days_diff % 20
+        day_sign = MAYAN_SIGNS[day_sign_index]
+        
+        return {
+            'number': day_number,
+            'sign': day_sign,
+            'sign_index': day_sign_index,
+            'kin': (days_diff % 260) + 1,
+            'energy': self._calculate_day_energy(day_number, day_sign_index)
+        }
+    
+    def _calculate_day_energy(self, number: int, sign_index: int) -> Dict:
+        number_meanings = {
+            1: "New beginnings, unity", 2: "Duality, choices", 3: "Action, movement",
+            4: "Stability, foundation", 5: "Center, empowerment", 6: "Flow, organic growth",
+            7: "Reflection, mysticism", 8: "Harmony, justice", 9: "Completion, patience",
+            10: "Manifestation, intention", 11: "Resolution, change",
+            12: "Understanding, wisdom", 13: "Transcendence, completion"
+        }
+        
+        sign_elements = ['water', 'air', 'earth', 'earth', 'fire',
+                        'earth', 'air', 'fire', 'water', 'fire',
+                        'air', 'earth', 'water', 'earth', 'air',
+                        'earth', 'earth', 'air', 'water', 'fire']
+        
+        tones = {
+            1: "Magnetic", 2: "Lunar", 3: "Electric", 4: "Self-Existing",
+            5: "Overtone", 6: "Rhythmic", 7: "Resonant", 8: "Galactic",
+            9: "Solar", 10: "Planetary", 11: "Spectral", 12: "Crystal", 13: "Cosmic"
+        }
+        
+        return {
+            'number_meaning': number_meanings.get(number, "Mystery"),
+            'element': sign_elements[sign_index],
+            'power_level': (number + sign_index) % 10 / 10,
+            'cosmic_tone': tones.get(number, "Unknown")
+        }
+    
+    def get_today_summary(self) -> Dict:
+        tzolkin = self.get_tzolkin()
+        return {
+            'tzolkin': tzolkin,
+            'greeting': f"Today is {tzolkin['number']} {tzolkin['sign']}",
+            'kin_number': tzolkin['kin'],
+            'energy': tzolkin['energy'],
+            'cosmic_tone': tzolkin['energy']['cosmic_tone']
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+# KARMA-DHARMA ENGINE
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+class KarmicValence(Enum):
+    POSITIVE = 1
+    NEUTRAL = 0
+    NEGATIVE = -1
+    TRANSFORMATIVE = 2
+
+
+@dataclass
+class KarmicVector:
+    id: str = field(default_factory=lambda: secrets.token_hex(8))
+    magnitude: float = 0.0
+    valence: KarmicValence = KarmicValence.NEUTRAL
+    velocity: float = 0.0
+    intention: float = 1.0
+    awareness: float = 1.0
+    source: str = ""
+    meaning: str = ""
+    
+    @property
+    def weight(self) -> float:
+        harmonic = PHI if self.valence == KarmicValence.POSITIVE else PHI_INVERSE
+        return self.magnitude * self.intention * self.awareness * harmonic
+
+
+class KarmaDharmaEngine:
+    """Spiritual mathematics engine"""
+    
+    def __init__(self, math_engine: MathematicalFoundations):
+        self.math = math_engine
+        self.vectors: List[KarmicVector] = []
+        self.field_potential: float = 0.0
+        self.dharmic_angle: float = 0.0
+        self.history: List[Dict] = []
+    
+    def add_action(self, action_type: str, magnitude: float,
+                   intention: float = 0.8, awareness: float = 0.7) -> KarmicVector:
+        positive = {'complete', 'achieve', 'help', 'create', 'meditate', 'learn', 'grow'}
+        negative = {'skip', 'avoid', 'procrastinate', 'abandon'}
+        
+        if action_type.lower() in positive:
+            valence = KarmicValence.POSITIVE
+        elif action_type.lower() in negative:
+            valence = KarmicValence.NEGATIVE
+        else:
+            valence = KarmicValence.NEUTRAL
+        
+        # Apply emotional harmonic to meaning
+        harmonic = self.math.emotional_harmonic(time.time() % 100, 'hope')
+        
+        vector = KarmicVector(
+            magnitude=magnitude * harmonic,
+            valence=valence,
+            velocity=intention * awareness,
+            intention=intention,
+            awareness=awareness,
+            source=action_type,
+            meaning=f"Action '{action_type}' resonates with harmonic {harmonic:.3f}"
+        )
+        
+        self.vectors.append(vector)
+        self._recalculate()
+        
+        self.history.append({
+            'id': vector.id, 'action': action_type,
+            'weight': vector.weight, 'valence': valence.name,
             'timestamp': time.time()
-        }
+        })
         
-        self.user_contributions.append(contribution)
-        
-        # Keep last 10000 contributions
-        if len(self.user_contributions) > 10000:
-            self.user_contributions = self.user_contributions[-10000:]
-        
-        # Periodic learning
-        if len(self.user_contributions) % 100 == 0:
-            self._learn()
+        return vector
     
-    def _learn(self):
-        """Recursive self-improvement through pattern analysis"""
-        if len(self.user_contributions) < 50:
-            return
-        
-        self.collective_knowledge['learning_iterations'] += 1
-        
-        # Analyze successful patterns
-        successful = [c for c in self.user_contributions if c.get('goal_progress', 0) > 0.5]
-        
-        if successful:
-            # Extract common patterns
-            pattern_freq = defaultdict(int)
-            for contrib in successful:
-                for pattern in contrib.get('activity_patterns', []):
-                    pattern_freq[pattern] += 1
-            
-            # Store most common patterns
-            sorted_patterns = sorted(pattern_freq.items(), key=lambda x: -x[1])
-            self.collective_knowledge['patterns'] = [p[0] for p in sorted_patterns[:20]]
-        
-        # Generate insights
-        avg_karma = sum(c.get('karma_trend', 0) for c in self.user_contributions) / len(self.user_contributions)
-        
-        if avg_karma > 0:
-            self.collective_knowledge['insights'].append({
-                'type': 'collective_karma_positive',
-                'message': "The collective karma is positive. Community growth is strong.",
-                'timestamp': time.time()
-            })
-        
-        self.last_training = time.time()
-        
-        # Version bump
-        major, minor, patch = map(int, self.model_version.split('.'))
-        self.model_version = f"{major}.{minor}.{patch + 1}"
+    def _recalculate(self):
+        pos = sum(v.weight for v in self.vectors if v.valence == KarmicValence.POSITIVE)
+        neg = sum(v.weight for v in self.vectors if v.valence == KarmicValence.NEGATIVE)
+        self.field_potential = pos * PHI - neg * PHI_INVERSE
     
-    def get_recommendations(self, user_state: Dict) -> List[str]:
-        """Get personalized recommendations based on collective learning"""
-        recommendations = []
-        
-        # Match user patterns to successful patterns
-        user_patterns = set(user_state.get('patterns', []))
-        successful_patterns = set(self.collective_knowledge.get('patterns', []))
-        
-        missing = successful_patterns - user_patterns
-        for pattern in list(missing)[:3]:
-            recommendations.append(f"Consider exploring: {pattern}")
-        
-        # Karma-based recommendations
-        if user_state.get('karma', 0) < 0:
-            recommendations.append("Small positive actions can shift your karmic balance")
-        
-        return recommendations
+    def get_dharmic_alignment(self) -> float:
+        return math.cos(self.dharmic_angle)
     
     def get_state(self) -> Dict:
         return {
-            'model_version': self.model_version,
-            'learning_iterations': self.collective_knowledge['learning_iterations'],
-            'known_patterns': len(self.collective_knowledge['patterns']),
-            'contributions': len(self.user_contributions),
-            'last_training': self.last_training
+            'field_potential': self.field_potential,
+            'dharmic_alignment': self.get_dharmic_alignment(),
+            'vector_count': len(self.vectors),
+            'recent_actions': self.history[-20:]
         }
 
 
@@ -1034,8 +1604,6 @@ class FederatedAI:
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
 class Database:
-    """Production SQLite database"""
-    
     def __init__(self, db_path: str = "life_fractal_v12.db"):
         self.db_path = db_path
         self.init_database()
@@ -1096,14 +1664,11 @@ class Database:
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
         
-        cursor.execute('''CREATE TABLE IF NOT EXISTS orb_state (
-            user_id TEXT PRIMARY KEY, orb_data TEXT NOT NULL,
-            last_updated TEXT NOT NULL,
+        cursor.execute('''CREATE TABLE IF NOT EXISTS animations (
+            id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT,
+            duration_seconds REAL, frame_count INTEGER,
+            created_at TEXT NOT NULL, status TEXT DEFAULT 'pending',
             FOREIGN KEY (user_id) REFERENCES users(id)
-        )''')
-        
-        cursor.execute('''CREATE TABLE IF NOT EXISTS federated_data (
-            id TEXT PRIMARY KEY, data TEXT NOT NULL, timestamp TEXT NOT NULL
         )''')
         
         conn.commit()
@@ -1143,11 +1708,12 @@ class LivingOrganism:
     """Central orchestrator for the living mathematical organism"""
     
     def __init__(self):
+        self.math = MathematicalFoundations()
         self.ai = OllamaAI()
-        self.karma_engine = KarmaDharmaEngine(self.ai)
-        self.swarm = SwarmCollective(self.ai)
+        self.karma_engine = KarmaDharmaEngine(self.math)
+        self.swarm = MathematicalSwarm(self.math)
         self.mayan = MayanCalendar()
-        self.federated = FederatedAI()
+        self.animation_engine = AnimationEngine(self.math)
         
         self.creation_time = time.time()
         self.uptime = 0.0
@@ -1156,10 +1722,9 @@ class LivingOrganism:
         # Initialize with golden spiral
         self.swarm.spawn_golden_spiral(FIBONACCI[7])  # 13 orbs
         
-        logger.info("🌀 Living organism awakened")
+        logger.info("🌀 Living organism awakened with 10 mathematical foundations")
     
     def update(self, dt: float = 0.1):
-        """Main update loop"""
         self.uptime = time.time() - self.creation_time
         
         environment = {
@@ -1167,36 +1732,27 @@ class LivingOrganism:
             'karma': self.karma_engine.field_potential
         }
         
-        self.karma_engine.evolve(dt)
         self.swarm.update(dt, environment)
         
-        # Update harmony
-        self.harmony = (
-            self.karma_engine.get_dharmic_alignment() * PHI +
-            self.swarm.collective_dharma * PHI_INVERSE +
-            0.5
-        ) / (PHI + PHI_INVERSE + 0.5)
+        # Update harmony using emotional manifold
+        manifold_val = self.math.emotional_manifold(0.5, 0.5, self.uptime, 
+                                                     self.swarm.collective_emotion)
+        self.harmony = 0.5 + 0.5 * math.tanh(manifold_val + self.karma_engine.get_dharmic_alignment())
     
     def process_action(self, action_type: str, magnitude: float = 1.0,
                       intention: float = 0.8, awareness: float = 0.7,
                       linked_data: Dict = None) -> Dict:
-        """Process user action through organism"""
         vector = self.karma_engine.add_action(action_type, magnitude, intention, awareness)
         
-        # Spawn celebration orbs for positive actions
         if vector.valence == KarmicValence.POSITIVE:
+            cell_type = CellType.GOAL if 'goal' in action_type.lower() else CellType.HABIT
             orb = self.swarm.spawn_orb(
-                cell_type=CellType.GOAL if 'goal' in action_type.lower() else CellType.HABIT,
+                cell_type=cell_type,
                 karma=vector.weight * 0.1,
+                emotion='joy',
                 linked_data=linked_data
             )
             orb.meaning = vector.meaning
-        
-        # Contribute to federated learning
-        self.federated.contribute({
-            'karma_trend': self.karma_engine.field_potential,
-            'patterns': [p['patterns'] for p in self.swarm.patterns_detected] if self.swarm.patterns_detected else []
-        })
         
         return {
             'karma_earned': vector.weight,
@@ -1205,22 +1761,45 @@ class LivingOrganism:
             'orb_count': len(self.swarm.orbs)
         }
     
+    def generate_animation(self, duration_seconds: float = 30.0) -> Dict:
+        """Generate animation from current organism state"""
+        # Add keyframes from swarm patterns
+        patterns = self.swarm.patterns_detected
+        if patterns:
+            p = patterns[0]
+            self.animation_engine.add_keyframe(0, self.swarm.collective_emotion, 1.0, 0)
+            self.animation_engine.add_keyframe(duration_seconds * 0.5, 'wonder', 1.5, 0.5)
+            self.animation_engine.add_keyframe(duration_seconds, 'peace', 2.0, 1.0)
+        
+        # Generate preview
+        preview_frames = self.animation_engine.generate_preview(duration_seconds, 5)
+        
+        return {
+            'duration': duration_seconds,
+            'preview_count': len(preview_frames),
+            'collective_emotion': self.swarm.collective_emotion,
+            'harmony': self.harmony
+        }
+    
     def get_state(self) -> Dict:
         mayan = self.mayan.get_today_summary()
         
         return {
+            'version': '12.1',
             'uptime': self.uptime,
             'harmony': self.harmony,
             'karma': self.karma_engine.get_state(),
             'swarm': self.swarm.get_visualization_data(),
             'mayan': mayan,
-            'ai': {
-                'ollama_available': self.ai.available,
-                'federated': self.federated.get_state()
+            'math_foundations': {
+                'golden_harmonic': self.math.golden_harmonic_fold(self.uptime),
+                'emotional_manifold': self.math.emotional_manifold(0.5, 0.5, self.uptime, 
+                                                                   self.swarm.collective_emotion),
+                'origami_active': any(o.state == CellState.FOLDING for o in self.swarm.orbs.values())
             },
+            'ai': {'ollama_available': self.ai.available},
             'sacred_constants': {
-                'phi': PHI,
-                'golden_angle': GOLDEN_ANGLE,
+                'phi': PHI, 'golden_angle': GOLDEN_ANGLE,
                 'dharma_frequency': DHARMA_FREQUENCY,
                 'fibonacci': FIBONACCI[:13]
             }
@@ -1293,8 +1872,6 @@ def login():
         return jsonify({'error': 'Invalid credentials'}), 401
     
     session['user_id'] = user['id']
-    db.execute('UPDATE users SET last_login = ? WHERE id = ?',
-              (datetime.now(timezone.utc).isoformat(), user['id']))
     return jsonify({'success': True})
 
 
@@ -1328,7 +1905,6 @@ def process_action():
         data.get('linked_data')
     )
     
-    # Store karma history
     db.execute('''INSERT INTO karma_history (id, user_id, action_type, karma_value, meaning, timestamp)
         VALUES (?, ?, ?, ?, ?, ?)''',
         (secrets.token_hex(8), session['user_id'], data.get('action_type', 'neutral'),
@@ -1336,6 +1912,71 @@ def process_action():
          datetime.now(timezone.utc).isoformat()))
     
     return jsonify(result)
+
+
+@app.route('/api/animation/generate', methods=['POST'])
+@require_auth
+def generate_animation():
+    """Generate animation from organism state"""
+    data = request.get_json()
+    duration = min(1200, max(1, data.get('duration_seconds', 30)))  # 1s to 20min
+    
+    result = organism.generate_animation(duration)
+    
+    # Log animation request
+    db.execute('''INSERT INTO animations (id, user_id, title, duration_seconds, created_at, status)
+        VALUES (?, ?, ?, ?, ?, ?)''',
+        (secrets.token_hex(8), session['user_id'], data.get('title', 'Untitled'),
+         duration, datetime.now(timezone.utc).isoformat(), 'generating'))
+    
+    return jsonify(result)
+
+
+@app.route('/api/animation/frame/<int:frame_num>', methods=['GET'])
+@require_auth
+def get_animation_frame(frame_num):
+    """Get single animation frame"""
+    duration = float(request.args.get('duration', 30))
+    total_frames = int(duration * organism.animation_engine.fps)
+    
+    if frame_num >= total_frames:
+        return jsonify({'error': 'Frame out of range'}), 400
+    
+    frame = organism.animation_engine.generate_frame(frame_num, total_frames)
+    
+    # Convert to base64 PNG
+    img = Image.fromarray(frame)
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    
+    return jsonify({
+        'frame': frame_num,
+        'total_frames': total_frames,
+        'image': base64.b64encode(buffer.getvalue()).decode('utf-8')
+    })
+
+
+@app.route('/api/math/golden-harmonic', methods=['GET'])
+@require_auth
+def get_golden_harmonic():
+    """Get golden-harmonic folding field value"""
+    t = float(request.args.get('t', time.time() % 100))
+    value = organism.math.golden_harmonic_fold(t)
+    return jsonify({'t': t, 'value': value, 'phi': PHI})
+
+
+@app.route('/api/math/emotional-manifold', methods=['GET'])
+@require_auth
+def get_emotional_manifold():
+    """Get emotional manifold value"""
+    x = float(request.args.get('x', 0.5))
+    y = float(request.args.get('y', 0.5))
+    t = float(request.args.get('t', time.time() % 100))
+    emotion = request.args.get('emotion', 'neutral')
+    
+    value = organism.math.emotional_manifold(x, y, t, emotion)
+    return jsonify({'x': x, 'y': y, 't': t, 'emotion': emotion, 'value': value})
 
 
 @app.route('/api/goals', methods=['GET'])
@@ -1352,10 +1993,8 @@ def create_goal():
     data = request.get_json()
     goal_id = secrets.token_hex(16)
     
-    # Create linked orb
     orb = organism.swarm.spawn_orb(
-        cell_type=CellType.GOAL,
-        karma=0.5,
+        cell_type=CellType.GOAL, karma=0.5, emotion='hope',
         linked_data={'type': 'goal', 'id': goal_id, 'title': data.get('title', '')}
     )
     
@@ -1404,8 +2043,7 @@ def create_habit():
     habit_id = secrets.token_hex(16)
     
     orb = organism.swarm.spawn_orb(
-        cell_type=CellType.HABIT,
-        karma=0.3,
+        cell_type=CellType.HABIT, karma=0.3, emotion='calm',
         linked_data={'type': 'habit', 'id': habit_id, 'name': data.get('name', '')}
     )
     
@@ -1434,7 +2072,6 @@ def complete_habit(habit_id):
         total_completions = ?, last_completed = ? WHERE id = ?''',
         (new_streak, longest, total, datetime.now(timezone.utc).isoformat(), habit_id))
     
-    # Fibonacci bonus
     fib_bonus = PHI if new_streak in FIBONACCI else 1.0
     result = organism.process_action('complete_habit', 0.3 * fib_bonus, 0.9, 0.85)
     
@@ -1503,16 +2140,10 @@ def interact_pet():
     
     hunger, energy, happiness = pet['hunger'], pet['energy'], pet['happiness']
     
-    if action == 'feed':
-        hunger = min(100, hunger + 30)
-        happiness = min(100, happiness + 10)
-    elif action == 'play':
-        energy = max(0, energy - 20)
-        happiness = min(100, happiness + 25)
-    elif action == 'rest':
-        energy = min(100, energy + 40)
-    elif action == 'pet':
-        happiness = min(100, happiness + 15)
+    if action == 'feed': hunger, happiness = min(100, hunger + 30), min(100, happiness + 10)
+    elif action == 'play': energy, happiness = max(0, energy - 20), min(100, happiness + 25)
+    elif action == 'rest': energy = min(100, energy + 40)
+    elif action == 'pet': happiness = min(100, happiness + 15)
     
     db.execute('UPDATE pet_state SET hunger = ?, energy = ?, happiness = ? WHERE user_id = ?',
               (hunger, energy, happiness, session['user_id']))
@@ -1529,16 +2160,12 @@ def interact_pet():
 @app.route('/api/analytics/patterns', methods=['GET'])
 @require_auth
 def get_patterns():
-    patterns = organism.swarm.patterns_detected
-    recommendations = organism.federated.get_recommendations({
-        'karma': organism.karma_engine.field_potential,
-        'patterns': [p.get('patterns', []) for p in patterns]
-    })
-    
     return jsonify({
-        'patterns': patterns,
-        'recommendations': recommendations,
-        'federated_state': organism.federated.get_state()
+        'patterns': organism.swarm.patterns_detected,
+        'math_foundations': {
+            'golden_harmonic': organism.math.golden_harmonic_fold(organism.uptime),
+            'collective_emotion': organism.swarm.collective_emotion
+        }
     })
 
 
@@ -1554,61 +2181,24 @@ def get_karma_history():
 @app.route('/api/fractal/2d', methods=['GET'])
 @require_auth
 def get_2d_fractal():
-    """Generate 2D Mandelbrot fractal"""
-    wellness = db.execute_one(
-        'SELECT * FROM daily_entries WHERE user_id = ? ORDER BY date DESC LIMIT 1',
-        (session['user_id'],))
+    """Generate 2D fractal using mathematical foundations"""
+    t = organism.uptime % 100
     
-    wellness_data = dict(wellness) if wellness else {}
-    energy = wellness_data.get('energy_level', 50) / 100
-    focus = wellness_data.get('focus_level', 50) / 100
-    mood = wellness_data.get('mood_level', 50) / 100
-    
-    # Generate fractal
+    # Use bloom expansion field
     width, height = 400, 400
-    img = Image.new('RGB', (width, height), (20, 20, 30))
+    bloom = organism.math.bloom_expansion_field(width, height, t, zoom=1.5)
+    
+    # Convert to image
+    img = Image.new('RGB', (width, height))
     pixels = img.load()
     
-    x_center = -0.5 + (energy - 0.5) * 0.3
-    y_center = (mood - 0.5) * 0.3
-    zoom = 1.5 + focus
-    max_iter = int(50 + focus * 100)
-    
-    x_min, x_max = x_center - 2/zoom, x_center + 2/zoom
-    y_min, y_max = y_center - 2/zoom, y_center + 2/zoom
-    
-    for px in range(width):
-        for py in range(height):
-            x0 = x_min + (x_max - x_min) * px / width
-            y0 = y_min + (y_max - y_min) * py / height
-            x, y = 0.0, 0.0
-            iteration = 0
-            
-            while x*x + y*y <= 4 and iteration < max_iter:
-                x_new = x*x - y*y + x0
-                y = 2*x*y + y0
-                x = x_new
-                iteration += 1
-            
-            if iteration < max_iter:
-                smooth = iteration + 1 - math.log(math.log(max(1, x*x + y*y))) / math.log(2)
-                hue = (smooth * PHI * 10) % 360
-                sat = 0.7
-                val = min(1, smooth / max_iter * 2)
-                
-                # HSV to RGB
-                c = val * sat
-                x_c = c * (1 - abs((hue / 60) % 2 - 1))
-                m = val - c
-                
-                if hue < 60: r, g, b = c, x_c, 0
-                elif hue < 120: r, g, b = x_c, c, 0
-                elif hue < 180: r, g, b = 0, c, x_c
-                elif hue < 240: r, g, b = 0, x_c, c
-                elif hue < 300: r, g, b = x_c, 0, c
-                else: r, g, b = c, 0, x_c
-                
-                pixels[px, py] = (int((r+m)*255), int((g+m)*255), int((b+m)*255))
+    max_val = np.max(bloom)
+    for y in range(height):
+        for x in range(width):
+            val = bloom[y, x] / max(1, max_val)
+            hue = (val * PHI * 60 + t * 20) % 360
+            r, g, b = organism.math._hsv_to_rgb(hue, 0.8, 0.3 + 0.7 * val)
+            pixels[x, y] = (int(r*255), int(g*255), int(b*255))
     
     buffer = BytesIO()
     img.save(buffer, format='PNG')
@@ -1624,29 +2214,28 @@ def get_2d_fractal():
 @require_auth
 def get_3d_params():
     """Get parameters for client-side WebGL 3D rendering"""
-    wellness = db.execute_one(
-        'SELECT * FROM daily_entries WHERE user_id = ? ORDER BY date DESC LIMIT 1',
-        (session['user_id'],))
-    
-    w = dict(wellness) if wellness else {}
+    t = organism.uptime
+    harmonic = organism.math.golden_harmonic_fold(t)
     
     return jsonify({
         'type': 'mandelbulb',
-        'power': 8.0 + w.get('energy_level', 50) / 100 * 4,
-        'iterations': int(8 + w.get('focus_level', 50) / 100 * 8),
-        'zoom': 1.5 + w.get('focus_level', 50) / 100 * 0.5,
-        'rotation': [
-            w.get('mood_level', 50) / 100 * math.pi * 2,
-            w.get('energy_level', 50) / 100 * math.pi,
-            organism.harmony * math.pi * 0.5
-        ],
+        'power': 8.0 + harmonic * 2,
+        'iterations': 12,
+        'zoom': 1.5 + organism.harmony * 0.5,
+        'rotation': [t * 0.1, harmonic * math.pi, organism.harmony * math.pi * 0.5],
         'color_scheme': {
             'base': [0.27, 0.51, 0.71],
             'accent': [1.0, 0.72, 0.3],
             'glow': [0.5, 0.8, 1.0]
         },
         'karma': organism.karma_engine.field_potential,
-        'harmony': organism.harmony
+        'harmony': organism.harmony,
+        'math': {
+            'golden_harmonic': harmonic,
+            'emotional_manifold': organism.math.emotional_manifold(
+                0.5, 0.5, t, organism.swarm.collective_emotion
+            )
+        }
     })
 
 
@@ -1654,9 +2243,10 @@ def get_3d_params():
 def health():
     return jsonify({
         'status': 'healthy',
-        'version': '12.0',
+        'version': '12.1',
         'harmony': organism.harmony,
         'orbs': len(organism.swarm.orbs),
+        'math_foundations': 'active',
         'ollama': organism.ai.available,
         'ml': HAS_SKLEARN,
         'mayan': organism.mayan.get_today_summary()['greeting'],
@@ -1665,1301 +2255,155 @@ def health():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════
-# MAIN HTML - FULL IMMERSIVE GUI
+# HTML INTERFACE (Preserved from v12, enhanced)
 # ═══════════════════════════════════════════════════════════════════════════════════════════
 
-MAIN_HTML = '''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌀 Life Fractal Intelligence</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        :root {
-            --phi: 1.618033988749895;
-            --bg-dark: #0a0a12;
-            --bg-panel: rgba(15, 15, 25, 0.95);
-            --accent-gold: #d4af37;
-            --accent-blue: #4a90a4;
-            --accent-purple: #8b5cf6;
-            --text-primary: #e8e8e8;
-            --text-muted: #888;
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
-        
-        /* Full Screen 3D Canvas */
-        #fractal-universe {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-        }
-        
-        /* Hamburger Menu */
-        .hamburger {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            width: 50px;
-            height: 50px;
-            background: var(--bg-panel);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-        
-        .hamburger:hover { border-color: var(--accent-gold); }
-        .hamburger span {
-            width: 24px;
-            height: 2px;
-            background: var(--accent-gold);
-            transition: all 0.3s;
-        }
-        .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-        .hamburger.open span:nth-child(2) { opacity: 0; }
-        .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-        
-        /* Side Navigation */
-        .side-nav {
-            position: fixed;
-            top: 0;
-            left: -320px;
-            width: 300px;
-            height: 100vh;
-            background: var(--bg-panel);
-            border-right: 1px solid rgba(212, 175, 55, 0.2);
-            z-index: 999;
-            transition: left 0.3s ease;
-            padding: 80px 20px 20px;
-            overflow-y: auto;
-        }
-        
-        .side-nav.open { left: 0; }
-        
-        .nav-section { margin-bottom: 25px; }
-        .nav-section h3 {
-            color: var(--accent-gold);
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-            padding-left: 10px;
-        }
-        
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 14px 16px;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 0.95em;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.2s;
-            margin-bottom: 4px;
-        }
-        
-        .nav-btn:hover { background: rgba(74, 144, 164, 0.15); }
-        .nav-btn.active { 
-            background: rgba(212, 175, 55, 0.15);
-            border-left: 3px solid var(--accent-gold);
-        }
-        
-        /* Top Bar */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: linear-gradient(180deg, rgba(10,10,18,0.95) 0%, rgba(10,10,18,0) 100%);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 80px;
-        }
-        
-        .logo {
-            font-size: 1.5em;
-            color: var(--accent-gold);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        /* Stats Bar */
-        .stats-bar {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            display: flex;
-            gap: 15px;
-        }
-        
-        .stat-pill {
-            background: var(--bg-panel);
-            border: 1px solid rgba(74, 144, 164, 0.3);
-            border-radius: 20px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85em;
-        }
-        
-        .stat-pill .value {
-            color: var(--accent-gold);
-            font-weight: 600;
-        }
-        
-        /* Content Panels */
-        .panel {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 800px;
-            max-height: 60vh;
-            background: var(--bg-panel);
-            border: 1px solid rgba(74, 144, 164, 0.2);
-            border-radius: 20px;
-            z-index: 100;
-            overflow: hidden;
-            display: none;
-        }
-        
-        .panel.active { display: block; }
-        
-        .panel-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(74, 144, 164, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .panel-header h2 {
-            color: var(--accent-gold);
-            font-size: 1.2em;
-        }
-        
-        .panel-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-        
-        .panel-content {
-            padding: 20px;
-            max-height: calc(60vh - 70px);
-            overflow-y: auto;
-        }
-        
-        /* Enter Fractal Button */
-        .enter-fractal-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            padding: 16px 40px;
-            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 30px rgba(139, 92, 246, 0.4);
-            transition: all 0.3s;
-        }
-        
-        .enter-fractal-btn:hover {
-            transform: translateX(-50%) translateY(-3px);
-            box-shadow: 0 8px 40px rgba(139, 92, 246, 0.6);
-        }
-        
-        .enter-fractal-btn.hidden { display: none; }
-        
-        /* Orb Tooltip */
-        .orb-tooltip {
-            position: fixed;
-            background: var(--bg-panel);
-            border: 1px solid var(--accent-gold);
-            border-radius: 12px;
-            padding: 15px;
-            max-width: 300px;
-            z-index: 1001;
-            display: none;
-            pointer-events: none;
-        }
-        
-        .orb-tooltip.visible { display: block; }
-        
-        .orb-tooltip h4 {
-            color: var(--accent-gold);
-            margin-bottom: 8px;
-        }
-        
-        .orb-tooltip p {
-            color: var(--text-muted);
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-        
-        .orb-tooltip .tags {
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        
-        .orb-tooltip .tag {
-            background: rgba(74, 144, 164, 0.2);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.75em;
-        }
-        
-        /* Mayan Calendar Widget */
-        .mayan-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--bg-panel);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 15px;
-            padding: 15px;
-            z-index: 100;
-            min-width: 200px;
-        }
-        
-        .mayan-widget h4 {
-            color: var(--accent-gold);
-            font-size: 0.8em;
-            margin-bottom: 8px;
-        }
-        
-        .mayan-widget .kin {
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        
-        .mayan-widget .energy {
-            color: var(--text-muted);
-            font-size: 0.85em;
-        }
-        
-        /* Forms */
-        .form-group { margin-bottom: 15px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: var(--text-muted);
-            font-size: 0.9em;
-        }
-        
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(74, 144, 164, 0.1);
-            border: 1px solid rgba(74, 144, 164, 0.3);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 1em;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--accent-blue) 0%, #357a8a 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn:hover { transform: translateY(-2px); }
-        .btn-gold { background: linear-gradient(135deg, var(--accent-gold) 0%, #c49b30 100%); }
-        
-        /* Item Cards */
-        .item-card {
-            background: rgba(74, 144, 164, 0.1);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .item-card h3 { margin-bottom: 5px; }
-        .item-card .meta { color: var(--text-muted); font-size: 0.85em; }
-        
-        /* Slider */
-        .slider-group { margin-bottom: 20px; }
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(74, 144, 164, 0.3);
-            -webkit-appearance: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--accent-gold);
-            cursor: pointer;
-        }
-        
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--accent-gold);
-            color: var(--bg-dark);
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 500;
-            z-index: 2000;
-            opacity: 0;
-            transition: all 0.3s;
-        }
-        
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .stats-bar { display: none; }
-            .mayan-widget { bottom: 100px; right: 10px; }
-        }
-    </style>
-</head>
-<body>
-    <!-- Full Screen 3D Universe -->
-    <canvas id="fractal-universe"></canvas>
-    
-    <!-- Hamburger Menu -->
-    <button class="hamburger" onclick="toggleNav()">
-        <span></span><span></span><span></span>
-    </button>
-    
-    <!-- Side Navigation -->
-    <nav class="side-nav" id="sideNav">
-        <div class="nav-section">
-            <h3>Planning</h3>
-            <button class="nav-btn active" onclick="showPanel('dashboard')">📊 Dashboard</button>
-            <button class="nav-btn" onclick="showPanel('goals')">🎯 Goals</button>
-            <button class="nav-btn" onclick="showPanel('habits')">✨ Habits</button>
-        </div>
-        <div class="nav-section">
-            <h3>Wellness</h3>
-            <button class="nav-btn" onclick="showPanel('checkin')">💫 Check-in</button>
-            <button class="nav-btn" onclick="showPanel('spoons')">🥄 Spoons</button>
-        </div>
-        <div class="nav-section">
-            <h3>Companions</h3>
-            <button class="nav-btn" onclick="showPanel('pet')">🐱 Pet</button>
-        </div>
-        <div class="nav-section">
-            <h3>Insights</h3>
-            <button class="nav-btn" onclick="showPanel('patterns')">🧠 ML Patterns</button>
-            <button class="nav-btn" onclick="showPanel('karma')">⚖️ Karma</button>
-        </div>
-    </nav>
-    
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="logo">🌀 Life Fractal Intelligence</div>
-    </div>
-    
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-        <div class="stat-pill">
-            <span>⚖️</span>
-            <span class="value" id="karma-display">0.00</span>
-        </div>
-        <div class="stat-pill">
-            <span>🔮</span>
-            <span class="value" id="harmony-display">1.00</span>
-        </div>
-        <div class="stat-pill">
-            <span>🧬</span>
-            <span class="value" id="orb-display">0</span>
-        </div>
-    </div>
-    
-    <!-- Enter Fractal Button -->
-    <button class="enter-fractal-btn" id="enterFractalBtn" onclick="enterFractal()">
-        🌀 Enter the Fractal
-    </button>
-    
-    <!-- Orb Tooltip -->
-    <div class="orb-tooltip" id="orbTooltip">
-        <h4 id="tooltipTitle">Orb</h4>
-        <p id="tooltipMeaning">Meaning...</p>
-        <div class="tags" id="tooltipTags"></div>
-    </div>
-    
-    <!-- Mayan Calendar Widget -->
-    <div class="mayan-widget" id="mayanWidget">
-        <h4>📅 Mayan Calendar</h4>
-        <div class="kin" id="mayanKin">Loading...</div>
-        <div class="energy" id="mayanEnergy"></div>
-    </div>
-    
-    <!-- Dashboard Panel -->
-    <div class="panel" id="dashboard-panel">
-        <div class="panel-header">
-            <h2>📊 Dashboard</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div id="dashboard-content"></div>
-        </div>
-    </div>
-    
-    <!-- Goals Panel -->
-    <div class="panel" id="goals-panel">
-        <div class="panel-header">
-            <h2>🎯 Goals</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div class="form-group">
-                <input type="text" id="goalTitle" placeholder="What's your goal?">
-            </div>
-            <button class="btn btn-gold" onclick="createGoal()">Create Goal</button>
-            <div id="goals-list" style="margin-top:20px;"></div>
-        </div>
-    </div>
-    
-    <!-- Habits Panel -->
-    <div class="panel" id="habits-panel">
-        <div class="panel-header">
-            <h2>✨ Habits</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div class="form-group">
-                <input type="text" id="habitName" placeholder="New habit...">
-            </div>
-            <button class="btn btn-gold" onclick="createHabit()">Add Habit</button>
-            <div id="habits-list" style="margin-top:20px;"></div>
-        </div>
-    </div>
-    
-    <!-- Check-in Panel -->
-    <div class="panel" id="checkin-panel">
-        <div class="panel-header">
-            <h2>💫 Daily Check-in</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div class="slider-group">
-                <div class="slider-header"><span>😴 Energy</span><span id="energyVal">50</span></div>
-                <input type="range" id="energySlider" min="0" max="100" value="50" 
-                    oninput="document.getElementById('energyVal').textContent=this.value">
-            </div>
-            <div class="slider-group">
-                <div class="slider-header"><span>😊 Mood</span><span id="moodVal">50</span></div>
-                <input type="range" id="moodSlider" min="0" max="100" value="50"
-                    oninput="document.getElementById('moodVal').textContent=this.value">
-            </div>
-            <div class="slider-group">
-                <div class="slider-header"><span>🎯 Focus</span><span id="focusVal">50</span></div>
-                <input type="range" id="focusSlider" min="0" max="100" value="50"
-                    oninput="document.getElementById('focusVal').textContent=this.value">
-            </div>
-            <button class="btn btn-gold" onclick="submitCheckin()">Submit</button>
-        </div>
-    </div>
-    
-    <!-- Pet Panel -->
-    <div class="panel" id="pet-panel">
-        <div class="panel-header">
-            <h2>🐱 Virtual Pet</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content" style="text-align:center;">
-            <div style="font-size:4em;margin:20px 0;" id="petEmoji">🐱</div>
-            <h3 id="petName">Karma</h3>
-            <div style="display:flex;justify-content:space-around;margin:20px 0;">
-                <div><div class="value" id="petHunger">50</div><div class="meta">Hunger</div></div>
-                <div><div class="value" id="petEnergy">50</div><div class="meta">Energy</div></div>
-                <div><div class="value" id="petHappy">50</div><div class="meta">Happy</div></div>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:center;">
-                <button class="btn" onclick="petAction('feed')">🍖 Feed</button>
-                <button class="btn" onclick="petAction('play')">🎾 Play</button>
-                <button class="btn" onclick="petAction('pet')">🤗 Pet</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Patterns Panel -->
-    <div class="panel" id="patterns-panel">
-        <div class="panel-header">
-            <h2>🧠 ML Insights</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div id="patterns-content"></div>
-        </div>
-    </div>
-    
-    <!-- Karma Panel -->
-    <div class="panel" id="karma-panel">
-        <div class="panel-header">
-            <h2>⚖️ Karma History</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div id="karma-history"></div>
-        </div>
-    </div>
-    
-    <!-- Spoons Panel -->
-    <div class="panel" id="spoons-panel">
-        <div class="panel-header">
-            <h2>🥄 Spoon Theory</h2>
-            <button class="panel-close" onclick="closePanel()">×</button>
-        </div>
-        <div class="panel-content">
-            <div id="spoons-content"></div>
-        </div>
-    </div>
-    
-    <div class="toast" id="toast"></div>
-    
-    <script>
-    // Sacred Constants
-    const PHI = 1.618033988749895;
-    const GOLDEN_ANGLE = 137.5077640500378;
-    
-    // State
-    let scene, camera, renderer, controls;
-    let orbs = [];
-    let orbMeshes = {};
-    let isInsideFractal = false;
-    let raycaster, mouse;
-    let hoveredOrb = null;
-    let organismData = {};
-    
-    // Initialize Three.js
-    function initThreeJS() {
-        const canvas = document.getElementById('fractal-universe');
-        
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a12);
-        scene.fog = new THREE.FogExp2(0x0a0a12, 0.008);
-        
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(0, 0, 100);
-        
-        renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        
-        // Lights
-        const ambient = new THREE.AmbientLight(0x404040, 0.5);
-        scene.add(ambient);
-        
-        const point = new THREE.PointLight(0xd4af37, 1, 500);
-        point.position.set(50, 50, 50);
-        scene.add(point);
-        
-        const point2 = new THREE.PointLight(0x4a90a4, 0.8, 400);
-        point2.position.set(-50, -30, 30);
-        scene.add(point2);
-        
-        // Stars background
-        const starsGeometry = new THREE.BufferGeometry();
-        const starPositions = [];
-        for (let i = 0; i < 5000; i++) {
-            starPositions.push(
-                (Math.random() - 0.5) * 2000,
-                (Math.random() - 0.5) * 2000,
-                (Math.random() - 0.5) * 2000
-            );
-        }
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5 });
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
-        
-        // Raycaster for orb interaction
-        raycaster = new THREE.Raycaster();
-        mouse = new THREE.Vector2();
-        
-        // Event listeners
-        window.addEventListener('resize', onResize);
-        canvas.addEventListener('mousemove', onMouseMove);
-        canvas.addEventListener('wheel', onWheel);
-        canvas.addEventListener('click', onCanvasClick);
-        
-        // Touch controls
-        let touchStart = { x: 0, y: 0 };
-        canvas.addEventListener('touchstart', (e) => {
-            touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        });
-        canvas.addEventListener('touchmove', (e) => {
-            const dx = e.touches[0].clientX - touchStart.x;
-            const dy = e.touches[0].clientY - touchStart.y;
-            scene.rotation.y += dx * 0.005;
-            scene.rotation.x += dy * 0.005;
-            touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        });
-        
-        animate();
-    }
-    
-    function onResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    
-    function onMouseMove(e) {
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        
-        // Rotate scene slightly with mouse
-        if (!isInsideFractal) {
-            scene.rotation.y = mouse.x * 0.2;
-            scene.rotation.x = mouse.y * 0.1;
-        }
-        
-        // Check orb hover
-        checkOrbHover(e);
-    }
-    
-    function onWheel(e) {
-        const zoomSpeed = 0.1;
-        camera.position.z += e.deltaY * zoomSpeed;
-        camera.position.z = Math.max(20, Math.min(200, camera.position.z));
-        
-        // Update label visibility based on zoom
-        updateLabelVisibility();
-    }
-    
-    function onCanvasClick(e) {
-        if (hoveredOrb) {
-            // Focus on clicked orb
-            const orb = hoveredOrb;
-            camera.position.set(
-                orb.position.x,
-                orb.position.y,
-                orb.position.z + 15
-            );
-        }
-    }
-    
-    function checkOrbHover(e) {
-        raycaster.setFromCamera(mouse, camera);
-        const meshes = Object.values(orbMeshes);
-        const intersects = raycaster.intersectObjects(meshes);
-        
-        const tooltip = document.getElementById('orbTooltip');
-        
-        if (intersects.length > 0) {
-            const mesh = intersects[0].object;
-            const orbData = mesh.userData;
-            hoveredOrb = mesh;
-            
-            // Only show tooltip when zoomed in
-            if (camera.position.z < 80) {
-                tooltip.style.left = e.clientX + 15 + 'px';
-                tooltip.style.top = e.clientY + 15 + 'px';
-                
-                document.getElementById('tooltipTitle').textContent = 
-                    `${orbData.type?.toUpperCase() || 'ORB'} #${orbData.index || 0}`;
-                document.getElementById('tooltipMeaning').textContent = 
-                    orbData.meaning || 'A living cell in your fractal universe...';
-                
-                const tagsEl = document.getElementById('tooltipTags');
-                tagsEl.innerHTML = '';
-                if (orbData.tags) {
-                    orbData.tags.forEach(tag => {
-                        const span = document.createElement('span');
-                        span.className = 'tag';
-                        span.textContent = tag;
-                        tagsEl.appendChild(span);
-                    });
-                }
-                
-                tooltip.classList.add('visible');
-            }
-        } else {
-            hoveredOrb = null;
-            tooltip.classList.remove('visible');
-        }
-    }
-    
-    function updateLabelVisibility() {
-        // Labels visible when camera.position.z < 50
-        const showLabels = camera.position.z < 50;
-        // Could update 3D text sprites here if implemented
-    }
-    
-    function createOrbMesh(orbData) {
-        const geometry = new THREE.SphereGeometry(orbData.radius || 1, 32, 32);
-        
-        const color = new THREE.Color(
-            orbData.color?.[0] || 0.3,
-            orbData.color?.[1] || 0.6,
-            orbData.color?.[2] || 0.9
-        );
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: color,
-            emissive: color,
-            emissiveIntensity: orbData.glow || 0.3,
-            shininess: 100,
-            transparent: true,
-            opacity: 0.9
-        });
-        
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(
-            orbData.position?.[0] || 0,
-            orbData.position?.[1] || 0,
-            orbData.position?.[2] || 0
-        );
-        mesh.userData = orbData;
-        
-        return mesh;
-    }
-    
-    function updateOrbs(orbsData) {
-        // Remove old orbs
-        Object.keys(orbMeshes).forEach(id => {
-            if (!orbsData.find(o => o.id === id)) {
-                scene.remove(orbMeshes[id]);
-                delete orbMeshes[id];
-            }
-        });
-        
-        // Add/update orbs
-        orbsData.forEach(orbData => {
-            if (orbMeshes[orbData.id]) {
-                // Update existing
-                const mesh = orbMeshes[orbData.id];
-                mesh.position.set(...orbData.position);
-                mesh.userData = orbData;
-                
-                // Pulse animation
-                const pulse = 1 + Math.sin(orbData.pulse_phase || 0) * 0.1;
-                mesh.scale.setScalar(pulse);
-            } else {
-                // Create new
-                const mesh = createOrbMesh(orbData);
-                scene.add(mesh);
-                orbMeshes[orbData.id] = mesh;
-            }
-        });
-        
-        // Add connections
-        // (Could add line geometry between connected orbs)
-    }
-    
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        // Rotate orbs slightly
-        Object.values(orbMeshes).forEach((mesh, i) => {
-            mesh.rotation.y += 0.002;
-            mesh.rotation.x += 0.001;
-        });
-        
-        // Slow scene rotation when not inside fractal
-        if (!isInsideFractal) {
-            scene.rotation.y += 0.0005;
-        }
-        
-        renderer.render(scene, camera);
-    }
-    
-    function enterFractal() {
-        isInsideFractal = true;
-        document.getElementById('enterFractalBtn').classList.add('hidden');
-        
-        // Zoom in
-        const tween = setInterval(() => {
-            camera.position.z -= 2;
-            if (camera.position.z <= 30) {
-                clearInterval(tween);
-            }
-        }, 16);
-        
-        showToast('🌀 Entering the fractal universe...');
-    }
-    
-    // Navigation
-    function toggleNav() {
-        document.querySelector('.hamburger').classList.toggle('open');
-        document.getElementById('sideNav').classList.toggle('open');
-    }
-    
-    function showPanel(name) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        
-        const panel = document.getElementById(name + '-panel');
-        if (panel) {
-            panel.classList.add('active');
-            loadPanelContent(name);
-        }
-        
-        event.target.classList.add('active');
-        toggleNav();
-    }
-    
-    function closePanel() {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    }
-    
-    async function loadPanelContent(name) {
-        if (name === 'goals') await loadGoals();
-        else if (name === 'habits') await loadHabits();
-        else if (name === 'pet') await loadPet();
-        else if (name === 'patterns') await loadPatterns();
-        else if (name === 'karma') await loadKarmaHistory();
-        else if (name === 'dashboard') await loadDashboard();
-    }
-    
-    // API helpers
-    async function api(endpoint, options = {}) {
-        try {
-            const res = await fetch(endpoint, {
-                ...options,
-                headers: { 'Content-Type': 'application/json', ...options.headers }
-            });
-            return await res.json();
-        } catch (e) {
-            console.error('API error:', e);
-            return null;
-        }
-    }
-    
-    // Load functions
-    async function loadOrganism() {
-        const data = await api('/api/organism/state');
-        if (data) {
-            organismData = data;
-            
-            document.getElementById('karma-display').textContent = 
-                data.karma?.field_potential?.toFixed(2) || '0.00';
-            document.getElementById('harmony-display').textContent = 
-                data.harmony?.toFixed(2) || '1.00';
-            document.getElementById('orb-display').textContent = 
-                data.swarm?.total_orbs || 0;
-            
-            // Update orbs in 3D
-            if (data.swarm?.orbs) {
-                updateOrbs(data.swarm.orbs);
-            }
-            
-            // Update Mayan widget
-            if (data.mayan) {
-                document.getElementById('mayanKin').textContent = data.mayan.greeting;
-                document.getElementById('mayanEnergy').textContent = 
-                    data.mayan.energy?.number_meaning || '';
-            }
-        }
-    }
-    
-    async function loadDashboard() {
-        const container = document.getElementById('dashboard-content');
-        container.innerHTML = `
-            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px;">
-                <div class="item-card">
-                    <div class="meta">Karma</div>
-                    <div style="font-size:1.5em;color:var(--accent-gold);">
-                        ${organismData.karma?.field_potential?.toFixed(2) || 0}
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="meta">Harmony</div>
-                    <div style="font-size:1.5em;color:var(--accent-blue);">
-                        ${organismData.harmony?.toFixed(2) || 1}
-                    </div>
-                </div>
-                <div class="item-card">
-                    <div class="meta">Living Orbs</div>
-                    <div style="font-size:1.5em;">${organismData.swarm?.total_orbs || 0}</div>
-                </div>
-                <div class="item-card">
-                    <div class="meta">AI Status</div>
-                    <div style="font-size:1.5em;">${organismData.ai?.ollama_available ? '🟢' : '🟡'}</div>
-                </div>
-            </div>
-            <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
-                <button class="btn" onclick="quickAction('complete')">✅ Complete Task</button>
-                <button class="btn" onclick="quickAction('meditate')">🧘 Meditate</button>
-                <button class="btn btn-gold" onclick="quickAction('achieve')">🏆 Achievement</button>
-            </div>
-        `;
-    }
-    
-    async function loadGoals() {
-        const goals = await api('/api/goals');
-        const container = document.getElementById('goals-list');
-        
-        if (goals && goals.length > 0) {
-            container.innerHTML = goals.map(g => `
-                <div class="item-card">
-                    <h3>${g.title}</h3>
-                    <div class="meta">Progress: ${g.progress?.toFixed(0) || 0}%</div>
-                </div>
-            `).join('');
-        } else {
-            container.innerHTML = '<p style="color:var(--text-muted);">No goals yet</p>';
-        }
-    }
-    
-    async function createGoal() {
-        const title = document.getElementById('goalTitle').value;
-        if (!title) return showToast('Enter a goal title');
-        
-        const result = await api('/api/goals', {
-            method: 'POST',
-            body: JSON.stringify({ title })
-        });
-        
-        if (result) {
-            showToast(`🎯 Goal created! +${result.karma_earned?.toFixed(2)} karma`);
-            document.getElementById('goalTitle').value = '';
-            loadGoals();
-            loadOrganism();
-        }
-    }
-    
-    async function loadHabits() {
-        const habits = await api('/api/habits');
-        const container = document.getElementById('habits-list');
-        
-        if (habits && habits.length > 0) {
-            container.innerHTML = habits.map(h => `
-                <div class="item-card" style="display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <h3>${h.name}</h3>
-                        <div class="meta">🔥 ${h.current_streak || 0} streak</div>
-                    </div>
-                    <button class="btn" onclick="completeHabit('${h.id}')">✓</button>
-                </div>
-            `).join('');
-        } else {
-            container.innerHTML = '<p style="color:var(--text-muted);">No habits yet</p>';
-        }
-    }
-    
-    async function createHabit() {
-        const name = document.getElementById('habitName').value;
-        if (!name) return showToast('Enter a habit name');
-        
-        const result = await api('/api/habits', {
-            method: 'POST',
-            body: JSON.stringify({ name })
-        });
-        
-        if (result) {
-            showToast('✨ Habit created!');
-            document.getElementById('habitName').value = '';
-            loadHabits();
-        }
-    }
-    
-    async function completeHabit(id) {
-        const result = await api(`/api/habits/${id}/complete`, { method: 'POST' });
-        if (result) {
-            let msg = `✅ +${result.karma_earned?.toFixed(2)} karma`;
-            if (result.fibonacci_bonus) msg += ' 🌟 Fibonacci bonus!';
-            showToast(msg);
-            loadHabits();
-            loadOrganism();
-        }
-    }
-    
-    async function submitCheckin() {
-        const data = {
-            energy: parseInt(document.getElementById('energySlider').value),
-            mood: parseInt(document.getElementById('moodSlider').value),
-            focus: parseInt(document.getElementById('focusSlider').value)
-        };
-        
-        const result = await api('/api/wellness/checkin', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-        
-        if (result) {
-            showToast(`💫 Check-in complete! +${result.karma_earned?.toFixed(2)} karma`);
-            closePanel();
-            loadOrganism();
-        }
-    }
-    
-    async function loadPet() {
-        const pet = await api('/api/pet/state');
-        if (pet) {
-            document.getElementById('petHunger').textContent = Math.round(pet.hunger || 50);
-            document.getElementById('petEnergy').textContent = Math.round(pet.energy || 50);
-            document.getElementById('petHappy').textContent = Math.round(pet.happiness || 50);
-            
-            const emoji = pet.happiness > 70 ? '😺' : pet.happiness > 40 ? '🐱' : '😿';
-            document.getElementById('petEmoji').textContent = emoji;
-        }
-    }
-    
-    async function petAction(action) {
-        const result = await api('/api/pet/interact', {
-            method: 'POST',
-            body: JSON.stringify({ action })
-        });
-        
-        if (result) {
-            showToast(`🐱 ${result.emotion}! +${result.karma_earned?.toFixed(2)} karma`);
-            loadPet();
-            loadOrganism();
-        }
-    }
-    
-    async function loadPatterns() {
-        const data = await api('/api/analytics/patterns');
-        const container = document.getElementById('patterns-content');
-        
-        if (data) {
-            const patterns = data.patterns?.[0] || {};
-            const recommendations = data.recommendations || [];
-            
-            container.innerHTML = `
-                <div class="item-card">
-                    <h3>Detected Patterns</h3>
-                    <p>${patterns.insights?.join('<br>') || 'Keep using the app to detect patterns...'}</p>
-                </div>
-                <div class="item-card">
-                    <h3>AI Recommendations</h3>
-                    <p>${recommendations.join('<br>') || 'No recommendations yet'}</p>
-                </div>
-                <div class="item-card">
-                    <h3>Federated AI</h3>
-                    <p>Model v${data.federated_state?.model_version || '1.0.0'}<br>
-                    Learning iterations: ${data.federated_state?.learning_iterations || 0}</p>
-                </div>
-            `;
-        }
-    }
-    
-    async function loadKarmaHistory() {
-        const history = await api('/api/analytics/karma-history');
-        const container = document.getElementById('karma-history');
-        
-        if (history && history.length > 0) {
-            container.innerHTML = history.slice(0, 10).map(h => `
-                <div class="item-card">
-                    <div style="display:flex;justify-content:space-between;">
-                        <span>${h.action_type}</span>
-                        <span style="color:var(--accent-gold);">+${h.karma_value?.toFixed(2)}</span>
-                    </div>
-                    ${h.meaning ? `<p class="meta">${h.meaning}</p>` : ''}
-                </div>
-            `).join('');
-        } else {
-            container.innerHTML = '<p style="color:var(--text-muted);">No karma history yet</p>';
-        }
-    }
-    
-    async function quickAction(type) {
-        const result = await api('/api/organism/action', {
-            method: 'POST',
-            body: JSON.stringify({ action_type: type, magnitude: 1.0 })
-        });
-        
-        if (result) {
-            showToast(`✨ +${result.karma_earned?.toFixed(2)} karma`);
-            loadOrganism();
-        }
-    }
-    
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.textContent = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        initThreeJS();
-        loadOrganism();
-        
-        // Refresh every 5 seconds
-        setInterval(loadOrganism, 5000);
-    });
-    </script>
-</body>
-</html>
-'''
-
-LOGIN_HTML = '''
-<!DOCTYPE html>
+MAIN_HTML = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌀 Life Fractal - Login</title>
+    <title>🌀 Life Fractal Intelligence v12.1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
+        :root { --phi: 1.618; --bg: #0a0a12; --gold: #d4af37; --blue: #4a90a4; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .card {
-            background: rgba(15, 15, 25, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-        .logo { font-size: 3em; text-align: center; margin-bottom: 10px; }
-        h1 { text-align: center; color: #d4af37; margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #888; }
-        input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(74, 144, 164, 0.1);
-            border: 1px solid rgba(74, 144, 164, 0.3);
-            border-radius: 10px;
-            color: #e8e8e8;
-            font-size: 1em;
-        }
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #4a90a4 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1.1em;
-            cursor: pointer;
-        }
-        .switch { text-align: center; margin-top: 20px; color: #888; }
-        .switch a { color: #d4af37; text-decoration: none; }
-        .error { background: rgba(244, 67, 54, 0.2); color: #f44336; padding: 10px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: #e8e8e8; overflow: hidden; height: 100vh; }
+        #universe { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        .hamburger { position: fixed; top: 20px; left: 20px; z-index: 1000; width: 50px; height: 50px; background: rgba(15,15,25,0.95); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; }
+        .hamburger span { width: 24px; height: 2px; background: var(--gold); transition: 0.3s; }
+        .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+        .nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: rgba(15,15,25,0.98); border-right: 1px solid rgba(212,175,55,0.2); z-index: 999; transition: left 0.3s; padding: 80px 15px 20px; overflow-y: auto; }
+        .nav.open { left: 0; }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section h3 { color: var(--gold); font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .nav-btn { display: block; width: 100%; padding: 12px; background: transparent; border: none; color: #e8e8e8; text-align: left; cursor: pointer; border-radius: 8px; margin-bottom: 4px; }
+        .nav-btn:hover { background: rgba(74,144,164,0.15); }
+        .stats { position: fixed; top: 15px; right: 15px; z-index: 100; display: flex; gap: 10px; }
+        .stat { background: rgba(15,15,25,0.9); border: 1px solid rgba(74,144,164,0.3); border-radius: 15px; padding: 8px 15px; font-size: 0.85em; }
+        .stat .val { color: var(--gold); font-weight: 600; }
+        .enter-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 16px 40px; background: linear-gradient(135deg, #8b5cf6, #4a90a4); border: none; border-radius: 25px; color: white; font-size: 1.1em; cursor: pointer; box-shadow: 0 4px 30px rgba(139,92,246,0.4); }
+        .enter-btn.hidden { display: none; }
+        .tooltip { position: fixed; background: rgba(15,15,25,0.95); border: 1px solid var(--gold); border-radius: 10px; padding: 12px; max-width: 280px; z-index: 1001; display: none; }
+        .tooltip.show { display: block; }
+        .tooltip h4 { color: var(--gold); margin-bottom: 5px; }
+        .tooltip p { color: #888; font-size: 0.9em; line-height: 1.4; }
+        .mayan { position: fixed; bottom: 20px; right: 20px; background: rgba(15,15,25,0.9); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 12px; z-index: 100; }
+        .mayan h4 { color: var(--gold); font-size: 0.75em; margin-bottom: 5px; }
+        .panel { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 700px; max-height: 55vh; background: rgba(15,15,25,0.98); border: 1px solid rgba(74,144,164,0.2); border-radius: 16px; z-index: 100; display: none; overflow: hidden; }
+        .panel.active { display: block; }
+        .panel-head { padding: 15px 20px; border-bottom: 1px solid rgba(74,144,164,0.2); display: flex; justify-content: space-between; }
+        .panel-head h2 { color: var(--gold); font-size: 1.1em; }
+        .panel-close { background: none; border: none; color: #888; font-size: 1.3em; cursor: pointer; }
+        .panel-body { padding: 20px; max-height: calc(55vh - 60px); overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #888; font-size: 0.9em; }
+        .form-group input { width: 100%; padding: 10px; background: rgba(74,144,164,0.1); border: 1px solid rgba(74,144,164,0.3); border-radius: 8px; color: #e8e8e8; }
+        .btn { padding: 10px 20px; background: linear-gradient(135deg, var(--blue), #357a8a); border: none; border-radius: 8px; color: white; cursor: pointer; }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #c49b30); }
+        .card { background: rgba(74,144,164,0.1); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+        .slider { width: 100%; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--gold); color: #0a0a12; padding: 10px 20px; border-radius: 8px; z-index: 2000; opacity: 0; transition: 0.3s; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo">🌀</div>
-        <h1 id="title">Login</h1>
-        <div class="error" id="error"></div>
-        <form id="form">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" required>
-            </div>
-            <div class="form-group" id="nameGroup" style="display:none;">
-                <label>Name</label>
-                <input type="text" id="name">
-            </div>
-            <button type="submit" class="btn" id="submitBtn">Login</button>
-        </form>
-        <div class="switch">
-            <span id="switchText">New here?</span>
-            <a href="#" onclick="toggle(event)">Register</a>
-        </div>
+<canvas id="universe"></canvas>
+<button class="hamburger" onclick="toggleNav()"><span></span><span></span><span></span></button>
+<nav class="nav" id="nav">
+    <div class="nav-section"><h3>Planning</h3>
+        <button class="nav-btn" onclick="showPanel('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showPanel('goals')">🎯 Goals</button>
+        <button class="nav-btn" onclick="showPanel('habits')">✨ Habits</button>
     </div>
-    <script>
-        let isLogin = true;
-        function toggle(e) {
-            e.preventDefault();
-            isLogin = !isLogin;
-            document.getElementById('title').textContent = isLogin ? 'Login' : 'Register';
-            document.getElementById('submitBtn').textContent = isLogin ? 'Login' : 'Register';
-            document.getElementById('nameGroup').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('switchText').textContent = isLogin ? 'New here?' : 'Have an account?';
-        }
-        document.getElementById('form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value
-            };
-            if (!isLogin) data.first_name = document.getElementById('name').value;
-            try {
-                const res = await fetch(isLogin ? '/api/auth/login' : '/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    window.location.href = '/';
-                } else {
-                    document.getElementById('error').textContent = result.error;
-                    document.getElementById('error').style.display = 'block';
-                }
-            } catch (err) {
-                document.getElementById('error').textContent = 'Connection error';
-                document.getElementById('error').style.display = 'block';
-            }
-        });
-    </script>
-</body>
-</html>
-'''
+    <div class="nav-section"><h3>Wellness</h3>
+        <button class="nav-btn" onclick="showPanel('checkin')">💫 Check-in</button>
+    </div>
+    <div class="nav-section"><h3>Companions</h3>
+        <button class="nav-btn" onclick="showPanel('pet')">🐱 Pet</button>
+    </div>
+    <div class="nav-section"><h3>Insights</h3>
+        <button class="nav-btn" onclick="showPanel('patterns')">🧠 ML Patterns</button>
+        <button class="nav-btn" onclick="showPanel('animation')">🎬 Animation</button>
+    </div>
+</nav>
+<div class="stats">
+    <div class="stat">⚖️ <span class="val" id="karma">0</span></div>
+    <div class="stat">🔮 <span class="val" id="harmony">1.00</span></div>
+    <div class="stat">🧬 <span class="val" id="orbs">0</span></div>
+</div>
+<button class="enter-btn" id="enterBtn" onclick="enterFractal()">🌀 Enter the Fractal</button>
+<div class="tooltip" id="tooltip"><h4 id="ttTitle">Orb</h4><p id="ttMeaning">...</p></div>
+<div class="mayan"><h4>📅 Mayan</h4><div id="mayanKin">Loading...</div></div>
+<div class="panel" id="dashboard-panel"><div class="panel-head"><h2>📊 Dashboard</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="dashContent"></div></div>
+<div class="panel" id="goals-panel"><div class="panel-head"><h2>🎯 Goals</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="goalTitle" placeholder="New goal..."></div><button class="btn btn-gold" onclick="createGoal()">Create</button><div id="goalsList"></div></div></div>
+<div class="panel" id="habits-panel"><div class="panel-head"><h2>✨ Habits</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><input id="habitName" placeholder="New habit..."></div><button class="btn btn-gold" onclick="createHabit()">Add</button><div id="habitsList"></div></div></div>
+<div class="panel" id="checkin-panel"><div class="panel-head"><h2>💫 Check-in</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><div class="form-group"><label>Energy: <span id="eVal">50</span></label><input type="range" class="slider" id="energy" value="50" oninput="document.getElementById('eVal').textContent=this.value"></div><div class="form-group"><label>Mood: <span id="mVal">50</span></label><input type="range" class="slider" id="mood" value="50" oninput="document.getElementById('mVal').textContent=this.value"></div><button class="btn btn-gold" onclick="submitCheckin()">Submit</button></div></div>
+<div class="panel" id="pet-panel"><div class="panel-head"><h2>🐱 Pet</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" style="text-align:center;"><div style="font-size:3em;" id="petEmoji">🐱</div><div id="petStats"></div><div style="display:flex;gap:8px;justify-content:center;margin-top:15px;"><button class="btn" onclick="petAction('feed')">🍖</button><button class="btn" onclick="petAction('play')">🎾</button><button class="btn" onclick="petAction('pet')">🤗</button></div></div></div>
+<div class="panel" id="patterns-panel"><div class="panel-head"><h2>🧠 Patterns</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body" id="patternsContent"></div></div>
+<div class="panel" id="animation-panel"><div class="panel-head"><h2>🎬 Animation</h2><button class="panel-close" onclick="closePanel()">×</button></div><div class="panel-body"><p>Generate animations from your living fractal universe.</p><div class="form-group"><label>Duration (seconds)</label><input type="number" id="animDuration" value="30" min="1" max="1200"></div><button class="btn btn-gold" onclick="generateAnimation()">Generate Preview</button><div id="animResult"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const PHI = 1.618033988749895;
+let scene, camera, renderer, orbs = {}, isInside = false, data = {};
+function initThree() {
+    const c = document.getElementById('universe');
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a12);
+    scene.fog = new THREE.FogExp2(0x0a0a12, 0.008);
+    camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 2000);
+    camera.position.z = 100;
+    renderer = new THREE.WebGLRenderer({canvas: c, antialias: true});
+    renderer.setSize(innerWidth, innerHeight);
+    const al = new THREE.AmbientLight(0x404040, 0.5);
+    scene.add(al);
+    const pl = new THREE.PointLight(0xd4af37, 1, 500);
+    pl.position.set(50,50,50);
+    scene.add(pl);
+    for(let i=0;i<3000;i++){const g=new THREE.SphereGeometry(0.3);const m=new THREE.MeshBasicMaterial({color:0xffffff});const s=new THREE.Mesh(g,m);s.position.set((Math.random()-0.5)*1500,(Math.random()-0.5)*1500,(Math.random()-0.5)*1500);scene.add(s);}
+    addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+    c.addEventListener('wheel',e=>{camera.position.z+=e.deltaY*0.1;camera.position.z=Math.max(20,Math.min(200,camera.position.z));});
+    c.addEventListener('mousemove',e=>{if(!isInside){scene.rotation.y=(e.clientX/innerWidth-0.5)*0.3;scene.rotation.x=(e.clientY/innerHeight-0.5)*0.15;}});
+    animate();
+}
+function animate(){requestAnimationFrame(animate);Object.values(orbs).forEach(m=>{m.rotation.y+=0.002;});if(!isInside)scene.rotation.y+=0.0003;renderer.render(scene,camera);}
+function updateOrbs(list){
+    Object.keys(orbs).forEach(id=>{if(!list.find(o=>o.id===id)){scene.remove(orbs[id]);delete orbs[id];}});
+    list.forEach(o=>{
+        if(orbs[o.id]){orbs[o.id].position.set(...o.position);orbs[o.id].scale.setScalar(1+0.1*Math.sin(o.pulse_phase));}
+        else{const g=new THREE.SphereGeometry(o.radius||1,24,24);const c=new THREE.Color(o.color?.[0]||0.3,o.color?.[1]||0.6,o.color?.[2]||0.9);const m=new THREE.MeshPhongMaterial({color:c,emissive:c,emissiveIntensity:o.glow||0.3,shininess:100,transparent:true,opacity:0.9});const mesh=new THREE.Mesh(g,m);mesh.position.set(...o.position);mesh.userData=o;scene.add(mesh);orbs[o.id]=mesh;}
+    });
+}
+function enterFractal(){isInside=true;document.getElementById('enterBtn').classList.add('hidden');const i=setInterval(()=>{camera.position.z-=2;if(camera.position.z<=30)clearInterval(i);},16);toast('🌀 Entering fractal universe...');}
+function toggleNav(){document.querySelector('.hamburger').classList.toggle('open');document.getElementById('nav').classList.toggle('open');}
+function showPanel(n){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));const p=document.getElementById(n+'-panel');if(p){p.classList.add('active');loadPanel(n);}toggleNav();}
+function closePanel(){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));}
+async function api(u,o={}){try{const r=await fetch(u,{...o,headers:{'Content-Type':'application/json',...o.headers}});return await r.json();}catch(e){console.error(e);return null;}}
+async function loadData(){
+    const d=await api('/api/organism/state');
+    if(d){data=d;document.getElementById('karma').textContent=(d.karma?.field_potential||0).toFixed(2);document.getElementById('harmony').textContent=(d.harmony||1).toFixed(2);document.getElementById('orbs').textContent=d.swarm?.total_orbs||0;if(d.swarm?.orbs)updateOrbs(d.swarm.orbs);if(d.mayan)document.getElementById('mayanKin').textContent=d.mayan.greeting;}
+}
+async function loadPanel(n){
+    if(n==='dashboard'){document.getElementById('dashContent').innerHTML='<div class="card"><b>Karma:</b> '+(data.karma?.field_potential||0).toFixed(2)+'</div><div class="card"><b>Harmony:</b> '+(data.harmony||1).toFixed(2)+'</div><div class="card"><b>Orbs:</b> '+(data.swarm?.total_orbs||0)+'</div><div class="card"><b>Math Active:</b> Golden Harmonic '+(data.math_foundations?.golden_harmonic||0).toFixed(3)+'</div>';}
+    if(n==='goals'){const g=await api('/api/goals');document.getElementById('goalsList').innerHTML=(g||[]).map(x=>'<div class="card"><b>'+x.title+'</b><br>'+x.progress+'%</div>').join('');}
+    if(n==='habits'){const h=await api('/api/habits');document.getElementById('habitsList').innerHTML=(h||[]).map(x=>'<div class="card" style="display:flex;justify-content:space-between;"><span><b>'+x.name+'</b> 🔥'+x.current_streak+'</span><button class="btn" onclick="completeHabit(\\''+x.id+'\\')">✓</button></div>').join('');}
+    if(n==='pet'){const p=await api('/api/pet/state');if(p)document.getElementById('petStats').innerHTML='Hunger: '+Math.round(p.hunger)+' | Energy: '+Math.round(p.energy)+' | Happy: '+Math.round(p.happiness);}
+    if(n==='patterns'){const p=await api('/api/analytics/patterns');document.getElementById('patternsContent').innerHTML='<div class="card"><b>Patterns:</b><br>'+(p?.patterns?.[0]?.patterns?.join(', ')||'Keep using app...')+'</div><div class="card"><b>Insights:</b><br>'+(p?.patterns?.[0]?.insights?.join('<br>')||'Building insights...')+'</div>';}
+}
+async function createGoal(){const t=document.getElementById('goalTitle').value;if(!t)return;const r=await api('/api/goals',{method:'POST',body:JSON.stringify({title:t})});if(r){toast('🎯 +'+r.karma_earned?.toFixed(2)+' karma');document.getElementById('goalTitle').value='';loadPanel('goals');loadData();}}
+async function createHabit(){const n=document.getElementById('habitName').value;if(!n)return;await api('/api/habits',{method:'POST',body:JSON.stringify({name:n})});toast('✨ Habit created!');document.getElementById('habitName').value='';loadPanel('habits');}
+async function completeHabit(id){const r=await api('/api/habits/'+id+'/complete',{method:'POST'});if(r){toast('✅ +'+r.karma_earned?.toFixed(2)+' karma'+(r.fibonacci_bonus?' 🌟 Fibonacci!':''));loadPanel('habits');loadData();}}
+async function submitCheckin(){const d={energy:+document.getElementById('energy').value,mood:+document.getElementById('mood').value};const r=await api('/api/wellness/checkin',{method:'POST',body:JSON.stringify(d)});if(r){toast('💫 +'+r.karma_earned?.toFixed(2)+' karma');closePanel();loadData();}}
+async function petAction(a){const r=await api('/api/pet/interact',{method:'POST',body:JSON.stringify({action:a})});if(r){toast('🐱 '+r.emotion+'!');loadPanel('pet');loadData();}}
+async function generateAnimation(){const d=+document.getElementById('animDuration').value||30;const r=await api('/api/animation/generate',{method:'POST',body:JSON.stringify({duration_seconds:d})});if(r)document.getElementById('animResult').innerHTML='<div class="card" style="margin-top:15px;"><b>Preview Generated</b><br>Duration: '+r.duration+'s | Emotion: '+r.collective_emotion+'</div>';}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+document.addEventListener('DOMContentLoaded',()=>{initThree();loadData();setInterval(loadData,5000);});
+</script>
+</body></html>'''
+
+LOGIN_HTML = '''<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Login</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui;background:linear-gradient(135deg,#0a0a12,#1a1a2e);min-height:100vh;display:flex;align-items:center;justify-content:center}.card{background:rgba(15,15,25,0.95);padding:40px;border-radius:20px;width:100%;max-width:380px;border:1px solid rgba(212,175,55,0.2)}.logo{font-size:3em;text-align:center}h1{text-align:center;color:#d4af37;margin:15px 0 30px}.form-group{margin-bottom:18px}label{display:block;margin-bottom:6px;color:#888}input{width:100%;padding:12px;background:rgba(74,144,164,0.1);border:1px solid rgba(74,144,164,0.3);border-radius:8px;color:#e8e8e8}.btn{width:100%;padding:14px;background:linear-gradient(135deg,#8b5cf6,#4a90a4);border:none;border-radius:8px;color:white;font-size:1em;cursor:pointer}.switch{text-align:center;margin-top:18px;color:#888}.switch a{color:#d4af37}.err{background:rgba(244,67,54,0.2);color:#f44336;padding:10px;border-radius:6px;margin-bottom:15px;display:none}</style></head><body><div class="card"><div class="logo">🌀</div><h1 id="title">Login</h1><div class="err" id="err"></div><form id="form"><div class="form-group"><label>Email</label><input type="email" id="email" required></div><div class="form-group"><label>Password</label><input type="password" id="pw" required></div><div class="form-group" id="nameG" style="display:none"><label>Name</label><input id="name"></div><button type="submit" class="btn" id="sub">Login</button></form><div class="switch"><span id="swTxt">New?</span> <a href="#" onclick="toggle(event)">Register</a></div></div><script>let isL=true;function toggle(e){e.preventDefault();isL=!isL;document.getElementById('title').textContent=isL?'Login':'Register';document.getElementById('sub').textContent=isL?'Login':'Register';document.getElementById('nameG').style.display=isL?'none':'block';document.getElementById('swTxt').textContent=isL?'New?':'Have account?';}document.getElementById('form').addEventListener('submit',async e=>{e.preventDefault();const d={email:document.getElementById('email').value,password:document.getElementById('pw').value};if(!isL)d.first_name=document.getElementById('name').value;try{const r=await fetch(isL?'/api/auth/login':'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});const j=await r.json();if(r.ok)location.href='/';else{document.getElementById('err').textContent=j.error;document.getElementById('err').style.display='block';}}catch(e){document.getElementById('err').textContent='Connection error';document.getElementById('err').style.display='block';}});</script></body></html>'''
 
 
 @app.route('/')
@@ -2980,19 +2424,20 @@ def login_page():
 
 if __name__ == '__main__':
     print("\n" + "═" * 80)
-    print("🌀 LIFE FRACTAL INTELLIGENCE v12.0 - LIVING MATHEMATICAL ORGANISM")
+    print("🌀 LIFE FRACTAL INTELLIGENCE v12.1 - MATHEMATICAL ANIMATION ENGINE")
     print("═" * 80)
-    print("\n✨ Features:")
-    print("   🌐 Full-screen interactive 3D fractal universe")
-    print("   🤖 Ollama AI integration for self-spawning orbs")
-    print("   🔍 Zoom-based label visibility")
-    print("   🧬 Self-aware, self-replicating cells")
-    print("   📅 Mayan calendar time science")
-    print("   🌊 Swarm intelligence pattern detection")
-    print("   ⚖️ Karma-dharma spiritual mathematics")
-    print("   🧠 Federated AI with recursive learning")
-    print(f"\n🤖 Ollama: {'Connected' if organism.ai.available else 'Offline (using patterns)'}")
-    print(f"📊 ML: {'Enabled' if HAS_SKLEARN else 'Disabled'}")
+    print("\n🔢 TEN MATHEMATICAL FOUNDATIONS:")
+    print("   1. Golden-Harmonic Folding Field    F(t,φ) = sin(2π·t·φ)·cos(2π·t/φ)+sin(π·t²)")
+    print("   2. Pareidolia Detection Field       Pattern recognition in noise")
+    print("   3. Sacred Blend Energy Map          Tone density with tanh modulation")
+    print("   4. Fractal Bloom Expansion          Z(n+1) = Z(n)² + C recursive structures")
+    print("   5. Centralized Origami Curve        O(u,v) = sin(u·v)+cos(φ·u)·sin(φ·v)")
+    print("   6. Emotionally Tuned Harmonic       H(t,e) = |sin(π·t·E[e])| + tanh(t·0.2)")
+    print("   7. Fourier Sketch Synthesis         Σ(aₙ·cos(n·x) + bₙ·sin(n·y))")
+    print("   8. GPU Parallel Frame Queue         Vectorized batch processing")
+    print("   9. Temporal Origami Compression     Cₜ = Σ Mf·(1/φ)ⁿ fold/unfold")
+    print("  10. Full-Scene Emotional Manifold    E(x,y,t) = ∇²B + H(t,e)·F(t,φ)")
+    print(f"\n🤖 Ollama: {'Connected' if organism.ai.available else 'Pattern mode'}")
     print(f"📅 Today: {organism.mayan.get_today_summary()['greeting']}")
     print("\n" + "═" * 80 + "\n")
     
