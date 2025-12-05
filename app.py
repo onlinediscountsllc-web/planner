@@ -518,51 +518,6 @@ class BinauralBeatGenerator:
             'left_channel': left_channel.tolist(),
             'right_channel': right_channel.tolist()
         }
-    
-    @staticmethod
-    def generate_wav_bytes(preset: str = 'calm', duration: float = 10.0) -> bytes:
-        """Generate WAV file bytes"""
-        audio_data = BinauralBeatGenerator.generate_binaural_beat(preset, duration)
-        
-        left = np.array(audio_data['left_channel'])
-        right = np.array(audio_data['right_channel'])
-        
-        # Interleave stereo channels
-        stereo = np.empty((len(left) + len(right),), dtype=left.dtype)
-        stereo[0::2] = left
-        stereo[1::2] = right
-        
-        # Convert to 16-bit PCM
-        stereo_int16 = (stereo * 32767).astype(np.int16)
-        
-        # Create WAV file in memory
-        buffer = BytesIO()
-        
-        # WAV header
-        sample_rate = audio_data['sample_rate']
-        num_channels = 2
-        bits_per_sample = 16
-        byte_rate = sample_rate * num_channels * bits_per_sample // 8
-        block_align = num_channels * bits_per_sample // 8
-        data_size = len(stereo_int16) * 2
-        
-        buffer.write(b'RIFF')
-        buffer.write(struct.pack('<I', 36 + data_size))
-        buffer.write(b'WAVE')
-        buffer.write(b'fmt ')
-        buffer.write(struct.pack('<I', 16))  # fmt chunk size
-        buffer.write(struct.pack('<H', 1))   # PCM format
-        buffer.write(struct.pack('<H', num_channels))
-        buffer.write(struct.pack('<I', sample_rate))
-        buffer.write(struct.pack('<I', byte_rate))
-        buffer.write(struct.pack('<H', block_align))
-        buffer.write(struct.pack('<H', bits_per_sample))
-        buffer.write(b'data')
-        buffer.write(struct.pack('<I', data_size))
-        buffer.write(stereo_int16.tobytes())
-        
-        buffer.seek(0)
-        return buffer.read()
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -707,11 +662,10 @@ CORS(app)
 db = Database()
 fractal_engine = FractalEngine()
 
-# Initialize new math foundations
+# Initialize new math foundations (reinitialize per request to avoid state issues)
 lorenz = LorenzAttractor()
 rossler = RosslerAttractor()
 coupled_chaos = CoupledChaosSystem()
-pso = ParticleSwarmEnergy()
 harmonic = HarmonicResonance()
 
 
@@ -817,24 +771,31 @@ def coupled_chaos_endpoint():
 @app.route('/api/math/particle-swarm', methods=['GET'])
 def particle_swarm_endpoint():
     """Foundation 14: Particle Swarm (Spoon Theory)"""
-    target_energy = float(request.args.get('energy', 0.7))
-    target_wellness = float(request.args.get('wellness', 0.7))
-    
-    # Update PSO
-    for _ in range(10):
-        pso.update(target_energy, target_wellness)
-    
-    convergence = pso.get_convergence()
-    
-    return jsonify({
-        'foundation': 14,
-        'name': 'Particle Swarm (Spoon Theory)',
-        'convergence': convergence,
-        'target_energy': target_energy,
-        'target_wellness': target_wellness,
-        'spoons_available': int(convergence * 10),
-        'status': 'recharged' if convergence > 0.7 else 'conserving'
-    })
+    try:
+        target_energy = float(request.args.get('energy', 0.7))
+        target_wellness = float(request.args.get('wellness', 0.7))
+        
+        # Reinitialize PSO for this request to avoid state issues
+        temp_pso = ParticleSwarmEnergy(n_particles=10)
+        
+        # Update PSO
+        for _ in range(10):
+            temp_pso.update(target_energy, target_wellness)
+        
+        convergence = temp_pso.get_convergence()
+        
+        return jsonify({
+            'foundation': 14,
+            'name': 'Particle Swarm (Spoon Theory)',
+            'convergence': convergence,
+            'target_energy': target_energy,
+            'target_wellness': target_wellness,
+            'spoons_available': int(convergence * 10),
+            'status': 'recharged' if convergence > 0.7 else 'conserving'
+        })
+    except Exception as e:
+        logger.error(f"PSO endpoint error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/math/harmonic-resonance', methods=['GET'])
@@ -930,18 +891,65 @@ def generate_binaural_audio(preset):
     """Generate and download binaural beat audio"""
     duration = float(request.args.get('duration', 10.0))
     
+    # Validate preset
+    if preset not in BinauralBeatGenerator.PRESETS:
+        return jsonify({
+            'error': f'Invalid preset: {preset}',
+            'available': list(BinauralBeatGenerator.PRESETS.keys())
+        }), 400
+    
     try:
-        wav_bytes = BinauralBeatGenerator.generate_wav_bytes(preset, duration)
+        # Generate audio data
+        audio_data = BinauralBeatGenerator.generate_binaural_beat(preset, duration)
+        
+        left = np.array(audio_data['left_channel'], dtype=np.float32)
+        right = np.array(audio_data['right_channel'], dtype=np.float32)
+        
+        # Interleave stereo channels
+        stereo = np.empty((len(left) + len(right),), dtype=np.float32)
+        stereo[0::2] = left
+        stereo[1::2] = right
+        
+        # Convert to 16-bit PCM
+        stereo_int16 = (stereo * 32767).astype(np.int16)
+        
+        # Create WAV file in memory
+        buffer = BytesIO()
+        
+        # WAV header
+        sample_rate = audio_data['sample_rate']
+        num_channels = 2
+        bits_per_sample = 16
+        byte_rate = sample_rate * num_channels * bits_per_sample // 8
+        block_align = num_channels * bits_per_sample // 8
+        data_size = len(stereo_int16) * 2
+        
+        buffer.write(b'RIFF')
+        buffer.write(struct.pack('<I', 36 + data_size))
+        buffer.write(b'WAVE')
+        buffer.write(b'fmt ')
+        buffer.write(struct.pack('<I', 16))  # fmt chunk size
+        buffer.write(struct.pack('<H', 1))   # PCM format
+        buffer.write(struct.pack('<H', num_channels))
+        buffer.write(struct.pack('<I', sample_rate))
+        buffer.write(struct.pack('<I', byte_rate))
+        buffer.write(struct.pack('<H', block_align))
+        buffer.write(struct.pack('<H', bits_per_sample))
+        buffer.write(b'data')
+        buffer.write(struct.pack('<I', data_size))
+        buffer.write(stereo_int16.tobytes())
+        
+        buffer.seek(0)
         
         return send_file(
-            BytesIO(wav_bytes),
+            buffer,
             mimetype='audio/wav',
             as_attachment=True,
             download_name=f'binaural_{preset}_{int(duration)}s.wav'
         )
     except Exception as e:
         logger.error(f"Error generating binaural audio: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'preset': preset, 'duration': duration}), 500
 
 
 @app.route('/api/visualization/config', methods=['GET'])
