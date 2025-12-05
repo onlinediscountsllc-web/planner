@@ -1762,23 +1762,37 @@ class LivingOrganism:
         }
     
     def generate_animation(self, duration_seconds: float = 30.0) -> Dict:
-        """Generate animation from current organism state"""
+        """Generate animation metadata (lightweight - no heavy computation)"""
         # Add keyframes from swarm patterns
         patterns = self.swarm.patterns_detected
         if patterns:
-            p = patterns[0]
             self.animation_engine.add_keyframe(0, self.swarm.collective_emotion, 1.0, 0)
             self.animation_engine.add_keyframe(duration_seconds * 0.5, 'wonder', 1.5, 0.5)
             self.animation_engine.add_keyframe(duration_seconds, 'peace', 2.0, 1.0)
         
-        # Generate preview
-        preview_frames = self.animation_engine.generate_preview(duration_seconds, 5)
+        # Calculate animation parameters without generating frames
+        total_frames = int(duration_seconds * self.animation_engine.fps)
+        
+        # Sample a few mathematical values (lightweight)
+        sample_times = [0, duration_seconds * 0.25, duration_seconds * 0.5, duration_seconds * 0.75, duration_seconds]
+        math_samples = []
+        for t in sample_times:
+            math_samples.append({
+                'time': t,
+                'golden_harmonic': self.math.golden_harmonic_fold(t),
+                'emotional_wave': self.math.emotional_harmonic(t, self.swarm.collective_emotion)
+            })
         
         return {
             'duration': duration_seconds,
-            'preview_count': len(preview_frames),
+            'total_frames': total_frames,
+            'fps': self.animation_engine.fps,
+            'resolution': self.animation_engine.resolution,
             'collective_emotion': self.swarm.collective_emotion,
-            'harmony': self.harmony
+            'harmony': self.harmony,
+            'math_samples': math_samples,
+            'status': 'ready',
+            'message': 'Animation parameters calculated. Use /api/animation/frame/<n> for individual frames.'
         }
     
     def get_state(self) -> Dict:
@@ -1935,24 +1949,60 @@ def generate_animation():
 @app.route('/api/animation/frame/<int:frame_num>', methods=['GET'])
 @require_auth
 def get_animation_frame(frame_num):
-    """Get single animation frame"""
+    """Get single animation frame (lightweight fractal render)"""
     duration = float(request.args.get('duration', 30))
     total_frames = int(duration * organism.animation_engine.fps)
     
     if frame_num >= total_frames:
         return jsonify({'error': 'Frame out of range'}), 400
     
-    frame = organism.animation_engine.generate_frame(frame_num, total_frames)
+    # Lightweight frame generation - smaller resolution, simpler math
+    t = frame_num / organism.animation_engine.fps
+    width, height = 200, 150  # Small for speed
+    
+    # Create frame using bloom expansion (faster than manifold)
+    img = Image.new('RGB', (width, height))
+    pixels = img.load()
+    
+    # Use golden harmonic for animation
+    harmonic = organism.math.golden_harmonic_fold(t)
+    emotion_mod = organism.math.emotional_harmonic(t, organism.swarm.collective_emotion)
+    
+    for y in range(height):
+        for x in range(width):
+            # Simple fractal coloring
+            nx = (x / width - 0.5) * 3
+            ny = (y / height - 0.5) * 2
+            
+            # Quick Mandelbrot iteration
+            zx, zy = 0, 0
+            cx = nx + harmonic * 0.1
+            cy = ny + emotion_mod * 0.05
+            
+            for i in range(20):
+                zx_new = zx*zx - zy*zy + cx
+                zy = 2*zx*zy + cy
+                zx = zx_new
+                if zx*zx + zy*zy > 4:
+                    break
+            
+            # Color based on iteration
+            hue = (i / 20 * 360 + t * 30) % 360
+            sat = 0.8
+            val = 0.3 + 0.7 * (i / 20)
+            r, g, b = organism.math._hsv_to_rgb(hue, sat, val)
+            pixels[x, y] = (int(r*255), int(g*255), int(b*255))
     
     # Convert to base64 PNG
-    img = Image.fromarray(frame)
     buffer = BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, format='PNG', optimize=True)
     buffer.seek(0)
     
     return jsonify({
         'frame': frame_num,
         'total_frames': total_frames,
+        'time': t,
+        'harmonic': harmonic,
         'image': base64.b64encode(buffer.getvalue()).decode('utf-8')
     })
 
@@ -2397,7 +2447,7 @@ async function createHabit(){const n=document.getElementById('habitName').value;
 async function completeHabit(id){const r=await api('/api/habits/'+id+'/complete',{method:'POST'});if(r){toast('✅ +'+r.karma_earned?.toFixed(2)+' karma'+(r.fibonacci_bonus?' 🌟 Fibonacci!':''));loadPanel('habits');loadData();}}
 async function submitCheckin(){const d={energy:+document.getElementById('energy').value,mood:+document.getElementById('mood').value};const r=await api('/api/wellness/checkin',{method:'POST',body:JSON.stringify(d)});if(r){toast('💫 +'+r.karma_earned?.toFixed(2)+' karma');closePanel();loadData();}}
 async function petAction(a){const r=await api('/api/pet/interact',{method:'POST',body:JSON.stringify({action:a})});if(r){toast('🐱 '+r.emotion+'!');loadPanel('pet');loadData();}}
-async function generateAnimation(){const d=+document.getElementById('animDuration').value||30;const r=await api('/api/animation/generate',{method:'POST',body:JSON.stringify({duration_seconds:d})});if(r)document.getElementById('animResult').innerHTML='<div class="card" style="margin-top:15px;"><b>Preview Generated</b><br>Duration: '+r.duration+'s | Emotion: '+r.collective_emotion+'</div>';}
+async function generateAnimation(){const d=+document.getElementById('animDuration').value||30;const r=await api('/api/animation/generate',{method:'POST',body:JSON.stringify({duration_seconds:d})});if(r)document.getElementById('animResult').innerHTML='<div class="card" style="margin-top:15px;"><b>✅ Animation Ready</b><br>Duration: '+r.duration+'s | Frames: '+r.total_frames+'<br>Emotion: '+r.collective_emotion+' | Harmony: '+(r.harmony||0).toFixed(2)+'<br><small>'+r.message+'</small></div>';}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 document.addEventListener('DOMContentLoaded',()=>{initThree();loadData();setInterval(loadData,5000);});
 </script>
