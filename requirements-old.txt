@@ -1,4 +1,4 @@
-# Life Fractal Intelligence v13.0 - Production Dependencies
+﻿# Life Fractal Intelligence v12.0 - Dependencies
 Flask>=3.0.0
 Flask-Cors>=4.0.0
 Werkzeug>=3.0.0
@@ -6,4 +6,3 @@ gunicorn>=21.0.0
 numpy>=2.0.0
 Pillow>=10.2.0
 scikit-learn>=1.4.0
-requests>=2.31.0
