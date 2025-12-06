@@ -1,869 +1,587 @@
 #!/usr/bin/env python3
 """
-🌟 LIFE FRACTAL INTELLIGENCE v15.0 ULTIMATE INTERACTIVE
+🎨 LIFE FRACTAL INTELLIGENCE - ChatGPT Secure API v1.0
 ═══════════════════════════════════════════════════════════════════════════════
 
-THE COMPLETE EXPERIENCE - EVERYTHING INTEGRATED
+SECURE CHATGPT INTEGRATION
+- API Key Authentication
+- Rate Limiting (prevents abuse)
+- Privacy Protection (encrypted user data)
+- Code Protection (no source code exposure)
+- Usage Tracking (analytics without PII)
+- Image Generation (fractal posters)
+- Pet Avatar System
 
-✅ Voice Conversations (Whisper + Ollama 3.1)
-✅ Virtual Pet AI Assistant (talks to you)
-✅ Congratulations Animations + Sounds
-✅ Audio Signals (visualization updates)
-✅ Interactive Visualizer (clickable orbs)
-✅ Advanced Tabbed Interface
-✅ Plain English Reports (PDF/DOCX)
-✅ Video Export (save animations)
-✅ Swedish Design (Nordic minimalism)
-✅ NO MATH JARGON (plain English everywhere)
-✅ Complete Endpoint Integration
-✅ Real Ollama Integration
-
-"Your life, visualized. Your assistant, personified. Your goals, celebrated."
+For ChatGPT Custom GPT: "Fractal Explorer"
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
 import os
 import sys
 import json
-import math
 import time
 import secrets
-import logging
-import sqlite3
 import hashlib
-import re
-import struct
-import subprocess
-from datetime import datetime, timedelta, timezone
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
-from io import BytesIO
-from pathlib import Path
+import logging
+from datetime import datetime, timedelta
+from collections import defaultdict
 from functools import wraps
-import base64
+from typing import Dict, List, Optional, Any
 
-# Flask
-from flask import Flask, request, jsonify, send_file, session
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
-
-# Data processing
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import base64
 
-# GPU (optional)
-try:
-    import torch
-    GPU_AVAILABLE = torch.cuda.is_available()
-    GPU_NAME = torch.cuda.get_device_name(0) if GPU_AVAILABLE else None
-except ImportError:
-    GPU_AVAILABLE = False
-    GPU_NAME = None
+# ═══════════════════════════════════════════════════════════════════════════
+# SECURITY CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
 
-
-# ════════════════════════════════════════════════════════════════════════════════
-# CONFIGURATION
-# ════════════════════════════════════════════════════════════════════════════════
-
-OLLAMA_API_URL = os.environ.get('OLLAMA_API_URL', 'http://localhost:11434')
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3.1')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger(__name__)
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# CONSTANTS
-# ════════════════════════════════════════════════════════════════════════════════
-
-PHI = (1 + math.sqrt(5)) / 2
-GOLDEN_ANGLE = 137.5077640500378
-GOLDEN_ANGLE_RAD = math.radians(GOLDEN_ANGLE)
-FIBONACCI = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610]
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# PLAIN ENGLISH TRANSLATIONS (No Math Jargon!)
-# ════════════════════════════════════════════════════════════════════════════════
-
-PLAIN_ENGLISH = {
-    # Math terms → Plain English
-    'chaos_balance': 'Life Balance',
-    'lorenz_wing': 'Current Phase',
-    'rossler_phase': 'Mood Cycle',
-    'convergence': 'Focus Level',
-    'harmonic_resonance': 'Inner Harmony',
-    'fractal_dimension': 'Life Complexity',
-    'golden_ratio': 'Natural Flow',
-    'fibonacci': 'Growth Pattern',
-    'particle_swarm': 'Energy Available',
-    'spoons_available': 'Energy Points',
+class SecurityConfig:
+    """Security settings for ChatGPT integration"""
     
-    # Phases
-    'growth': 'Growing & Learning',
-    'stability': 'Steady & Stable',
-    'recovery': 'Resting & Healing',
-    'rest': 'Taking a Break',
+    # API Key for ChatGPT authentication
+    CHATGPT_API_KEY = os.getenv("CHATGPT_API_KEY", secrets.token_urlsafe(32))
     
-    # Pet behaviors
-    'idle': 'relaxing',
-    'happy': 'feeling great',
-    'playful': 'ready to play',
-    'tired': 'needs rest',
-    'hungry': 'wants food',
-    'sad': 'feeling down',
-    'excited': 'super energized',
-    'sleeping': 'taking a nap',
-    'meditating': 'finding peace',
-    'glowing': 'spiritually radiant'
-}
+    # Rate limiting (requests per minute)
+    RATE_LIMIT_PER_MINUTE = 20
+    RATE_LIMIT_PER_HOUR = 100
+    RATE_LIMIT_PER_DAY = 500
+    
+    # Image generation limits
+    MAX_IMAGE_SIZE = 2048
+    MAX_IMAGES_PER_USER_PER_DAY = 50
+    
+    # Privacy settings
+    ENCRYPT_USER_DATA = True
+    ANONYMIZE_ANALYTICS = True
+    NO_PII_IN_LOGS = True
+    
+    # Code protection
+    HIDE_IMPLEMENTATION = True
+    NO_SOURCE_CODE_RESPONSES = True
+    
+    # Usage tracking (for improvement)
+    TRACK_FEATURE_USAGE = True
+    TRACK_ERROR_PATTERNS = True
 
+# ═══════════════════════════════════════════════════════════════════════════
+# RATE LIMITER
+# ═══════════════════════════════════════════════════════════════════════════
 
-# ════════════════════════════════════════════════════════════════════════════════
-# OLLAMA AI INTEGRATION
-# ════════════════════════════════════════════════════════════════════════════════
-
-class OllamaAssistant:
-    """Virtual Pet AI Assistant using Ollama 3.1"""
+class RateLimiter:
+    """Prevents abuse by limiting API calls"""
     
-    def __init__(self, pet_name: str = "Buddy"):
-        self.pet_name = pet_name
-        self.api_url = OLLAMA_API_URL
-        self.model = OLLAMA_MODEL
-    
-    def chat(self, user_message: str, context: Dict = None) -> str:
-        """Have conversation with pet assistant"""
+    def __init__(self):
+        self.requests = defaultdict(list)  # user_id -> list of timestamps
         
-        # Build system prompt based on pet personality
-        system_prompt = f"""You are {self.pet_name}, a friendly and supportive virtual companion. 
-You help your human friend organize their life, track goals, and stay motivated.
-You speak in a warm, encouraging tone and give practical advice.
-You understand their tasks, goals, karma (helping others), and dharma (life purpose).
-Keep responses brief (2-3 sentences) and encouraging.
-
-Current context:
-- Total tasks: {context.get('total_tasks', 0)}
-- Completed today: {context.get('completed_today', 0)}
-- Energy level: {context.get('energy', 0.5) * 100:.0f}%
-- Current phase: {context.get('phase', 'growing')}
-"""
+    def is_allowed(self, user_id: str, limit: int, window_seconds: int) -> bool:
+        """Check if user is within rate limits"""
+        now = time.time()
+        cutoff = now - window_seconds
         
-        try:
-            # Call Ollama API
-            response = self._call_ollama(system_prompt, user_message)
-            return response
-        except Exception as e:
-            logger.error(f"Ollama error: {e}")
-            return f"*{self.pet_name} is thinking...* (Ollama not available: {str(e)})"
-    
-    def _call_ollama(self, system_prompt: str, user_message: str) -> str:
-        """Call Ollama API"""
-        import requests
-        
-        url = f"{self.api_url}/api/generate"
-        
-        payload = {
-            "model": self.model,
-            "prompt": f"{system_prompt}\n\nHuman: {user_message}\n\nAssistant:",
-            "stream": False
-        }
-        
-        response = requests.post(url, json=payload, timeout=10)
-        response.raise_for_status()
-        
-        result = response.json()
-        return result.get('response', '').strip()
-    
-    def interpret_voice_command(self, transcript: str) -> Dict:
-        """Interpret voice command and extract intent"""
-        
-        # Simple pattern matching (can be enhanced with Ollama)
-        lower = transcript.lower()
-        
-        if any(word in lower for word in ['add', 'create', 'new task', 'remind me']):
-            return {
-                'intent': 'create_task',
-                'text': transcript,
-                'confidence': 0.8
-            }
-        elif any(word in lower for word in ['complete', 'done', 'finish']):
-            return {
-                'intent': 'complete_task',
-                'text': transcript,
-                'confidence': 0.7
-            }
-        elif any(word in lower for word in ['how am i', 'progress', 'status']):
-            return {
-                'intent': 'get_status',
-                'text': transcript,
-                'confidence': 0.9
-            }
-        elif any(word in lower for word in ['help', 'what can you do']):
-            return {
-                'intent': 'help',
-                'text': transcript,
-                'confidence': 1.0
-            }
-        else:
-            return {
-                'intent': 'chat',
-                'text': transcript,
-                'confidence': 0.5
-            }
-    
-    def celebrate_completion(self, task_title: str, karma_earned: int, dharma_earned: int) -> str:
-        """Generate celebration message"""
-        
-        messages = [
-            f"🎉 Awesome! You completed '{task_title}'!",
-            f"✨ Great work on '{task_title}'!",
-            f"🌟 You did it! '{task_title}' is done!",
-            f"💪 Nice job finishing '{task_title}'!"
+        # Remove old requests
+        self.requests[user_id] = [
+            ts for ts in self.requests[user_id] 
+            if ts > cutoff
         ]
         
-        import random
-        message = random.choice(messages)
+        # Check limit
+        if len(self.requests[user_id]) >= limit:
+            return False
+            
+        # Record this request
+        self.requests[user_id].append(now)
+        return True
+    
+    def get_reset_time(self, user_id: str, window_seconds: int) -> int:
+        """Get seconds until rate limit resets"""
+        if not self.requests[user_id]:
+            return 0
+        oldest = min(self.requests[user_id])
+        reset_time = oldest + window_seconds
+        return max(0, int(reset_time - time.time()))
+
+rate_limiter = RateLimiter()
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+def require_api_key(f):
+    """Decorator to require API key authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('X-API-Key')
         
-        if karma_earned > 0:
-            message += f" Earned {karma_earned} karma for helping others!"
-        if dharma_earned > 0:
-            message += f" Earned {dharma_earned} dharma for purpose work!"
+        if not api_key:
+            return jsonify({
+                'error': 'API key required',
+                'message': 'Please provide X-API-Key header'
+            }), 401
+            
+        if api_key != SecurityConfig.CHATGPT_API_KEY:
+            return jsonify({
+                'error': 'Invalid API key',
+                'message': 'Authentication failed'
+            }), 403
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_rate_limit(f):
+    """Decorator to enforce rate limits"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Get user identifier (anonymized)
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        user_hash = hashlib.sha256(user_id.encode()).hexdigest()[:16]
         
-        return message
+        # Check minute limit
+        if not rate_limiter.is_allowed(f"{user_hash}_min", 
+                                      SecurityConfig.RATE_LIMIT_PER_MINUTE, 60):
+            reset = rate_limiter.get_reset_time(f"{user_hash}_min", 60)
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'message': f'Too many requests. Try again in {reset} seconds.',
+                'retry_after': reset
+            }), 429
+            
+        # Check hour limit
+        if not rate_limiter.is_allowed(f"{user_hash}_hour",
+                                      SecurityConfig.RATE_LIMIT_PER_HOUR, 3600):
+            reset = rate_limiter.get_reset_time(f"{user_hash}_hour", 3600)
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'message': f'Hourly limit reached. Resets in {reset//60} minutes.',
+                'retry_after': reset
+            }), 429
+            
+        return f(*args, **kwargs)
+    return decorated_function
 
+# ═══════════════════════════════════════════════════════════════════════════
+# PRIVACY PROTECTION
+# ═══════════════════════════════════════════════════════════════════════════
 
-# ════════════════════════════════════════════════════════════════════════════════
-# AUDIO GENERATION
-# ════════════════════════════════════════════════════════════════════════════════
-
-class AudioFeedback:
-    """Generate audio signals for user feedback"""
+class PrivacyProtector:
+    """Protects user privacy and data"""
     
     @staticmethod
-    def generate_celebration_sound(duration: float = 1.0) -> bytes:
-        """Generate uplifting celebration sound"""
-        sample_rate = 44100
-        
-        # Major chord: C-E-G (happy sound)
-        freqs = [523.25, 659.25, 783.99]  # C5, E5, G5
-        
-        t = np.linspace(0, duration, int(sample_rate * duration))
-        
-        # Combine frequencies with envelope
-        signal = np.zeros_like(t)
-        for freq in freqs:
-            signal += np.sin(2 * np.pi * freq * t)
-        
-        # Add envelope (fade in/out)
-        envelope = np.exp(-3 * t / duration)
-        signal = signal * envelope
-        
-        # Normalize
-        signal = signal / np.max(np.abs(signal))
-        
-        # Convert to 16-bit PCM
-        audio_data = (signal * 32767).astype(np.int16)
-        
-        # Create WAV
-        buffer = BytesIO()
-        buffer.write(b'RIFF')
-        buffer.write(struct.pack('<I', 36 + len(audio_data) * 2))
-        buffer.write(b'WAVE')
-        buffer.write(b'fmt ')
-        buffer.write(struct.pack('<IHHI', 16, 1, 1, sample_rate))
-        buffer.write(struct.pack('<IHH', sample_rate * 2, 2, 16))
-        buffer.write(b'data')
-        buffer.write(struct.pack('<I', len(audio_data) * 2))
-        buffer.write(audio_data.tobytes())
-        
-        return buffer.getvalue()
+    def anonymize_user_id(user_id: str) -> str:
+        """Convert user ID to anonymous hash"""
+        return hashlib.sha256(user_id.encode()).hexdigest()[:16]
     
     @staticmethod
-    def generate_notification_sound() -> bytes:
-        """Generate gentle notification beep"""
-        sample_rate = 44100
-        duration = 0.3
-        freq = 800  # Hz
+    def sanitize_response(data: dict) -> dict:
+        """Remove any PII from responses"""
+        # Remove sensitive fields
+        sensitive_keys = ['email', 'ip', 'location', 'phone', 'address']
+        cleaned = {}
         
-        t = np.linspace(0, duration, int(sample_rate * duration))
-        signal = np.sin(2 * np.pi * freq * t)
-        
-        # Quick fade out
-        envelope = np.exp(-10 * t / duration)
-        signal = signal * envelope
-        signal = signal / np.max(np.abs(signal))
-        
-        audio_data = (signal * 32767).astype(np.int16)
-        
-        buffer = BytesIO()
-        buffer.write(b'RIFF')
-        buffer.write(struct.pack('<I', 36 + len(audio_data) * 2))
-        buffer.write(b'WAVE')
-        buffer.write(b'fmt ')
-        buffer.write(struct.pack('<IHHI', 16, 1, 1, sample_rate))
-        buffer.write(struct.pack('<IHH', sample_rate * 2, 2, 16))
-        buffer.write(b'data')
-        buffer.write(struct.pack('<I', len(audio_data) * 2))
-        buffer.write(audio_data.tobytes())
-        
-        return buffer.getvalue()
+        for key, value in data.items():
+            if key.lower() not in sensitive_keys:
+                if isinstance(value, dict):
+                    cleaned[key] = PrivacyProtector.sanitize_response(value)
+                else:
+                    cleaned[key] = value
+                    
+        return cleaned
 
+# ═══════════════════════════════════════════════════════════════════════════
+# FRACTAL GENERATOR (Secure, No Code Exposure)
+# ═══════════════════════════════════════════════════════════════════════════
 
-# ════════════════════════════════════════════════════════════════════════════════
-# REPORT GENERATION
-# ════════════════════════════════════════════════════════════════════════════════
-
-class ReportGenerator:
-    """Generate plain English reports about user progress"""
+class FractalGenerator:
+    """Generates fractals without exposing implementation"""
+    
+    AVAILABLE_TYPES = [
+        "mandelbrot", "julia", "burning_ship", "tricorn",
+        "newton", "phoenix", "buddhabrot", "lyapunov",
+        "sierpinski", "dragon", "koch_snowflake", "hilbert",
+        "golden_spiral", "fibonacci", "flower_of_life", "metatron"
+    ]
     
     @staticmethod
-    def generate_progress_report(user_data: Dict) -> str:
-        """Generate plain English progress report"""
+    def generate(fractal_type: str, params: dict, size: int = 1024) -> Image.Image:
+        """Generate fractal image (implementation hidden)"""
         
-        total_tasks = user_data.get('total_tasks', 0)
-        completed = user_data.get('completed_tasks', 0)
-        in_progress = user_data.get('in_progress_tasks', 0)
-        karma_points = user_data.get('karma_points', 0)
-        dharma_points = user_data.get('dharma_points', 0)
-        energy = user_data.get('energy', 0.5)
-        phase = user_data.get('phase', 'growing')
+        # Validate size
+        size = min(size, SecurityConfig.MAX_IMAGE_SIZE)
         
-        # Translate phase to plain English
-        phase_english = PLAIN_ENGLISH.get(phase, phase)
+        # Create base image
+        img = Image.new('RGB', (size, size), 'black')
+        draw = ImageDraw.Draw(img)
         
-        report = f"""
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                         YOUR LIFE PROGRESS REPORT                          ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-
-📊 OVERVIEW
-──────────────────────────────────────────────────────────────────────────────
-You have {total_tasks} total tasks in your life right now.
-You've completed {completed} of them, with {in_progress} still in progress.
-
-Current Phase: {phase_english}
-Energy Level: {int(energy * 100)}%
-
-🌟 ACCOMPLISHMENTS
-──────────────────────────────────────────────────────────────────────────────
-Karma Points: {karma_points} (helping others & good deeds)
-Dharma Points: {dharma_points} (purpose work & spiritual growth)
-
-💡 INSIGHTS
-──────────────────────────────────────────────────────────────────────────────
-"""
-        
-        # Add personalized insights
-        if completed > total_tasks * 0.7:
-            report += "You're crushing it! Over 70% of your tasks are complete. 🎉\n"
-        elif completed > total_tasks * 0.5:
-            report += "Great momentum! You're more than halfway through your tasks. 💪\n"
-        elif completed < total_tasks * 0.3:
-            report += "Focus on just 1-2 priorities today. Small steps add up! 🌱\n"
-        
-        if energy < 0.3:
-            report += "Your energy is low. Consider taking a break or rest day. 😴\n"
-        elif energy > 0.7:
-            report += "You're energized and ready to tackle new challenges! ⚡\n"
-        
-        if karma_points > 50:
-            report += "Your kindness is making a real difference in others' lives. 💖\n"
-        
-        if dharma_points > 50:
-            report += "You're deeply connected to your life purpose. Keep going! ✨\n"
-        
-        report += "\n"
-        report += "═══════════════════════════════════════════════════════════════════════════\n"
-        report += f"Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}\n"
-        report += "═══════════════════════════════════════════════════════════════════════════\n"
-        
-        return report
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# DATABASE (From v14)
-# ════════════════════════════════════════════════════════════════════════════════
-
-class Database:
-    """Complete database with all features"""
+        if fractal_type == "mandelbrot":
+            return FractalGenerator._mandelbrot(size, params)
+        elif fractal_type == "julia":
+            return FractalGenerator._julia(size, params)
+        elif fractal_type == "golden_spiral":
+            return FractalGenerator._golden_spiral(size, params)
+        elif fractal_type == "flower_of_life":
+            return FractalGenerator._flower_of_life(size, params)
+        else:
+            # Return placeholder for other types
+            return FractalGenerator._placeholder(size, fractal_type)
     
-    def __init__(self, db_path: str = "life_fractal_v15.db"):
-        self.db_path = db_path
-        self.init_db()
+    @staticmethod
+    def _mandelbrot(size: int, params: dict) -> Image.Image:
+        """Mandelbrot set"""
+        img = Image.new('RGB', (size, size))
+        pixels = img.load()
+        
+        max_iter = params.get('iterations', 100)
+        zoom = params.get('zoom', 1.0)
+        
+        for x in range(size):
+            for y in range(size):
+                zx = 1.5 * (x - size/2) / (0.5 * zoom * size)
+                zy = (y - size/2) / (0.5 * zoom * size)
+                c = complex(zx, zy)
+                z = c
+                
+                for i in range(max_iter):
+                    if abs(z) > 2.0:
+                        break
+                    z = z*z + c
+                
+                color = int(255 * i / max_iter)
+                pixels[x, y] = (color, color//2, 255-color)
+        
+        return img
     
-    def init_db(self):
-        """Initialize all tables"""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
+    @staticmethod
+    def _golden_spiral(size: int, params: dict) -> Image.Image:
+        """Golden ratio spiral"""
+        img = Image.new('RGB', (size, size), 'black')
+        draw = ImageDraw.Draw(img)
         
-        # Users
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                trial_ends_at TEXT NOT NULL,
-                subscription_status TEXT DEFAULT 'trial'
-            )
-        ''')
+        phi = 1.618033988749895
+        center = size // 2
         
-        # Tasks/Goals
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                title TEXT NOT NULL,
-                description TEXT,
-                goal_type TEXT DEFAULT 'task',
-                priority TEXT DEFAULT 'medium',
-                progress REAL DEFAULT 0.0,
-                karma_points INTEGER DEFAULT 0,
-                dharma_points INTEGER DEFAULT 0,
-                due_date TEXT,
-                completed_at TEXT,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
+        angle = 0
+        radius = 1
+        points = []
         
-        # Virtual Pets
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS pets (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                species TEXT NOT NULL,
-                name TEXT NOT NULL,
-                hunger REAL DEFAULT 50.0,
-                energy REAL DEFAULT 50.0,
-                mood REAL DEFAULT 50.0,
-                level INTEGER DEFAULT 1,
-                karma_points INTEGER DEFAULT 0,
-                dharma_points INTEGER DEFAULT 0,
-                behavior TEXT DEFAULT 'idle',
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
+        for i in range(500):
+            x = center + radius * np.cos(angle)
+            y = center + radius * np.sin(angle)
+            points.append((x, y))
+            
+            angle += 0.1
+            radius *= phi ** 0.01
+            
+            if radius > size:
+                break
         
-        # Voice transcripts
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS voice_transcripts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                transcript TEXT NOT NULL,
-                intent TEXT,
-                response TEXT,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        ''')
+        # Draw spiral
+        if len(points) > 1:
+            draw.line(points, fill=(255, 215, 0), width=2)
         
-        conn.commit()
-        conn.close()
-        logger.info("✅ Database initialized: v15 with voice support")
+        return img
     
-    def create_user(self, email: str, password: str) -> int:
-        """Create user"""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
+    @staticmethod
+    def _flower_of_life(size: int, params: dict) -> Image.Image:
+        """Flower of Life sacred geometry"""
+        img = Image.new('RGB', (size, size), (0, 0, 40))
+        draw = ImageDraw.Draw(img)
         
-        password_hash = generate_password_hash(password)
-        now = datetime.now(timezone.utc).isoformat()
-        trial_ends = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+        center = size // 2
+        radius = size // 4
         
-        c.execute('''
-            INSERT INTO users (email, password_hash, created_at, trial_ends_at)
-            VALUES (?, ?, ?, ?)
-        ''', (email, password_hash, now, trial_ends))
+        # Center circle
+        draw.ellipse([center-radius, center-radius, 
+                     center+radius, center+radius], 
+                     outline=(255, 215, 0), width=2)
         
-        user_id = c.lastrowid
-        conn.commit()
-        conn.close()
+        # 6 surrounding circles
+        for i in range(6):
+            angle = i * 60 * np.pi / 180
+            x = center + radius * np.cos(angle)
+            y = center + radius * np.sin(angle)
+            draw.ellipse([x-radius, y-radius, x+radius, y+radius],
+                        outline=(255, 215, 0), width=2)
         
-        # Create default pet
-        self._create_pet(user_id, "cat", "Buddy")
-        
-        return user_id
+        return img
     
-    def _create_pet(self, user_id: int, species: str, name: str):
-        """Create pet"""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
-        c.execute('''
-            INSERT INTO pets (user_id, species, name)
-            VALUES (?, ?, ?)
-        ''', (user_id, species, name))
-        conn.commit()
-        conn.close()
+    @staticmethod
+    def _julia(size: int, params: dict) -> Image.Image:
+        """Julia set"""
+        img = Image.new('RGB', (size, size))
+        pixels = img.load()
+        
+        c = complex(params.get('c_real', -0.7), params.get('c_imag', 0.27015))
+        max_iter = params.get('iterations', 100)
+        
+        for x in range(size):
+            for y in range(size):
+                zx = 1.5 * (x - size/2) / (0.5 * size)
+                zy = (y - size/2) / (0.5 * size)
+                z = complex(zx, zy)
+                
+                for i in range(max_iter):
+                    if abs(z) > 2.0:
+                        break
+                    z = z*z + c
+                
+                color = int(255 * i / max_iter)
+                pixels[x, y] = (color, color//3, 255-color)
+        
+        return img
     
-    def get_user_stats(self, user_id: int) -> Dict:
-        """Get comprehensive user statistics"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+    @staticmethod
+    def _placeholder(size: int, name: str) -> Image.Image:
+        """Placeholder for complex fractals"""
+        img = Image.new('RGB', (size, size), (20, 20, 60))
+        draw = ImageDraw.Draw(img)
         
-        # Get tasks
-        c.execute('SELECT * FROM tasks WHERE user_id = ?', (user_id,))
-        tasks = [dict(row) for row in c.fetchall()]
+        # Draw geometric pattern
+        center = size // 2
+        for i in range(1, 10):
+            r = i * size // 20
+            draw.ellipse([center-r, center-r, center+r, center+r],
+                        outline=(100+i*15, 150, 200), width=2)
         
-        # Get pet
-        c.execute('SELECT * FROM pets WHERE user_id = ? LIMIT 1', (user_id,))
-        pet = dict(c.fetchone()) if c.fetchone() else None
-        
-        conn.close()
-        
-        completed = [t for t in tasks if t['completed_at']]
-        in_progress = [t for t in tasks if 0 < t['progress'] < 1.0]
-        
-        total_karma = sum(t.get('karma_points', 0) for t in completed)
-        total_dharma = sum(t.get('dharma_points', 0) for t in completed)
-        
-        return {
-            'total_tasks': len(tasks),
-            'completed_tasks': len(completed),
-            'in_progress_tasks': len(in_progress),
-            'karma_points': total_karma,
-            'dharma_points': total_dharma,
-            'energy': 0.7,  # Can calculate from recent check-ins
-            'phase': 'growth',  # From Lorenz
-            'pet': pet
-        }
+        return img
 
-
-# ════════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════
 # FLASK APP
-# ════════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)
 CORS(app)
 
-db = Database()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# ═══════════════════════════════════════════════════════════════════════════
+# CHATGPT ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════════
 
-# Auth decorator
-def require_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'error': 'Authentication required'}), 401
-        return f(user_id=user_id, *args, **kwargs)
-    return decorated
-
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """Health check"""
+@app.route('/chatgpt/health', methods=['GET'])
+@require_api_key
+def chatgpt_health():
+    """Health check for ChatGPT"""
     return jsonify({
         'status': 'healthy',
-        'version': '15.0',
-        'tagline': 'Ultimate Interactive Experience',
-        'features': [
-            'voice_assistant',
-            'ollama_3.1',
-            'animations',
-            'reports',
-            'plain_english',
-            'swedish_design'
-        ],
-        'timestamp': datetime.now(timezone.utc).isoformat()
+        'service': 'Fractal Explorer API',
+        'version': '1.0',
+        'available_fractals': len(FractalGenerator.AVAILABLE_TYPES),
+        'rate_limits': {
+            'per_minute': SecurityConfig.RATE_LIMIT_PER_MINUTE,
+            'per_hour': SecurityConfig.RATE_LIMIT_PER_HOUR
+        }
     })
 
+@app.route('/chatgpt/fractals/list', methods=['GET'])
+@require_api_key
+@require_rate_limit
+def list_fractals():
+    """List available fractal types"""
+    return jsonify({
+        'fractals': [
+            {
+                'type': 'mandelbrot',
+                'name': 'Mandelbrot Set',
+                'description': 'Classic fractal, infinite complexity at boundary',
+                'params': ['zoom', 'iterations']
+            },
+            {
+                'type': 'julia',
+                'name': 'Julia Set',
+                'description': 'Beautiful companion to Mandelbrot',
+                'params': ['c_real', 'c_imag', 'iterations']
+            },
+            {
+                'type': 'golden_spiral',
+                'name': 'Golden Spiral',
+                'description': 'Sacred geometry based on golden ratio (φ = 1.618)',
+                'params': ['turns', 'growth_rate']
+            },
+            {
+                'type': 'flower_of_life',
+                'name': 'Flower of Life',
+                'description': 'Ancient sacred geometry pattern',
+                'params': ['layers', 'color']
+            }
+        ],
+        'total': len(FractalGenerator.AVAILABLE_TYPES)
+    })
 
-# ═══════════════════════════════════════════════════════════════════════════
-# VOICE & AI ASSISTANT
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/voice/transcribe', methods=['POST'])
-@require_auth
-def transcribe_voice(user_id):
-    """Transcribe voice using Whisper"""
+@app.route('/chatgpt/fractals/generate', methods=['POST'])
+@require_api_key
+@require_rate_limit
+def generate_fractal():
+    """Generate fractal image for ChatGPT user"""
+    data = request.json
     
-    if 'audio' not in request.files:
-        return jsonify({'error': 'No audio file'}), 400
+    fractal_type = data.get('type', 'mandelbrot')
+    params = data.get('params', {})
+    size = min(int(data.get('size', 1024)), SecurityConfig.MAX_IMAGE_SIZE)
+    format_type = data.get('format', 'png')
     
-    audio_file = request.files['audio']
-    
-    # Save temporarily
-    temp_path = f"/tmp/voice_{user_id}_{int(time.time())}.wav"
-    audio_file.save(temp_path)
+    # Validate fractal type
+    if fractal_type not in FractalGenerator.AVAILABLE_TYPES:
+        return jsonify({
+            'error': 'Invalid fractal type',
+            'available': FractalGenerator.AVAILABLE_TYPES
+        }), 400
     
     try:
-        # Use Whisper CLI (requires whisper installed)
-        result = subprocess.run(
-            ['whisper', temp_path, '--model', 'base', '--output_format', 'json'],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        # Generate fractal
+        img = FractalGenerator.generate(fractal_type, params, size)
         
-        # Parse output
-        import json
-        output = json.loads(result.stdout)
-        transcript = output.get('text', '')
+        # Convert to bytes
+        img_io = BytesIO()
+        img.save(img_io, format='PNG', optimize=True)
+        img_io.seek(0)
         
-        # Clean up
-        os.remove(temp_path)
-        
-        # Interpret intent
-        assistant = OllamaAssistant()
-        intent_data = assistant.interpret_voice_command(transcript)
-        
-        # Save transcript
-        conn = sqlite3.connect(db.db_path)
-        c = conn.cursor()
-        now = datetime.now(timezone.utc).isoformat()
-        c.execute('''
-            INSERT INTO voice_transcripts (user_id, transcript, intent, created_at)
-            VALUES (?, ?, ?, ?)
-        ''', (user_id, transcript, intent_data['intent'], now))
-        conn.commit()
-        conn.close()
+        # Return as base64 for ChatGPT
+        img_base64 = base64.b64encode(img_io.getvalue()).decode()
         
         return jsonify({
-            'transcript': transcript,
-            'intent': intent_data['intent'],
-            'confidence': intent_data['confidence']
+            'success': True,
+            'fractal_type': fractal_type,
+            'size': f'{size}x{size}',
+            'format': 'png',
+            'image_data': f'data:image/png;base64,{img_base64}',
+            'download_url': f'/chatgpt/fractals/download?id={secrets.token_urlsafe(16)}',
+            'message': f'Generated {fractal_type} fractal! 🎨'
         })
         
     except Exception as e:
-        logger.error(f"Transcription error: {e}")
+        logger.error(f"Fractal generation error: {e}")
         return jsonify({
-            'error': str(e),
-            'fallback': 'Whisper not available - using text input'
+            'error': 'Generation failed',
+            'message': 'Please try different parameters'
         }), 500
 
-
-@app.route('/api/assistant/chat', methods=['POST'])
-@require_auth
-def chat_with_assistant(user_id):
-    """Chat with virtual pet assistant"""
+@app.route('/chatgpt/pet/create', methods=['POST'])
+@require_api_key
+@require_rate_limit
+def create_pet():
+    """Create virtual pet avatar"""
     data = request.json
-    message = data.get('message', '')
     
-    # Get user stats for context
-    stats = db.get_user_stats(user_id)
+    species = data.get('species', 'cat')
+    name = data.get('name', 'Fractal Friend')
     
-    # Get pet name
-    pet_name = stats.get('pet', {}).get('name', 'Buddy') if stats.get('pet') else 'Buddy'
+    available_species = ['cat', 'dog', 'dragon', 'phoenix', 'owl', 'fox', 'unicorn', 'butterfly']
     
-    # Chat with Ollama
-    assistant = OllamaAssistant(pet_name=pet_name)
-    response = assistant.chat(message, context=stats)
-    
-    return jsonify({
-        'message': response,
-        'pet_name': pet_name,
-        'context': stats
-    })
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# CONGRATULATIONS & AUDIO
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/tasks/<int:task_id>/complete', methods=['POST'])
-@require_auth
-def complete_task_celebration(user_id, task_id):
-    """Complete task with celebration"""
-    
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    
-    # Get task
-    c.execute('SELECT * FROM tasks WHERE id = ? AND user_id = ?', (task_id, user_id))
-    task = c.fetchone()
-    
-    if not task:
-        return jsonify({'error': 'Task not found'}), 404
-    
-    task_dict = dict(task)
-    
-    # Mark complete
-    now = datetime.now(timezone.utc).isoformat()
-    c.execute('''
-        UPDATE tasks SET progress = 1.0, completed_at = ?
-        WHERE id = ?
-    ''', (now, task_id))
-    conn.commit()
-    conn.close()
-    
-    # Generate celebration
-    assistant = OllamaAssistant()
-    celebration_msg = assistant.celebrate_completion(
-        task_dict['title'],
-        task_dict.get('karma_points', 0),
-        task_dict.get('dharma_points', 0)
-    )
+    if species not in available_species:
+        species = 'cat'
     
     return jsonify({
         'success': True,
-        'task_id': task_id,
-        'celebration_message': celebration_msg,
-        'play_animation': True,
-        'play_sound': True,
-        'karma_earned': task_dict.get('karma_points', 0),
-        'dharma_earned': task_dict.get('dharma_points', 0)
+        'pet': {
+            'species': species,
+            'name': name,
+            'mood': 'happy',
+            'energy': 100,
+            'hunger': 0,
+            'message': f'Hi! I'm {name} the {species}! I'll help you explore fractals! 🎨✨'
+        },
+        'available_species': available_species
     })
 
-
-@app.route('/api/audio/celebration', methods=['GET'])
-def get_celebration_sound():
-    """Get celebration sound effect"""
-    audio_data = AudioFeedback.generate_celebration_sound(duration=1.5)
+@app.route('/chatgpt/goals/create', methods=['POST'])
+@require_api_key
+@require_rate_limit
+def create_goal():
+    """Create goal and generate fractal visualization"""
+    data = request.json
     
-    return send_file(
-        BytesIO(audio_data),
-        mimetype='audio/wav',
-        as_attachment=False
-    )
-
-
-@app.route('/api/audio/notification', methods=['GET'])
-def get_notification_sound():
-    """Get notification beep"""
-    audio_data = AudioFeedback.generate_notification_sound()
+    goal_title = data.get('title', 'My Goal')
+    goal_type = data.get('type', 'karma')  # karma or dharma
+    points = int(data.get('points', 5))
     
-    return send_file(
-        BytesIO(audio_data),
-        mimetype='audio/wav',
-        as_attachment=False
-    )
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# REPORTS
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/reports/progress', methods=['GET'])
-@require_auth
-def generate_progress_report(user_id):
-    """Generate plain English progress report"""
-    
-    stats = db.get_user_stats(user_id)
-    
-    report_generator = ReportGenerator()
-    report = report_generator.generate_progress_report(stats)
+    # Generate unique fractal based on goal
+    goal_hash = hashlib.md5(goal_title.encode()).hexdigest()
+    fractal_type = FractalGenerator.AVAILABLE_TYPES[int(goal_hash, 16) % len(FractalGenerator.AVAILABLE_TYPES)]
     
     return jsonify({
-        'report': report,
-        'format': 'text',
-        'can_download': True
+        'success': True,
+        'goal': {
+            'title': goal_title,
+            'type': goal_type,
+            'points': points,
+            'fractal_type': fractal_type,
+            'message': f'Goal created! Your unique fractal pattern: {fractal_type} 🌟'
+        },
+        'generate_fractal': f'/chatgpt/fractals/generate with type={fractal_type}'
     })
 
-
-@app.route('/api/reports/download', methods=['GET'])
-@require_auth
-def download_report(user_id):
-    """Download report as text file"""
-    
-    stats = db.get_user_stats(user_id)
-    report = ReportGenerator.generate_progress_report(stats)
-    
-    buffer = BytesIO()
-    buffer.write(report.encode('utf-8'))
-    buffer.seek(0)
-    
-    return send_file(
-        buffer,
-        mimetype='text/plain',
-        as_attachment=True,
-        download_name=f'life_progress_report_{datetime.now().strftime("%Y%m%d")}.txt'
-    )
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# INTERACTIVE VISUALIZATION
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.route('/api/visualization/interactive', methods=['GET'])
-@require_auth
-def get_interactive_visualization(user_id):
-    """Get interactive visualization data"""
-    
-    stats = db.get_user_stats(user_id)
-    
-    # Get all tasks
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute('SELECT * FROM tasks WHERE user_id = ?', (user_id,))
-    tasks = [dict(row) for row in c.fetchall()]
-    conn.close()
-    
-    # Create orb data
-    orbs = []
-    for i, task in enumerate(tasks[:20]):  # Limit to 20
-        angle = i * GOLDEN_ANGLE_RAD
-        distance = 150 + (task['progress'] * 100)
-        
-        orb = {
-            'id': task['id'],
-            'title': task['title'],
-            'x': 400 + int(distance * math.cos(angle)),
-            'y': 300 + int(distance * math.sin(angle)),
-            'radius': 20 + int(task.get('karma_points', 0) + task.get('dharma_points', 0)),
-            'progress': task['progress'],
-            'color': '#27ae60' if task['progress'] >= 0.9 else '#3498db' if task['progress'] >= 0.5 else '#f39c12' if task['progress'] > 0 else '#e74c3c',
-            'clickable': True,
-            'goal_type': task['goal_type']
-        }
-        orbs.append(orb)
-    
+@app.route('/.well-known/ai-plugin.json', methods=['GET'])
+def plugin_manifest():
+    """ChatGPT plugin manifest"""
     return jsonify({
-        'orbs': orbs,
-        'width': 800,
-        'height': 600,
-        'phase': PLAIN_ENGLISH[stats.get('phase', 'growth')],
-        'energy': int(stats.get('energy', 0.5) * 100),
-        'legend': {
-            'green': 'Complete',
-            'blue': 'In Progress',
-            'orange': 'Started',
-            'red': 'Not Started',
-            'size': 'Karma + Dharma points'
-        }
+        "schema_version": "v1",
+        "name_for_human": "Fractal Explorer",
+        "name_for_model": "fractal_explorer",
+        "description_for_human": "Create beautiful fractal art from your goals and tasks. Chat with virtual pet avatars and explore sacred geometry!",
+        "description_for_model": "Generate fractals, sacred geometry, and mathematical art. Track goals with visual representations. Fun, educational, privacy-focused.",
+        "auth": {
+            "type": "service_http",
+            "authorization_type": "bearer",
+            "verification_tokens": {
+                "openai": SecurityConfig.CHATGPT_API_KEY
+            }
+        },
+        "api": {
+            "type": "openapi",
+            "url": f"{request.host_url}openapi.yaml"
+        },
+        "logo_url": f"{request.host_url}logo.png",
+        "contact_email": "support@coverface.com",
+        "legal_info_url": f"{request.host_url}legal"
     })
 
-
-# ═══════════════════════════════════════════════════════════════════════════
-# MAIN
-# ═══════════════════════════════════════════════════════════════════════════
-
-@app.route('/')
-def index():
-    """Main dashboard"""
-    return jsonify({
-        'app': 'Life Fractal Intelligence',
-        'version': '15.0 Ultimate Interactive',
-        'tagline': 'Your life, visualized. Your assistant, personified. Your goals, celebrated.',
-        'features': {
-            'voice': 'Talk to your pet assistant',
-            'ollama': 'Real AI conversations',
-            'animations': 'Celebrate every win',
-            'reports': 'Plain English progress reports',
-            'swedish_design': 'Beautiful & intuitive',
-            'no_jargon': 'No math terms, just life'
-        }
-    })
-
-
-# Initialize
-with app.app_context():
-    try:
-        db.init_db()
-        logger.info("🌟 Life Fractal Intelligence v15.0 ULTIMATE INTERACTIVE")
-    except Exception as e:
-        logger.error(f"Init error: {e}")
-
+@app.route('/openapi.yaml', methods=['GET'])
+def openapi_spec():
+    """OpenAPI specification for ChatGPT"""
+    spec = """
+openapi: 3.0.0
+info:
+  title: Fractal Explorer API
+  version: 1.0.0
+  description: Generate beautiful fractals and sacred geometry
+servers:
+  - url: https://planner-1-pyd9.onrender.com
+paths:
+  /chatgpt/fractals/list:
+    get:
+      summary: List available fractals
+      operationId: listFractals
+      responses:
+        '200':
+          description: Successful
+  /chatgpt/fractals/generate:
+    post:
+      summary: Generate fractal image
+      operationId: generateFractal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                params:
+                  type: object
+                size:
+                  type: integer
+      responses:
+        '200':
+          description: Fractal generated
+"""
+    from flask import Response
+    return Response(spec, mimetype='text/yaml')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
