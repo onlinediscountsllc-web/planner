@@ -1,0 +1,118 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚨 URGENT FIX: Render Configuration Issue
+═══════════════════════════════════════════════════════════════════════════════
+
+## THE PROBLEM
+
+Your logs show:
+```
+==> Running 'gunicorn life_fractal_v10:app'
+```
+
+But your file is named `app.py`, so it should be:
+```
+==> Running 'gunicorn app:app'
+```
+
+Render is pointing to an OLD module name that doesn't exist!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## THE FIX
+
+### Option 1: Update Render Dashboard (FASTEST)
+
+1. Go to: https://dashboard.render.com
+2. Select your "planner" service
+3. Click "Settings" tab
+4. Find "Start Command"
+5. Change from: `gunicorn life_fractal_v10:app`
+6. Change to: `gunicorn app:app`
+7. Click "Save Changes"
+8. Render will redeploy automatically
+
+### Option 2: Add Procfile (PERMANENT)
+
+Create a file called `Procfile` (no extension) in your project root:
+
+```
+web: gunicorn app:app
+```
+
+Then push:
+```powershell
+cd C:\Users\Luke\Desktop\planner
+echo "web: gunicorn app:app" > Procfile
+git add Procfile
+git commit -m "Fix: Use correct start command"
+git push origin main
+```
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## VERIFY IT WORKED
+
+After fixing, check logs again:
+```
+==> Running 'gunicorn app:app'  ← Should see this
+```
+
+Then test:
+```powershell
+curl "https://planner-1-pyd9.onrender.com/api/health"
+```
+
+Should show: `"version":"14.0"` (not 13.0)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## WHY THIS HAPPENED
+
+Your original deployment had a file named `life_fractal_v10.py` and Render 
+remembered that start command. When you renamed it to `app.py`, Render kept 
+using the old command.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## ONCE FIXED, TEST THESE:
+
+```powershell
+# Should work now (version 14.0)
+curl "https://planner-1-pyd9.onrender.com/api/health"
+
+# Virtual pet endpoint (NEW in v14)
+curl "https://planner-1-pyd9.onrender.com/api/pet"
+
+# Particle swarm (should be FIXED)
+curl "https://planner-1-pyd9.onrender.com/api/math/particle-swarm?energy=0.7&wellness=0.7"
+
+# Binaural audio (should be FIXED)
+curl "https://planner-1-pyd9.onrender.com/api/audio/binaural/focus?duration=5.0" -o test.wav
+
+# Karma goals endpoint (NEW in v14)
+curl "https://planner-1-pyd9.onrender.com/api/goals/karma"
+
+# Create karma goal (NEW in v14)
+curl -X POST "https://planner-1-pyd9.onrender.com/api/goals/karma" `
+  -H "Content-Type: application/json" `
+  -d '{"title":"Help friend","karma_points":5}'
+```
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## QUICK CHECKLIST
+
+- [ ] Go to Render Dashboard
+- [ ] Change Start Command to: `gunicorn app:app`
+- [ ] Wait for redeploy (~2 min)
+- [ ] Test health endpoint
+- [ ] Verify version shows 14.0
+- [ ] Test particle swarm (should work)
+- [ ] Test binaural audio (should work)
+- [ ] Test new pet endpoints
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DO THIS NOW: Fix the start command in Render Dashboard! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVER FACE - Life Planning Reimagined</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        
+        /* Top Navigation */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3498db;
+        }
+        
+        .logo-subtitle {
+            font-size: 12px;
+            color: #95a5a6;
+            font-weight: 400;
+        }
+        
+        .mode-toggle {
+            background: #ecf0f1;
+            border-radius: 20px;
+            padding: 5px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .mode-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            background: transparent;
+            color: #7f8c8d;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #3498db;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .quick-add {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .mood-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .mood-btn {
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .mood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .mood-btn.active {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+        
+        .mood-emoji {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .mood-label {
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .ai-insight h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .ai-insight p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        /* Visualization Card */
+        .viz-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .viz-header h2 {
+            font-size: 20px;
+        }
+        
+        .legend {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        /* Task List */
+        .task-list {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .task-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .task-info h4 {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .task-meta {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            border: 1px solid #e1e8ed;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .btn-small:hover {
+            background: #f8f9fa;
+        }
+        
+        /* Info Boxes */
+        .info-box {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-box h4 {
+            font-size: 13px;
+            color: #3498db;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            font-size: 13px;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Hidden in Easy Mode */
+        .advanced-only {
+            display: none;
+        }
+        
+        body.advanced-mode .advanced-only {
+            display: block;
+        }
+    </style>
+</head>
+<body class="easy-mode">
+    <!-- Navigation -->
+    <div class="navbar">
+        <div>
+            <div class="logo">
+                COVER FACE
+            </div>
+            <div class="logo-subtitle">Life Planning Reimagined</div>
+        </div>
+        
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="setMode('easy')">
+                📱 Easy Mode
+            </button>
+            <button class="mode-btn" onclick="setMode('advanced')">
+                🔬 Advanced Mode
+            </button>
+        </div>
+        
+        <div>
+            <button class="btn-small">Trial: 5 days left</button>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Quick Add</h2>
+            
+            <div class="quick-add">
+                <div class="input-group">
+                    <label>What needs to be done?</label>
+                    <input type="text" id="taskTitle" placeholder="E.g., Call dentist, Finish report, Buy groceries">
+                </div>
+                
+                <div class="input-group">
+                    <label>Priority</label>
+                    <select id="taskPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Due Date</label>
+                    <input type="date" id="taskDueDate">
+                </div>
+                
+                <button class="btn-primary" onclick="addTask()">
+                    ✅ Add Task
+                </button>
+            </div>
+            
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #e1e8ed;">
+            
+            <h2>How are you today?</h2>
+            <div class="mood-selector">
+                <div class="mood-btn" onclick="setMood('great')">
+                    <span class="mood-emoji">😄</span>
+                    <span class="mood-label">Great</span>
+                </div>
+                <div class="mood-btn" onclick="setMood('good')">
+                    <span class="mood-emoji">🙂</span>
+                    <span class="mood-label">Good</span>
+                </div>
+                <div class="mood-btn active" onclick="setMood('okay')">
+                    <span class="mood-emoji">😐</span>
+                    <span class="mood-label">Okay</span>
+                </div>
+                <div class="mood-btn" onclick="setMood('struggling')">
+                    <span class="mood-emoji">😟</span>
+                    <span class="mood-label">Struggling</span>
+                </div>
+                <div class="mood-btn" onclick="setMood('difficult')">
+                    <span class="mood-emoji">😞</span>
+                    <span class="mood-label">Difficult</span>
+                </div>
+            </div>
+            
+            <div class="input-group" style="margin-top: 15px;">
+                <label>Energy Level</label>
+                <input type="range" id="energyLevel" min="0" max="100" value="50" 
+                       oninput="document.getElementById('energyValue').textContent = this.value + '%'">
+                <div style="text-align: center; font-size: 14px; color: #7f8c8d; margin-top: 5px;">
+                    <span id="energyValue">50%</span>
+                </div>
+            </div>
+            
+            <button class="btn-primary" style="margin-top: 15px;" onclick="saveCheckin()">
+                💾 Save Check-in
+            </button>
+            
+            <!-- Info boxes for explanations -->
+            <div class="info-box" style="margin-top: 25px;">
+                <h4>💡 What are the orbs?</h4>
+                <p>Each circle represents a task or goal. Bigger circles need more energy. Colors show your progress.</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>📍 What do the positions mean?</h4>
+                <p>Tasks are organized by type: Growth (learning), Planning (future goals), Foundation (basics), and Action (do now).</p>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- AI Insight -->
+            <div class="ai-insight">
+                <h3>🤖 AI Insight</h3>
+                <p id="aiInsight">You're maintaining good momentum. You have 2 tasks completed, 3 in progress, and 1 to start. You're juggling a lot - maybe pick 1-2 priorities to focus on?</p>
+            </div>
+            
+            <!-- Visualization -->
+            <div class="viz-card">
+                <div class="viz-header">
+                    <h2>Your Life Map</h2>
+                    <button class="btn-small">Download Image</button>
+                </div>
+                
+                <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px;">
+                    <img id="vizImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect fill='%23f5f7fa' width='800' height='600'/%3E%3Ctext x='400' y='300' text-anchor='middle' fill='%237f8c8d' font-size='20'%3EVisualization will appear here%3C/text%3E%3C/svg%3E" 
+                         style="max-width: 100%; border-radius: 8px;">
+                </div>
+                
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #27ae60;"></div>
+                        <span class="legend-text">Complete (90%+)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span class="legend-text">In Progress (50-90%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f39c12;"></div>
+                        <span class="legend-text">Started (10-50%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span class="legend-text">Not Started</span>
+                    </div>
+                    <div class="legend-item" style="grid-column: 1 / -1;">
+                        <span class="legend-text"><strong>Size</strong> = Energy needed | <strong>Position</strong> = Task type (Growth/Planning/Foundation/Action)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task List -->
+            <div class="task-list">
+                <h2 style="margin-bottom: 20px;">Your Tasks</h2>
+                
+                <div id="taskListContainer">
+                    <!-- Example tasks -->
+                    <div class="task-item">
+                        <div class="task-info">
+                            <h4>Finish quarterly report</h4>
+                            <div class="task-meta">Due: Today | High Priority | 65% complete</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%;"></div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn-small">✏️ Edit</button>
+                                <button class="btn-small">✅ Complete</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-info">
+                            <h4>Call dentist for appointment</h4>
+                            <div class="task-meta">Due: Tomorrow | Medium Priority | Not started</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn-small">✏️ Edit</button>
+                                <button class="btn-small">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-info">
+                            <h4>Review project proposal</h4>
+                            <div class="task-meta">Due: Friday | Low Priority | 30% complete</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 30%;"></div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="btn-small">✏️ Edit</button>
+                                <button class="btn-small">✅ Complete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let currentMode = 'easy';
+        let currentMood = 'okay';
+        let tasks = [];
+        
+        // Mode toggle
+        function setMode(mode) {
+            currentMode = mode;
+            document.body.className = mode + '-mode';
+            
+            // Update button states
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // API call to update mode
+            fetch('/api/user/mode', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mode: mode})
+            });
+            
+            // Reload visualization
+            loadVisualization();
+        }
+        
+        // Mood selector
+        function setMood(mood) {
+            currentMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // Add task
+        function addTask() {
+            const title = document.getElementById('taskTitle').value;
+            const priority = document.getElementById('taskPriority').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            
+            if (!title.trim()) {
+                alert('Please enter a task title');
+                return;
+            }
+            
+            fetch('/api/tasks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: title,
+                    priority: priority,
+                    due_date: dueDate
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('taskTitle').value = '';
+                    loadTasks();
+                    loadVisualization();
+                } else {
+                    alert(data.error || 'Failed to create task');
+                }
+            });
+        }
+        
+        // Save check-in
+        function saveCheckin() {
+            const energy = document.getElementById('energyLevel').value / 100;
+            
+            fetch('/api/checkin', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    mood: currentMood,
+                    energy: energy
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('aiInsight').textContent = data.ai_explanation;
+                    loadVisualization();
+                } else {
+                    alert(data.error || 'Failed to save check-in');
+                }
+            });
+        }
+        
+        // Load tasks
+        function loadTasks() {
+            fetch('/api/tasks')
+                .then(r => r.json())
+                .then(data => {
+                    tasks = data.tasks || [];
+                    renderTasks();
+                });
+        }
+        
+        // Render tasks
+        function renderTasks() {
+            const container = document.getElementById('taskListContainer');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #95a5a6; padding: 40px;">No tasks yet. Add one to get started!</p>';
+                return;
+            }
+            
+            container.innerHTML = tasks.map(task => `
+                <div class="task-item">
+                    <div class="task-info">
+                        <h4>${task.title}</h4>
+                        <div class="task-meta">
+                            ${task.due_date ? 'Due: ' + task.due_date + ' | ' : ''}
+                            ${task.priority} Priority | 
+                            ${Math.round(task.progress * 100)}% complete
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${task.progress * 100}%;"></div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn-small" onclick="editTask(${task.id})">✏️ Edit</button>
+                            <button class="btn-small" onclick="deleteTask(${task.id})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load visualization
+        function loadVisualization() {
+            fetch('/api/visualization')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.image) {
+                        document.getElementById('vizImage').src = data.image;
+                    }
+                    if (data.ai_explanation) {
+                        document.getElementById('aiInsight').textContent = data.ai_explanation;
+                    }
+                });
+        }
+        
+        // Edit task
+        function editTask(taskId) {
+            const newProgress = prompt('Enter new progress (0-100):');
+            if (newProgress === null) return;
+            
+            fetch(`/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    progress: parseInt(newProgress) / 100
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadTasks();
+                    loadVisualization();
+                }
+            });
+        }
+        
+        // Delete task
+        function deleteTask(taskId) {
+            if (!confirm('Delete this task?')) return;
+            
+            fetch(`/api/tasks/${taskId}`, {
+                method: 'DELETE'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadTasks();
+                    loadVisualization();
+                }
+            });
+        }
+        
+        // Initial load
+        loadTasks();
+        loadVisualization();
+    </script>
+</body>
+</html>

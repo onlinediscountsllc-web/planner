@@ -1,0 +1,648 @@
+openapi: 3.1.0
+info:
+  title: Life Fractal Intelligence API
+  description: |
+    🌀 Transform your goals into beautiful fractal art!
+    
+    Features:
+    - 🐾 Virtual Pet Companions (8 species)
+    - 🎨 12+ Fractal Types with Sacred Geometry
+    - 📊 Goal Visualization for Aphantasia
+    - 🧠 Neurodivergent-Friendly Design
+    
+    Built for minds that work differently.
+  version: 2.0.0
+
+servers:
+  - url: https://planner-1-pyd9.onrender.com
+    description: Production server
+
+paths:
+  # ═══════════════════════════════════════════════════════════════
+  # HEALTH & INFO
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/health:
+    get:
+      operationId: checkHealth
+      summary: Check API health
+      description: Verify the API is running and get system info
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  available_fractals:
+                    type: integer
+                  available_pets:
+                    type: integer
+                  message:
+                    type: string
+
+  # ═══════════════════════════════════════════════════════════════
+  # FRACTAL ENDPOINTS
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/fractals/list:
+    get:
+      operationId: listFractals
+      summary: List all fractal types
+      description: Get all available fractal types with their meanings and best uses
+      responses:
+        "200":
+          description: List of fractals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fractals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        meaning:
+                          type: string
+                        best_for:
+                          type: array
+                          items:
+                            type: string
+                  total:
+                    type: integer
+
+  /chatgpt/fractals/generate:
+    post:
+      operationId: generateFractal
+      summary: Generate a fractal image
+      description: Create a beautiful fractal image. Returns base64 PNG.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  description: Fractal type to generate
+                  enum:
+                    - mandelbrot
+                    - julia
+                    - golden_spiral
+                    - flower_of_life
+                    - burning_ship
+                    - phoenix
+                    - sierpinski
+                    - dragon
+                    - koch_snowflake
+                    - fibonacci
+                    - lorenz
+                    - metatron
+                size:
+                  type: integer
+                  description: Image size (256-2048)
+                  minimum: 256
+                  maximum: 2048
+                  default: 800
+                params:
+                  type: object
+                  description: Optional fractal parameters
+                  properties:
+                    zoom:
+                      type: number
+                    iterations:
+                      type: integer
+                    c_real:
+                      type: number
+                    c_imag:
+                      type: number
+      responses:
+        "200":
+          description: Fractal generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  fractal_type:
+                    type: string
+                  fractal_name:
+                    type: string
+                  meaning:
+                    type: string
+                  image_data:
+                    type: string
+                    description: Base64 PNG with data URI prefix
+                  message:
+                    type: string
+
+  /chatgpt/fractals/suggest:
+    post:
+      operationId: suggestFractal
+      summary: Suggest a fractal for a goal
+      description: Get a fractal recommendation based on your goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - goal
+              properties:
+                goal:
+                  type: string
+                  description: Your goal or intention
+                type:
+                  type: string
+                  enum: [karma, dharma]
+                  default: karma
+      responses:
+        "200":
+          description: Fractal suggestion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggested_fractal:
+                    type: string
+                  fractal_name:
+                    type: string
+                  reason:
+                    type: string
+                  message:
+                    type: string
+
+  # ═══════════════════════════════════════════════════════════════
+  # PET ENDPOINTS
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/pets/list:
+    get:
+      operationId: listPets
+      summary: List all pet species
+      description: See all available virtual pet companions
+      responses:
+        "200":
+          description: List of pets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        species:
+                          type: string
+                        name:
+                          type: string
+                        emoji:
+                          type: string
+                        personality:
+                          type: string
+                        favorite_fractal:
+                          type: string
+                  total:
+                    type: integer
+
+  /chatgpt/pet/create:
+    post:
+      operationId: createPet
+      summary: Create a virtual pet
+      description: Create your fractal companion!
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - species
+              properties:
+                species:
+                  type: string
+                  description: Pet species
+                  enum:
+                    - cat
+                    - dog
+                    - dragon
+                    - phoenix
+                    - owl
+                    - fox
+                    - unicorn
+                    - butterfly
+                name:
+                  type: string
+                  description: Pet name
+                  maxLength: 50
+                  default: Fractal Friend
+      responses:
+        "200":
+          description: Pet created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  pet:
+                    type: object
+                    properties:
+                      species:
+                        type: string
+                      name:
+                        type: string
+                      level:
+                        type: integer
+                      happiness:
+                        type: integer
+                      hunger:
+                        type: integer
+                      energy:
+                        type: integer
+                      mood:
+                        type: string
+                  greeting:
+                    type: string
+                  message:
+                    type: string
+
+  /chatgpt/pet/feed:
+    post:
+      operationId: feedPet
+      summary: Feed your pet
+      description: Give your pet a tasty treat!
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pet
+              properties:
+                pet:
+                  type: object
+                  description: Pet data from create response
+                food:
+                  type: string
+                  enum:
+                    - golden_apple
+                    - fibonacci_berries
+                    - fractal_treat
+                    - cosmic_kibble
+                    - sacred_nectar
+                  default: cosmic_kibble
+      responses:
+        "200":
+          description: Pet fed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  pet:
+                    type: object
+                  message:
+                    type: string
+
+  /chatgpt/pet/play:
+    post:
+      operationId: playWithPet
+      summary: Play with your pet
+      description: Fun activities with your companion!
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pet
+              properties:
+                pet:
+                  type: object
+                  description: Pet data
+                activity:
+                  type: string
+                  enum:
+                    - explore_mandelbrot
+                    - chase_fractals
+                    - meditate_sacred
+                    - learn_geometry
+                    - dream_fractals
+                  default: chase_fractals
+      responses:
+        "200":
+          description: Activity complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  pet:
+                    type: object
+                  xp_gained:
+                    type: integer
+                  message:
+                    type: string
+
+  /chatgpt/pet/status:
+    post:
+      operationId: getPetStatus
+      summary: Check pet status
+      description: See how your pet is doing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pet
+              properties:
+                pet:
+                  type: object
+      responses:
+        "200":
+          description: Pet status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  pet:
+                    type: object
+                  greeting:
+                    type: string
+                  needs:
+                    type: object
+                    properties:
+                      hungry:
+                        type: boolean
+                      lonely:
+                        type: boolean
+                      tired:
+                        type: boolean
+
+  # ═══════════════════════════════════════════════════════════════
+  # GOAL ENDPOINTS
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/goals/create:
+    post:
+      operationId: createGoal
+      summary: Create a goal
+      description: Create a goal and get its fractal type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                type:
+                  type: string
+                  enum: [karma, dharma]
+                  default: karma
+                points:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+      responses:
+        "200":
+          description: Goal created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  goal:
+                    type: object
+                  suggested_fractal:
+                    type: object
+                  message:
+                    type: string
+
+  /chatgpt/goals/visualize:
+    post:
+      operationId: visualizeGoal
+      summary: Visualize a goal as a fractal
+      description: Create goal AND generate its fractal in one call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - goal
+              properties:
+                goal:
+                  type: string
+                  description: Your goal
+                type:
+                  type: string
+                  enum: [karma, dharma]
+                points:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                size:
+                  type: integer
+                  minimum: 256
+                  maximum: 2048
+      responses:
+        "200":
+          description: Goal visualized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  goal:
+                    type: string
+                  fractal_type:
+                    type: string
+                  meaning:
+                    type: string
+                  image_data:
+                    type: string
+                  message:
+                    type: string
+
+  # ═══════════════════════════════════════════════════════════════
+  # SACRED GEOMETRY ENDPOINTS
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/sacred/explain:
+    get:
+      operationId: explainSacredMath
+      summary: Learn sacred mathematics
+      description: Understand the math behind the fractals
+      responses:
+        "200":
+          description: Sacred math explanation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sacred_mathematics:
+                    type: object
+                  for_aphantasia:
+                    type: object
+
+  /chatgpt/sacred/calculate:
+    post:
+      operationId: calculateSacred
+      summary: Sacred geometry calculator
+      description: Calculate Fibonacci, golden rectangles, etc.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [fibonacci, golden_rectangle, golden_spiral]
+                n:
+                  type: integer
+                width:
+                  type: number
+      responses:
+        "200":
+          description: Calculation results
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ═══════════════════════════════════════════════════════════════
+  # POSTER & MEDIA
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/poster/create:
+    post:
+      operationId: createPoster
+      summary: Create a poster
+      description: Generate a printable poster with your goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                goal:
+                  type: string
+                fractal_type:
+                  type: string
+                size:
+                  type: integer
+                  minimum: 800
+                  maximum: 2048
+      responses:
+        "200":
+          description: Poster created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  poster:
+                    type: string
+                    description: Base64 PNG
+                  message:
+                    type: string
+
+  # ═══════════════════════════════════════════════════════════════
+  # NEURODIVERGENT SUPPORT
+  # ═══════════════════════════════════════════════════════════════
+  
+  /chatgpt/aphantasia/help:
+    get:
+      operationId: aphantasiaHelp
+      summary: Aphantasia support
+      description: Learn how fractals help people who can't visualize
+      responses:
+        "200":
+          description: Aphantasia info
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /chatgpt/spoons/check:
+    post:
+      operationId: spoonCheck
+      summary: Spoon Theory energy check
+      description: Get recommendations based on your energy level
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spoons:
+                  type: integer
+                  description: Current energy (1-10)
+                  minimum: 1
+                  maximum: 10
+      responses:
+        "200":
+          description: Energy recommendations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  spoons:
+                    type: integer
+                  recommendation:
+                    type: object

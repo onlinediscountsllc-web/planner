@@ -1,0 +1,55 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    🔧 THE PROBLEM & THE FIX                                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+YOUR PROBLEM:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Your logs show Render is running:
+  gunicorn life_fractal_v10:app  ← This file doesn't exist!
+
+But your actual file is:
+  app.py  ← v14.0 code is here!
+
+Result: Render can't find the file, falls back to v13.0, endpoints broken.
+
+
+THE FIX (30 seconds):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 1: Run this script (easiest):
+  .\FIX_AND_DEPLOY.ps1
+
+OPTION 2: Manual commands:
+  cd C:\Users\Luke\Desktop\planner
+  echo "web: gunicorn app:app" > Procfile
+  git add Procfile
+  git commit -m "Fix start command"
+  git push origin main
+
+Then also do this ONE TIME:
+  1. Go to https://dashboard.render.com
+  2. Click "planner" service
+  3. Settings → Start Command
+  4. Change to: gunicorn app:app
+  5. Save
+
+
+AFTER THE FIX:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Wait 3 minutes, then test:
+
+curl "https://planner-1-pyd9.onrender.com/api/health"
+
+Should show:
+  ✅ "version": "14.0"
+  ✅ "features": ["virtual_pet", "karma_dharma", ...]
+  
+Then test these (should all work):
+  ✅ curl "https://planner-1-pyd9.onrender.com/api/pet"
+  ✅ curl "https://planner-1-pyd9.onrender.com/api/math/particle-swarm?energy=0.7&wellness=0.7"
+  ✅ curl "https://planner-1-pyd9.onrender.com/api/audio/binaural/focus?duration=5.0" -o test.wav
+
+
+THAT'S IT! Your deployment will work perfectly. 🚀
+
+╚═══════════════════════════════════════════════════════════════════════════╝
